@@ -1,186 +1,119 @@
 <!DOCTYPE html>
-<html lang="pt-AO">
+<html lang="pt">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Only24²⁴ — Filmes, Séries, Animes & Mais</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONLY24 - Angola</title>
 <style>
-:root{color-scheme:dark;--bg:#060608;--surface:#0f0f12;--surface2:#18181f;--border:rgba(255,255,255,0.07);--red:#e8192c;--gold:#f5a623;--green:#00e676;--white:#f0ede8;--muted2:#888}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--white);overflow-x:hidden;padding-bottom:85px}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--red);border-radius:4px}
-nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(6,6,8,0.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:0.6rem 1.2rem}
-.top-nav-row{display:flex;align-items:center;justify-content:space-between;gap:0.8rem;margin-bottom:0.5rem}
-.logo-wrap{display:flex;align-items:center;gap:0.5rem;cursor:pointer}
-.logo{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:2px;background:linear-gradient(135deg,var(--white) 40%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.logo-badge{font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--gold);border:1px solid var(--gold);padding:0.1rem 0.3rem;border-radius:3px}
-.nav-search-box{display:flex;align-items:center;gap:0.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:0.35rem 0.8rem;flex:1;max-width:260px}
-.nav-search-box input{background:none;border:none;outline:none;color:var(--white);font-family:'Syne',sans-serif;font-size:0.8rem;width:100%}
-.btn-procurar{background:var(--green);color:#000;border:none;padding:0.3rem 0.8rem;border-radius:14px;font-weight:700;font-size:0.75rem;cursor:pointer}
-.top-actions{display:flex;align-items:center;gap:0.6rem}
-.bell{position:relative;background:var(--surface2);border:1px solid var(--border);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem}
-.bell-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:0.6rem;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:800}
-.top-tabs{display:flex;gap:1.2rem;overflow-x:auto;scrollbar-width:none;padding-bottom:0.2rem}
-.top-tabs::-webkit-scrollbar{display:none}
-.ttab{background:none;border:none;color:var(--muted2);font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap;padding:0.2rem 0}
-.ttab:hover,.ttab.active{color:var(--white);border-bottom:2px solid var(--green)}
-.main-container{padding-top:105px}
-.section{padding:1.5rem 1.2rem;max-width:1400px;margin:0 auto}
-.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-.sec-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px}
-.sec-more{color:var(--muted2);font-size:0.75rem;cursor:pointer}
-.sub-chips{display:flex;gap:0.5rem;overflow-x:auto;scrollbar-width:none;margin-bottom:1rem}
-.sub-chips::-webkit-scrollbar{display:none}
-.schip{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);padding:0.35rem 0.8rem;border-radius:16px;font-size:0.75rem;font-weight:700;white-space:nowrap;cursor:pointer}
-.schip.active{background:rgba(0,230,118,0.15);border-color:var(--green);color:var(--green)}
-.scroller{display:flex;gap:0.8rem;overflow-x:auto;scrollbar-width:none;padding-bottom:0.5rem;flex-wrap:wrap}
-.scroller::-webkit-scrollbar{display:none}
-.pcard{flex:0 0 130px;cursor:pointer;position:relative}
-.pcard-poster{position:relative;aspect-ratio:2/3;border-radius:8px;overflow:hidden;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:2.5rem}
-.pcard-poster img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.pcard-poster::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(6,6,8,0.85) 0%,transparent 40%)}
-.p-lang{position:absolute;top:5px;left:5px;background:rgba(0,0,0,0.7);color:#fff;font-size:0.55rem;padding:0.1rem 0.3rem;border-radius:3px;font-family:'JetBrains Mono',monospace;z-index:3}
-.p-rank{position:absolute;bottom:0;left:-5px;font-family:'Bebas Neue',sans-serif;font-size:4.5rem;color:rgba(255,255,255,0.25);z-index:2;line-height:0.8;pointer-events:none}
-.pcard-title{font-size:0.78rem;font-weight:700;margin-top:0.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pcard-meta{font-size:0.65rem;color:var(--muted2)}
-.fav-btn{position:absolute;top:5px;right:5px;z-index:4;background:rgba(0,0,0,0.6);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:0.8rem}
-.fav-btn.on{color:var(--red)}
-.edit-btn{position:absolute;bottom:5px;right:5px;z-index:4;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:0.2rem 0.5rem;border-radius:10px;font-size:0.65rem;cursor:pointer}
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:400;background:rgba(10,10,13,0.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:0.5rem 0}
-.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.2rem;background:none;border:none;color:var(--muted2);font-family:'Syne',sans-serif;font-size:0.65rem;font-weight:700;cursor:pointer}
-.bnav-item.active{color:var(--green)}
-.bnav-item svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8}
-.overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.92);backdrop-filter:blur(10px);justify-content:center;align-items:flex-end}
-.overlay.open{display:flex}
-.modal-content{background:var(--surface);width:100%;max-height:90vh;border-radius:16px 16px 0 0;padding:1.2rem;overflow-y:auto}
-.modal-close{float:right;background:rgba(255,255,255,0.1);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-weight:bold}
-.player-box{width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden;margin:0.8rem 0;position:relative}
-.player-box video{width:100%;height:100%}
-.player-box img{width:100%;height:100%;object-fit:cover}
-.action-row{display:flex;gap:0.5rem;margin:0.8rem 0}
-.btn-main{flex:1;background:var(--green);color:#000;border:none;padding:0.8rem;border-radius:8px;font-weight:800;cursor:pointer}
-.btn-sec{flex:1;background:var(--surface2);border:1px solid var(--border);color:#fff;padding:0.8rem;border-radius:8px;font-weight:700;cursor:pointer}
-.admin-overlay{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,0.96);overflow-y:auto;padding:1.5rem}
-.admin-overlay.open{display:block}
-.admin-box{max-width:600px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
-.afield{margin-bottom:0.8rem}
-.afield label{display:block;font-size:0.7rem;color:var(--muted2);margin-bottom:0.3rem;text-transform:uppercase}
-.afield input,.afield select,.afield textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.6rem;color:#fff;font-family:'Syne',sans-serif;font-size:0.85rem}
-.abtn{background:var(--green);color:#000;border:none;padding:0.8rem;border-radius:6px;font-weight:800;width:100%;cursor:pointer;margin-top:0.5rem}
-.abtn:disabled{opacity:0.6;cursor:wait}
-.abtn-red{background:var(--red);color:#fff;border:none;padding:0.6rem;border-radius:6px;font-weight:700;width:100%;cursor:pointer;margin-top:0.5rem}
-.view-pane{display:none}
-.view-pane.active{display:block}
-.list-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;display:flex;justify-content:space-between;align-items:center;gap:0.8rem}
-.empty{color:var(--muted2);font-size:0.8rem;text-align:center;padding:2rem 0}
-.poster-preview{width:100%;max-height:220px;object-fit:cover;border-radius:8px;display:none;margin-top:0.5rem;border:1px solid var(--border)}
-.progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;display:none;margin-top:0.5rem}
-.progress-bar div{height:100%;background:var(--green);width:0%}
-.ep-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.8rem;display:flex;justify-content:space-between;align-items:center;gap:0.6rem;cursor:pointer}
-.ep-item.active{border-color:var(--green);background:rgba(0,230,118,0.1)}
-.ep-admin{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.8rem;margin-bottom:0.6rem}
-.admin-only{display:none}
-body.is-admin .admin-only{display:block}
-body.is-admin .edit-btn{display:block}
-body:not(.is-admin) .edit-btn{display:none!important}
-body.is-admin .admin-inline{display:inline-block}
-body:not(.is-admin) .admin-inline{display:none!important}
-.season-tab{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);padding:0.4rem 0.9rem;border-radius:16px;font-size:0.75rem;font-weight:700;cursor:pointer}
-.season-tab.active{background:var(--gold);color:#000;border-color:var(--gold)}
-.notif-panel{display:none;position:fixed;top:65px;right:10px;left:10px;max-width:420px;margin-left:auto;z-index:500;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;max-height:60vh;overflow-y:auto}
-.notif-panel.open{display:block}
-.footer-signature{text-align:center;padding:1.5rem 1rem 0.5rem;font-size:0.75rem;color:var(--muted2);line-height:1.6}
-.footer-signature b{color:#fff}
-.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;flex:1}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#0a0a0a;color:#fff;padding-bottom:80px}
+header{display:flex;justify-content:space-between;align-items:center;padding:15px}
+.logo{font-size:28px;font-weight:900} .logo span{color:#f5c518}
+.search-box{display:flex;gap:5px;background:#1c1c1c;padding:5px 10px;border-radius:20px}
+.search-box input{background:none;border:none;color:#fff;outline:none;width:110px}
+.search-box button{background:#22c55e;border:none;padding:5px 12px;border-radius:15px;font-weight:700}
+nav{display:flex;gap:20px;padding:0 15px;font-weight:700;color:#aaa}
+nav b{color:#fff;border-bottom:2px solid #22c55e}
+h2{padding:20px 15px 10px;font-size:20px}
+.filtros{display:flex;gap:8px;padding:0 15px;overflow-x:auto}
+.filtros button{background:#222;border:none;color:#fff;padding:8px 14px;border-radius:20px;white-space:nowrap}
+.filtros button.ativo{background:#22c55e}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:15px}
+.card{background:#1a1a1a;border-radius:10px;overflow:hidden}
+.card img{width:100%;height:170px;object-fit:cover}
+.card p{padding:8px;font-size:13px;font-weight:700}
+.card small{padding:0 8px 10px;display:block;color:#f5c518}
+footer{text-align:center;color:#888;padding:30px 10px;font-size:13px}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;justify-content:space-around;padding:12px;border-top:1px solid #222}
+.bottom button{background:none;border:none;color:#fff;font-size:14px}
+.bottom button.ativo{color:#22c55e}
+#menu{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:flex-end}
+#menu.aberto{display:flex}
+.menu-box{background:#1a1a1a;width:100%;padding:20px;border-radius:20px 20px 0 0}
+.menu-box a{display:block;padding:14px 0;color:#fff;text-decoration:none;border-bottom:1px solid #333;font-size:16px}
+.menu-box button{width:100%;margin-top:15px;padding:12px;background:#22c55e;border:none;border-radius:10px;font-weight:800}
 </style>
 </head>
 <body>
+<header>
+<div class="logo">ONLY<span>24</span></div>
+<div class="search-box"><input id="pesquisa" placeholder="Pesquisar..."><button onclick="pesquisar()">Procurar</button></div>
+<div>🔔</div>
+</header>
+<nav><b>Tendendo</b><span>Filme</span><span>TV</span><span>Anime</span></nav>
 
-<nav>
-  <div class="top-nav-row"><div class="logo-wrap" onclick="switchView('lar');resetFilters()"><div class="logo">Only24</div><div class="logo-badge">²⁴</div></div>
-  <div class="top-actions">
-    <div class="nav-search-box"><input type="text" id="global-search" placeholder="Pesquisar..." oninput="handleSearch(this.value)"/><button class="btn-procurar" onclick="handleSearch(document.getElementById('global-search').value)">Procurar</button></div>
-    <button class="bell" onclick="toggleNotif()">🔔<span class="bell-badge" id="bell-badge" style="display:none">0</span></button>
-  </div></div>
-  <div class="top-tabs"><button class="ttab active" data-cat="todos" onclick="filterCategory('todos',this)">Tendendo</button><button class="ttab" data-cat="filme" onclick="filterCategory('filme',this)">Filme</button><button class="ttab" data-cat="serie" onclick="filterCategory('serie',this)">TV</button><button class="ttab" data-cat="anime" onclick="filterCategory('anime',this)">Anime</button></div>
-</nav>
+<h2>CLASSIFICAÇÕES DE FILMES</h2>
+<div class="filtros">
+<button class="ativo" onclick="filtrar(this,'todos')">Tendências</button>
+<button onclick="filtrar(this,'acao')">Ação</button>
+<button onclick="filtrar(this,'animacao')">Animação</button>
+<button onclick="filtrar(this,'crime')">Crime</button>
+</div>
+<div class="grid" id="filmes"></div>
 
-<!-- NOTIFICAÇÕES -->
-<div class="notif-panel" id="notif-panel">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem"><h3 style="font-family:'Bebas Neue';font-size:1.1rem">🔔 Notificações</h3><button onclick="toggleNotif()" style="background:none;border:none;color:#fff;cursor:pointer">✕</button></div>
-  <div id="notif-list"></div>
-  <button onclick="clearNotif()" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:#fff;padding:0.6rem;border-radius:6px;margin-top:0.8rem;cursor:pointer">Limpar notificações</button>
-  <p style="font-size:0.65rem;color:var(--muted2);margin-top:0.5rem;text-align:center">Quando o Admin Poster Dembe publica um novo poster, aparece aqui.</p>
+<h2>CLASSIFICAÇÕES DA SÉRIE</h2>
+<div class="grid" id="series"></div>
+
+<h2>ANIMES</h2>
+<div class="grid" id="animes"></div>
+
+<footer><b>Only24 - Angola</b><br>Admin & Poster — Dembe<br>© 2026 Only24 - Todos os direitos reservados</footer>
+
+<div class="bottom">
+<button class="ativo">🏠<br>Lar</button>
+<button>⬇<br>Transferências</button>
+<button onclick="abrirMenu()">👤<br>Menu</button>
 </div>
 
-<div id="view-lar" class="view-pane active main-container">
-  <div class="section" style="padding-top:0.5rem"><div class="sec-head"><h2 class="sec-title">Classificações de filmes</h2><a class="sec-more" onclick="filterCategory('filme')">Todos ></a></div>
-  <div class="sub-chips" id="chips"><div class="schip active" onclick="filterGenre('todos',this)">Tendências</div><div class="schip" onclick="filterGenre('Ação',this)">Ação</div><div class="schip" onclick="filterGenre('Animação',this)">Animação</div><div class="schip" onclick="filterGenre('Crime',this)">Crime e Suspense</div><div class="schip" onclick="filterGenre('Terror',this)">Terror</div></div>
-  <div class="scroller" id="ranking-filmes-grid"></div></div>
-  <div class="section" style="padding-top:0"><div class="sec-head"><h2 class="sec-title">Classificações da série</h2><a class="sec-more" onclick="filterCategory('serie')">Todos ></a></div><div class="scroller" id="ranking-series-grid"></div></div>
-  <div class="section" style="padding-top:0"><div class="sec-head"><h2 class="sec-title">Animes</h2><a class="sec-more" onclick="filterCategory('anime')">Todos ></a></div><div class="scroller" id="ranking-anime-grid"></div></div>
-  <div class="footer-signature"><b>Only24²⁴</b><br/>Angola<br/>Admin & Poster — <b>Dembe</b><br/><span style="font-size:0.65rem">© 2026 Only24²⁴ • Todos os direitos reservados • Angola</span></div>
+<div id="menu" onclick="fecharMenu()">
+<div class="menu-box" onclick="event.stopPropagation()">
+<a href="#">🏠 Início</a>
+<a href="#">🎬 Filmes</a>
+<a href="#">📺 Séries</a>
+<a href="#">✨ Animes</a>
+<a href="#">⬇ Minhas Transferências</a>
+<a href="#">⚙️ Definições</a>
+<button onclick="fecharMenu()">Fechar Menu</button>
+</div>
 </div>
 
-<div id="view-transferencias" class="view-pane main-container" style="padding:1.5rem"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><h2 style="font-family:'Bebas Neue';font-size:1.5rem">Transferências</h2><button class="admin-only" style="background:var(--green);color:#000;border:none;padding:0.4rem 0.8rem;border-radius:6px;font-weight:700;font-size:0.75rem" onclick="openAdmin()">⚙ Admin</button></div><div id="downloads-list" style="display:flex;flex-direction:column;gap:0.8rem"></div>
-<div class="footer-signature"><b>Only24²⁴</b> • Angola • Admin Poster Dembe</div></div>
-
-<div id="view-meu" class="view-pane main-container" style="padding:1.5rem"><h2 style="font-family:'Bebas Neue';font-size:1.5rem;margin-bottom:1.2rem">Meu Perfil</h2>
-
-<!-- PAINEL SÓ DO ADMIN: VÍDEOS VISUALIZADOS + ONLINE -->
-<div class="admin-only" style="background:var(--surface);border:1px solid var(--gold);border-radius:12px;padding:1rem;margin-bottom:1rem">
-  <h3 style="font-family:'Bebas Neue';font-size:1.1rem;color:var(--gold)">👑 Painel Admin — Só tu vês isto</h3>
-  <p style="font-size:0.7rem;color:var(--muted2)">Admin: Poster Dembe • Only24²⁴ • Angola</p>
-  <div style="display:flex;gap:0.6rem;margin:1rem 0">
-    <div class="stat-card"><div id="stat-online" style="font-size:1.4rem;font-weight:800;color:var(--green)">1</div><div style="font-size:0.65rem;color:var(--muted2)">🟢 Usuários Online Agora</div></div>
-    <div class="stat-card"><div id="stat-views" style="font-size:1.4rem;font-weight:800;color:var(--gold)">0</div><div style="font-size:0.65rem;color:var(--muted2)">👁️ Total Visualizações</div></div>
-    <div class="stat-card"><div id="stat-total" style="font-size:1.4rem;font-weight:800">0</div><div style="font-size:0.65rem;color:var(--muted2)">🎬 Conteúdos</div></div>
-  </div>
-  <div id="admin-stats-list" style="display:flex;flex-direction:column;gap:0.5rem"></div>
-  <button onclick="refreshAdminStats()" style="width:100%;background:var(--gold);color:#000;border:none;padding:0.6rem;border-radius:6px;font-weight:800;margin-top:0.8rem;cursor:pointer">🔄 Atualizar estatísticas</button>
-</div>
-
-<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
-<div style="padding:1rem;border-bottom:1px solid var(--border);cursor:pointer" onclick="showHistory()">🕒 Histórico de exibição ></div>
-<div style="padding:1rem;border-bottom:1px solid var(--border);cursor:pointer" onclick="showFavorites()">❤️ Minha lista ></div>
-<div class="admin-only" style="padding:1rem;border-bottom:1px solid var(--border);cursor:pointer" onclick="openAdmin()">⚙ Painel de Administração & Postagens ></div>
-<div id="admin-login-row" style="padding:1rem;border-bottom:1px solid var(--border);cursor:pointer" onclick="adminLogin()">🔐 Entrar como Admin ></div>
-<div id="admin-logout-row" class="admin-only" style="padding:1rem;border-bottom:1px solid var(--border);cursor:pointer;color:var(--red)" onclick="adminLogout()">🚪 Sair do modo Admin</div>
-<div style="padding:1rem;cursor:pointer" onclick="alert('Only24²⁴\nAngola\nAdmin & Poster: Dembe')">ℹ️ Sobre nós — Only24²⁴ • Angola • Dembe ></div>
-</div>
-<p id="visitor-note" style="font-size:0.75rem;color:var(--muted2);margin-top:1rem;text-align:center">👀 Visitante — podes assistir e baixar. Estatísticas e vídeos visualizados são só do Admin.</p>
-<p class="admin-only" style="font-size:0.75rem;color:var(--green);margin-top:1rem;text-align:center">✅ Admin Poster Dembe — Only24²⁴ • Angola</p>
-<div id="meu-lista" style="margin-top:1rem"></div>
-<div class="footer-signature"><b>Only24²⁴</b><br/>Angola<br/>Admin & Poster — <b>Dembe</b></div></div>
-
-<div class="bnav">
-  <button class="bnav-item active" id="bnav-lar" onclick="switchView('lar')"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Lar</button>
-  <button class="bnav-item" id="bnav-trans" onclick="switchView('transferencias')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Transferências</button>
-  <button class="bnav-item" id="bnav-meu" onclick="switchView('meu')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Meu</button>
-</div>
-
-<div class="overlay" id="detail-modal" onclick="if(event.target===this) closeDetail()">
-  <div class="modal-content"><button class="modal-close" onclick="closeDetail()">✕</button><h3 id="d-title" style="font-family:'Bebas Neue';font-size:1.4rem;padding-right:35px"></h3><p id="d-meta" style="font-size:0.75rem;color:var(--muted2);margin:0.3rem 0"></p>
-  <div class="player-box"><video id="d-video" controls playsinline></video><img id="d-poster-img" style="display:none"/></div>
-  <p id="d-now-playing" style="font-size:0.75rem;color:var(--green);font-weight:700;margin-bottom:0.3rem"></p>
-  <p id="d-desc" style="font-size:0.8rem;color:#ccc;line-height:1.5"></p>
-  <div id="season-tabs" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin:0.8rem 0"></div>
-  <div id="episodes-list" style="display:flex;flex-direction:column;gap:0.5rem;margin:0.5rem 0"></div>
-  <div class="action-row"><button class="btn-main" onclick="playCurrent()">▶ Assistir</button><button class="btn-sec" onclick="downloadCurrent()">⬇ Baixar</button><button class="btn-sec" id="d-fav" onclick="toggleFavCurrent()">❤️ Favoritar</button></div>
-  <button class="btn-sec admin-only" style="width:100%;background:var(--gold);color:#000;border:none" onclick="editCurrent()">✏️ Editar — Adicionar vídeo / episódios / poster</button>
-  <button class="btn-sec admin-only" style="width:100%;margin-top:0.5rem" onclick="deleteCurrent()">🗑 Eliminar conteúdo</button>
-  <p style="font-size:0.65rem;color:var(--muted2);text-align:center;margin-top:0.5rem">Only24²⁴ • Angola • Poster Dembe</p>
-  </div>
-</div>
-
-<!-- ADMIN -->
-<div class="admin-overlay" id="admin-modal">
-  <div class="admin-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><h3 style="font-family:'Bebas Neue';font-size:1.3rem;color:var(--green)" id="admin-title">⚙ Painel Only24²⁴</h3><button class="modal-close" onclick="closeAdmin()">✕</button></div>
-    <div style="text-align:center;font-size:0.7rem;color:var(--muted2);margin-bottom:1rem">Angola • Admin & Poster: <b style="color:#fff">Dembe</b> • Only24²⁴</div>
-    <div id="edit-badge" style="background:var(--gold);color:#000;font-size:0.65rem;font-weight:800;padding:0.2rem 0.5rem;border-radius:4px;display:none;margin-bottom:0.8rem">✏️ A EDITAR</div>
-
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.8rem;margin-bottom:1rem">
-      <p style="font-size:0.75rem;color:var(--muted2);margin-bottom:0.5rem">Backup + PIN:</p>
-      <div style="display:
+<script>
+const filmes=[
+{t:"Velozes e Furiosos 10",c:"acao",n:"8.2",img:"https://image.tmdb.org/t/p/w500/fiVW06jE7z9YnO4trhaMEdghSi5.jpg"},
+{t:"John Wick 4",c:"acao",n:"8.5",img:"https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg"},
+{t:"Super Mario Bros",c:"animacao",n:"7.8",img:"https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg"},
+{t:"Guardiões da Galáxia 3",c:"acao",n:"8.0",img:"https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg"},
+{t:"The Batman",c:"crime",n:"7.9",img:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg"},
+{t:"Homem-Aranha 2",c:"animacao",n:"8.6",img:"https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg"},
+];
+const series=[
+{t:"The Last of Us",n:"8.8",img:"https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg"},
+{t:"Wednesday",n:"8.4",img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQyRUXUmmsAUvBhgeM.jpg"},
+{t:"One Piece",n:"8.6",img:"https://image.tmdb.org/t/p/w500/eVX05xRKS8JhEYQFObCi4lAnZT4.jpg"},
+];
+const animes=[
+{t:"Naruto",n:"8.9",img:"https://image.tmdb.org/t/p/w500/zl1L9wVj5xKxV0dXxJ0b2nJj0J0J.jpg"},
+{t:"One Piece Anime",n:"9.0",img:"https://image.tmdb.org/t/p/w500/eVX05xRKS8JhEYQFObCi4lAnZT4.jpg"},
+{t:"Dragon Ball Super",n:"8.5",img:"https://image.tmdb.org/t/p/w500/3wIOsnD6X9M3Q8o0e0Z1J0J0J0J0.jpg"},
+];
+function criar(lista,el){
+document.getElementById(el).innerHTML=lista.map(f=>`<div class="card"><img src="${f.img}" onerror="this.src='https://via.placeholder.com/300x450?text=Only24'"><p>${f.t}</p><small>⭐ ${f.n}</small></div>`).join("");
+}
+function filtrar(btn,cat){
+document.querySelectorAll('.filtros button').forEach(b=>b.classList.remove('ativo'));
+btn.classList.add('ativo');
+let l = cat==='todos'?filmes:filmes.filter(f=>f.c===cat);
+criar(l,'filmes');
+}
+function pesquisar(){
+let v=document.getElementById('pesquisa').value.toLowerCase();
+let l=filmes.filter(f=>f.t.toLowerCase().includes(v));
+criar(l,'filmes');
+if(l.length===0) alert('Nenhum filme encontrado para: '+v);
+}
+function abrirMenu(){document.getElementById('menu').classList.add('aberto')}
+function fecharMenu(){document.getElementById('menu').classList.remove('aberto')}
+criar(filmes,'filmes'); criar(series,'series'); criar(animes,'animes');
+</script>
+</body>
+</html>
