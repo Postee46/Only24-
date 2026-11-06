@@ -5,115 +5,74 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ONLY24 - Angola</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#0a0a0a;color:#fff;padding-bottom:80px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#0a0a0a;color:#fff;padding-bottom:90px}
 header{display:flex;justify-content:space-between;align-items:center;padding:15px}
-.logo{font-size:28px;font-weight:900} .logo span{color:#f5c518}
-.search-box{display:flex;gap:5px;background:#1c1c1c;padding:5px 10px;border-radius:20px}
-.search-box input{background:none;border:none;color:#fff;outline:none;width:110px}
-.search-box button{background:#22c55e;border:none;padding:5px 12px;border-radius:15px;font-weight:700}
-nav{display:flex;gap:20px;padding:0 15px;font-weight:700;color:#aaa}
-nav b{color:#fff;border-bottom:2px solid #22c55e}
-h2{padding:20px 15px 10px;font-size:20px}
-.filtros{display:flex;gap:8px;padding:0 15px;overflow-x:auto}
-.filtros button{background:#222;border:none;color:#fff;padding:8px 14px;border-radius:20px;white-space:nowrap}
-.filtros button.ativo{background:#22c55e}
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:15px}
-.card{background:#1a1a1a;border-radius:10px;overflow:hidden}
-.card img{width:100%;height:170px;object-fit:cover}
-.card p{padding:8px;font-size:13px;font-weight:700}
-.card small{padding:0 8px 10px;display:block;color:#f5c518}
+.logo{font-size:28px;font-weight:900}.logo span{color:#f5c518}
+.top{display:flex;gap:8px;padding:0 15px}
+.top a{background:#222;color:#fff;padding:8px 14px;border-radius:20px;text-decoration:none;font-size:14px}
+.top a.ativo{background:#22c55e}
+h2{padding:20px 15px 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 15px}
+.card{background:#1a1a1a;border-radius:10px;overflow:hidden;text-align:center;padding-bottom:8px}
+.card img{width:100%;height:160px;object-fit:cover;background:#333}
+.card b{font-size:13px;display:block;padding:6px}
+.card span{color:#f5c518;font-size:13px}
 footer{text-align:center;color:#888;padding:30px 10px;font-size:13px}
 .bottom{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;justify-content:space-around;padding:12px;border-top:1px solid #222}
-.bottom button{background:none;border:none;color:#fff;font-size:14px}
-.bottom button.ativo{color:#22c55e}
-#menu{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:flex-end}
-#menu.aberto{display:flex}
-.menu-box{background:#1a1a1a;width:100%;padding:20px;border-radius:20px 20px 0 0}
-.menu-box a{display:block;padding:14px 0;color:#fff;text-decoration:none;border-bottom:1px solid #333;font-size:16px}
+.bottom a{color:#fff;text-decoration:none;text-align:center;font-size:13px}
+#menu{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none}
+#menu.aberto{display:block}
+.menu-box{background:#1a1a1a;position:absolute;bottom:0;left:0;right:0;padding:20px;border-radius:20px 20px 0 0}
+.menu-box a{display:block;padding:14px 0;color:#fff;text-decoration:none;border-bottom:1px solid #333}
 .menu-box button{width:100%;margin-top:15px;padding:12px;background:#22c55e;border:none;border-radius:10px;font-weight:800}
 </style>
 </head>
 <body>
-<header>
-<div class="logo">ONLY<span>24</span></div>
-<div class="search-box"><input id="pesquisa" placeholder="Pesquisar..."><button onclick="pesquisar()">Procurar</button></div>
-<div>🔔</div>
-</header>
-<nav><b>Tendendo</b><span>Filme</span><span>TV</span><span>Anime</span></nav>
+<header><div class="logo">ONLY<span>24</span></div><div>🔔</div></header>
+<div class="top"><a href="#" class="ativo">Tendências</a><a href="#">Ação</a><a href="#">Animação</a><a href="#">Crime</a></div>
 
 <h2>CLASSIFICAÇÕES DE FILMES</h2>
-<div class="filtros">
-<button class="ativo" onclick="filtrar(this,'todos')">Tendências</button>
-<button onclick="filtrar(this,'acao')">Ação</button>
-<button onclick="filtrar(this,'animacao')">Animação</button>
-<button onclick="filtrar(this,'crime')">Crime</button>
+<div class="grid">
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/fiVW06jE7z9YnO4trhaMEdghSi5.jpg"><b>Velozes 10</b><span>⭐ 8.2</span></div>
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg"><b>John Wick 4</b><span>⭐ 8.5</span></div>
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg"><b>Super Mario</b><span>⭐ 7.8</span></div>
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg"><b>Guardiões 3</b><span>⭐ 8.0</span></div>
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg"><b>The Batman</b><span>⭐ 7.9</span></div>
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg"><b>Homem-Aranha 2</b><span>⭐ 8.6</span></div>
 </div>
-<div class="grid" id="filmes"></div>
 
 <h2>CLASSIFICAÇÕES DA SÉRIE</h2>
-<div class="grid" id="series"></div>
-
-<h2>ANIMES</h2>
-<div class="grid" id="animes"></div>
-
-<footer><b>Only24 - Angola</b><br>Admin & Poster — Dembe<br>© 2026 Only24 - Todos os direitos reservados</footer>
-
-<div class="bottom">
-<button class="ativo">🏠<br>Lar</button>
-<button>⬇<br>Transferências</button>
-<button onclick="abrirMenu()">👤<br>Menu</button>
+<div class="grid">
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg"><b>The Last of Us</b><span>⭐ 8.8</span></div>
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/9PFonBhy4cQyRUXUmmsAUvBhgeM.jpg"><b>Wednesday</b><span>⭐ 8.4</span></div>
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/eVX05xRKS8JhEYQFObCi4lAnZT4.jpg"><b>One Piece</b><span>⭐ 8.6</span></div>
 </div>
 
-<div id="menu" onclick="fecharMenu()">
-<div class="menu-box" onclick="event.stopPropagation()">
+<h2>ANIMES</h2>
+<div class="grid">
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/39yRY1W2YJz6z3yH0b7qJ0b2nJj0J0.jpg"><b>Naruto</b><span>⭐ 8.9</span></div>
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/eVX05xRKS8JhEYQFObCi4lAnZT4.jpg"><b>One Piece Anime</b><span>⭐ 9.0</span></div>
+<div class="card"><img src="https://image.tmdb.org/t/p/w500/3wIOsnD6X9M3Q8o0e0Z1J0J0J0J0.jpg"><b>Dragon Ball</b><span>⭐ 8.5</span></div>
+</div>
+
+<footer><b>Only24 - Angola</b><br>Admin & Poster — Dembe<br>© 2026 Only24</footer>
+
+<div class="bottom">
+<a href="#">🏠<br>Lar</a>
+<a href="#">⬇<br>Transferências</a>
+<a href="javascript:void(0)" onclick="document.getElementById('menu').classList.add('aberto')">👤<br>Menu</a>
+</div>
+
+<div id="menu">
+<div class="menu-box">
 <a href="#">🏠 Início</a>
 <a href="#">🎬 Filmes</a>
 <a href="#">📺 Séries</a>
 <a href="#">✨ Animes</a>
 <a href="#">⬇ Minhas Transferências</a>
-<a href="#">⚙️ Definições</a>
-<button onclick="fecharMenu()">Fechar Menu</button>
+<button onclick="document.getElementById('menu').classList.remove('aberto')">Fechar Menu</button>
 </div>
 </div>
-
-<script>
-const filmes=[
-{t:"Velozes e Furiosos 10",c:"acao",n:"8.2",img:"https://image.tmdb.org/t/p/w500/fiVW06jE7z9YnO4trhaMEdghSi5.jpg"},
-{t:"John Wick 4",c:"acao",n:"8.5",img:"https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg"},
-{t:"Super Mario Bros",c:"animacao",n:"7.8",img:"https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg"},
-{t:"Guardiões da Galáxia 3",c:"acao",n:"8.0",img:"https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg"},
-{t:"The Batman",c:"crime",n:"7.9",img:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg"},
-{t:"Homem-Aranha 2",c:"animacao",n:"8.6",img:"https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg"},
-];
-const series=[
-{t:"The Last of Us",n:"8.8",img:"https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg"},
-{t:"Wednesday",n:"8.4",img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQyRUXUmmsAUvBhgeM.jpg"},
-{t:"One Piece",n:"8.6",img:"https://image.tmdb.org/t/p/w500/eVX05xRKS8JhEYQFObCi4lAnZT4.jpg"},
-];
-const animes=[
-{t:"Naruto",n:"8.9",img:"https://image.tmdb.org/t/p/w500/zl1L9wVj5xKxV0dXxJ0b2nJj0J0J.jpg"},
-{t:"One Piece Anime",n:"9.0",img:"https://image.tmdb.org/t/p/w500/eVX05xRKS8JhEYQFObCi4lAnZT4.jpg"},
-{t:"Dragon Ball Super",n:"8.5",img:"https://image.tmdb.org/t/p/w500/3wIOsnD6X9M3Q8o0e0Z1J0J0J0J0.jpg"},
-];
-function criar(lista,el){
-document.getElementById(el).innerHTML=lista.map(f=>`<div class="card"><img src="${f.img}" onerror="this.src='https://via.placeholder.com/300x450?text=Only24'"><p>${f.t}</p><small>⭐ ${f.n}</small></div>`).join("");
-}
-function filtrar(btn,cat){
-document.querySelectorAll('.filtros button').forEach(b=>b.classList.remove('ativo'));
-btn.classList.add('ativo');
-let l = cat==='todos'?filmes:filmes.filter(f=>f.c===cat);
-criar(l,'filmes');
-}
-function pesquisar(){
-let v=document.getElementById('pesquisa').value.toLowerCase();
-let l=filmes.filter(f=>f.t.toLowerCase().includes(v));
-criar(l,'filmes');
-if(l.length===0) alert('Nenhum filme encontrado para: '+v);
-}
-function abrirMenu(){document.getElementById('menu').classList.add('aberto')}
-function fecharMenu(){document.getElementById('menu').classList.remove('aberto')}
-criar(filmes,'filmes'); criar(series,'series'); criar(animes,'animes');
-</script>
 </body>
 </html>
