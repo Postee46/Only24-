@@ -4,29 +4,164 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Only24 - Filmes e Séries</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.svg">
-<meta name="theme-color" content="#e50914">
-<link rel="stylesheet" href="css/style.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#000;color:#fff;padding-bottom:60px}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 15px;position:sticky;top:0;background:#000;z-index:100}
+.logo{font-size:28px;font-weight:900}.logo span{color:#e50914}
+.menu-btn{font-size:26px;background:none;border:none;color:#fff}
+.btn-pesq{background:#e50914;color:#fff;border:none;padding:10px 16px;border-radius:25px;font-weight:bold}
+.hero{margin:0 15px 15px;border-radius:15px;overflow:hidden;position:relative;height:220px;background:#222}
+.hero img{width:100%;height:100%;object-fit:cover}
+.hero-info{position:absolute;bottom:0;left:0;right:0;padding:15px;background:linear-gradient(transparent,rgba(0,0,0,.9))}
+.hero-info h1{font-size:22px}.hero-info p{font-size:13px;color:#ccc;margin:5px 0}
+.hero-info button{background:#e50914;color:#fff;border:none;padding:9px 18px;border-radius:20px;font-weight:bold;margin-right:8px}
+.hero-info button.out{background:#fff;color:#000}
+.search{margin:0 15px;background:#1a1a1a;border-radius:25px;padding:12px 18px}
+.search input{background:transparent;border:none;outline:none;color:#fff;width:100%;font-size:16px}
+.filtros{display:flex;gap:8px;padding:15px;overflow-x:auto}
+.filtros button{background:#222;color:#fff;border:none;padding:9px 16px;border-radius:20px;white-space:nowrap}
+.filtros button.active{background:#e50914}
+h2{padding:0 15px 10px;font-size:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 15px}
+.card{background:#111;border-radius:12px;overflow:hidden;position:relative}
+.card img{width:100%;height:220px;object-fit:cover;display:block}
+.card-info{padding:10px}.card-info h3{font-size:14px;line-height:1.2}.card-info p{font-size:12px;color:#aaa;margin:5px 0 8px}
+.card-info button{background:#e50914;color:#fff;border:none;padding:7px;border-radius:15px;width:100%;margin-top:4px}
+.card-info button.sec{background:#333}
+.del{position:absolute;top:5px;right:5px;background:red;color:#fff;border:none;border-radius:50%;width:28px;height:28px;z-index:5}
+.badge{position:absolute;top:8px;left:8px;background:#e50914;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:bold}
+#menu{position:fixed;top:0;left:-280px;width:260px;height:100%;background:#111;z-index:1000;transition:.3s;padding:20px;overflow:auto}
+#menu.aberto{left:0}
+#menu a{display:block;color:#fff;text-decoration:none;padding:13px 0;border-bottom:1px solid #222;font-size:15px}
+#menu button{background:#e50914;color:#fff;border:none;padding:11px;width:100%;border-radius:10px;margin-top:15px;font-weight:bold}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:999}
+#overlay.show{display:block}
+input,select,textarea{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none;background:#222;color:#fff;font-size:15px}
+.btn{background:#e50914;color:#fff;border:none;padding:13px;border-radius:10px;width:100%;font-weight:bold}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;justify-content:space-around;padding:12px 0;z-index:100;border-top:1px solid #222}
+.bottom-nav button{background:none;border:none;color:#fff;font-size:13px}
+.bottom-nav button.active{color:#e50914;font-weight:bold}
+</style>
 </head>
 <body>
-<header>
-  <div class="logo">Only<span>24</span></div>
-  <button class="btn" onclick="document.getElementById('search').focus()">🔍 Pesquisar</button>
-</header>
-
-<div class="search">
-  <input id="search" type="text" placeholder="Pesquisar filmes, séries...">
+<div id="overlay" onclick="fecharMenu()"></div>
+<div id="menu">
+<h2>Only<span style="color:#e50914">24</span></h2>
+<p style="color:#888;font-size:12px;margin:5px 0 10px">Filmes e Séries 24h</p>
+<a href="#" onclick="ir('todos')">🏠 Início</a>
+<a href="#" onclick="ir('filme')">🎬 Filmes</a>
+<a href="#" onclick="ir('serie')">📺 Séries</a>
+<a href="#" onclick="ir('favoritos')">❤️ Meus Favoritos</a>
+<a href="#" onclick="ir('Ação')">🔥 Ação</a>
+<a href="#" onclick="ir('Comédia')">😂 Comédia</a>
+<a href="#" onclick="ir('Drama')">🎭 Drama</a>
+<a href="#" onclick="ir('Terror')">👻 Terror</a>
+<a href="#" onclick="ir('Fantasia')">✨ Fantasia</a>
+<button onclick="abrirAdmin()">🔐 ADMIN - Postar Filme/Série</button>
+<button onclick="fecharMenu()" style="background:#333">✖ Fechar Menu</button>
+<p style="color:#555;font-size:11px;margin-top:20px">Only24 © 2026<br>Versão Completa</p>
 </div>
 
-<main id="grid" class="grid"></main>
+<header><button class="menu-btn" onclick="abrirMenu()">☰</button><div class="logo">Only<span>24</span></div><button class="btn-pesq" onclick="document.getElementById('busca').focus()">🔍 Pesquisar</button></header>
 
-<div id="modal" class="modal">
-  <div class="modal-box">
-    <div id="modalBody"></div>
-  </div>
+<div class="hero" id="hero"></div>
+<div class="search"><input id="busca" placeholder="🔍 Pesquisar filmes, séries..." oninput="mostrar()"></div>
+<div id="conteudo"></div>
+
+<div class="bottom-nav">
+<button id="navInicio" class="active" onclick="ir('todos')">🏠<br>Início</button>
+<button onclick="ir('filme')">🎬<br>Filmes</button>
+<button onclick="ir('serie')">📺<br>Séries</button>
+<button onclick="ir('favoritos')">❤️<br>Favoritos</button>
+<button onclick="abrirAdmin()">🔐<br>Admin</button>
 </div>
 
-<script type="module" src="js/app.js"></script>
+<script>
+let PADRAO=[
+{id:1,t:"Vingadores: Ultimato",tipo:"filme",cat:"Ação",ano:2019,nota:"8.4",img:"https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg",desc:"Os Vingadores tentam reverter o estalo de Thanos e salvar o universo.",video:"https://www.youtube.com/embed/TcMBFSGVi1c"},
+{id:2,t:"Homem-Aranha: Sem Volta",tipo:"filme",cat:"Ação",ano:2021,nota:"8.2",img:"https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",desc:"Peter Parker pede ajuda ao Doutor Estranho e abre o multiverso.",video:"https://www.youtube.com/embed/JfVOs4VSpmA"},
+{id:3,t:"Batman",tipo:"filme",cat:"Ação",ano:2022,nota:"7.7",img:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",desc:"Batman investiga assassinatos em Gotham City.",video:"https://www.youtube.com/embed/mqqft2x_Aa4"},
+{id:4,t:"Avatar 2",tipo:"filme",cat:"Aventura",ano:2022,nota:"7.6",img:"https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",desc:"Jake Sully e Neytiri protegem Pandora e a família.",video:"https://www.youtube.com/embed/d9MyW72ELq0"},
+{id:5,t:"Top Gun: Maverick",tipo:"filme",cat:"Ação",ano:2022,nota:"8.3",img:"https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg",desc:"Maverick volta para treinar uma nova geração de pilotos.",video:"https://www.youtube.com/embed/qSqVVswa420"},
+{id:6,t:"Stranger Things",tipo:"serie",cat:"Terror",ano:2016,nota:"8.7",img:"https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",desc:"Crianças enfrentam o Mundo Invertido em Hawkins.",video:"https://www.youtube.com/embed/b9EkMc79ZSU"},
+{id:7,t:"La Casa de Papel",tipo:"serie",cat:"Drama",ano:2017,nota:"8.2",img:"https://image.tmdb.org/t/p/w500/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg",desc:"Um grupo faz o maior assalto da história à Casa da Moeda.",video:"https://www.youtube.com/embed/_InqQJRqGW4"},
+{id:8,t:"Round 6",tipo:"serie",cat:"Drama",ano:2021,nota:"8.0",img:"https://image.tmdb.org/t/p/w500/1LRLLWGvs5sZdTjqHRvGmszQ5O9.jpg",desc:"Jogadores desesperados competem em jogos mortais por dinheiro.",video:"https://www.youtube.com/embed/oqxAJKy0ii4"},
+{id:9,t:"The Witcher",tipo:"serie",cat:"Fantasia",ano:2019,nota:"8.0",img:"https://image.tmdb.org/t/p/w500/7vjaCdMw15FEbXyLQTVa04URsPm.jpg",desc:"Geralt de Rívia, um caçador de monstros mutante.",video:"https://www.youtube.com/embed/ndl1W4ltcmg"},
+{id:10,t:"Wednesday",tipo:"serie",cat:"Comédia",ano:2022,nota:"8.5",img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg",desc:"Wednesday Addams investiga mistérios na escola Nevermore.",video:"https://www.youtube.com/embed/Q73UhUTs6y0"},
+{id:11,t:"Duna: Parte 2",tipo:"filme",cat:"Ficção",ano:2024,nota:"8.5",img:"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",desc:"Paul Atreides une-se aos Fremen para lutar contra os Harkonnen.",video:"https://www.youtube.com/embed/Way9Dexny3w"},
+{id:12,t:"Joker",tipo:"filme",cat:"Drama",ano:2019,nota:"8.4",img:"https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg",desc:"A origem do Coringa, Arthur Fleck em Gotham.",video:"https://www.youtube.com/embed/zAGVQLHvwOY"}
+];
+let MEUS=JSON.parse(localStorage.getItem('meus_filmes')||'[]');
+let FILMES=[...PADRAO,...MEUS];
+let fav=JSON.parse(localStorage.getItem('fav')||'[]');
+let filtro='todos';
+let isAdmin=false;
+
+function abrirMenu(){document.getElementById('menu').classList.add('aberto');document.getElementById('overlay').classList.add('show')}
+function fecharMenu(){document.getElementById('menu').classList.remove('aberto');document.getElementById('overlay').classList.remove('show')}
+function ir(f){filtro=f;fecharMenu();window.scrollTo(0,0);mostrar();}
+
+function mostrar(){
+let busca=(document.getElementById('busca').value||'').toLowerCase();
+let destaque=FILMES[0];
+document.getElementById('hero').innerHTML=`<img src="${destaque.img}"><div class="hero-info"><h1>🔥 ${destaque.t}</h1><p>${destaque.ano} • ⭐ ${destaque.nota} • ${destaque.cat}</p><button onclick="abrir(${destaque.id})">▶ Assistir Agora</button><button class="out" onclick="favoritar(${destaque.id})">+ Favoritos</button></div>`;
+let lista=FILMES.filter(f=>{
+if(filtro==='filme'&&f.tipo!=='filme')return false;
+if(filtro==='serie'&&f.tipo!=='serie')return false;
+if(filtro==='favoritos'&&!fav.includes(f.id))return false;
+if(['Ação','Comédia','Drama','Terror','Fantasia','Aventura','Ficção'].includes(filtro)&&f.cat!==filtro)return false;
+if(busca&&!f.t.toLowerCase().includes(busca))return false;
+return true;
+});
+let titulo=filtro==='todos'?'🔥 Em Alta - Todos':filtro==='favoritos'?'❤️ Teus Favoritos':filtro==='filme'?'🎬 Filmes':filtro==='serie'?'📺 Séries':'📂 '+filtro;
+document.getElementById('conteudo').innerHTML=`<div class="filtros">
+<button onclick="ir('todos')" class="${filtro==='todos'?'active':''}">Todos</button>
+<button onclick="ir('filme')" class="${filtro==='filme'?'active':''}">🎬 Filmes</button>
+<button onclick="ir('serie')" class="${filtro==='serie'?'active':''}">📺 Séries</button>
+<button onclick="ir('favoritos')" class="${filtro==='favoritos'?'active':''}">❤️ Favoritos</button>
+<button onclick="ir('Ação')">🔥 Ação</button><button onclick="ir('Comédia')">😂 Comédia</button><button onclick="ir('Drama')">🎭 Drama</button></div>
+<h2>${titulo} (${lista.length})</h2>
+<div class="grid">${lista.map(f=>`<div class="card" onclick="abrir(${f.id})"><span class="badge">${f.tipo==='filme'?'FILME':'SÉRIE'}</span>${isAdmin?`<button class="del" onclick="event.stopPropagation();apagar(${f.id})">✖</button>`:''}<img src="${f.img}" onerror="this.src='https://via.placeholder.com/300x450/111/fff?text='+encodeURIComponent('${f.t}')"><div class="card-info"><h3>${f.t}</h3><p>${f.ano} • ⭐ ${f.nota} • ${f.cat}</p><button onclick="event.stopPropagation();abrir(${f.id})">▶ Assistir</button><button class="sec" onclick="event.stopPropagation();favoritar(${f.id})">${fav.includes(f.id)?'❤️ Favoritado':'🤍 Favoritar'}</button>${isAdmin?`<button class="sec" onclick="event.stopPropagation();editar(${f.id})">✏️ Editar</button>`:''}</div></div>`).join('')||'<p style="padding:20px">Nenhum conteúdo. Vai ao Admin e publica!</p>'}</div><p style="text-align:center;color:#666;padding:20px 0;font-size:12px">Total: ${FILMES.length} conteúdos • Only24 • 24h por dia</p>`;
+}
+function favoritar(id){if(fav.includes(id))fav=fav.filter(x=>x!==id);else fav.push(id);localStorage.setItem('fav',JSON.stringify(fav));mostrar();}
+function apagar(id){if(!confirm('Apagar este conteúdo?'))return;FILMES=FILMES.filter(x=>x.id!==id);MEUS=MEUS.filter(x=>x.id!==id);localStorage.setItem('meus_filmes',JSON.stringify(MEUS));mostrar();}
+function abrir(id){let f=FILMES.find(x=>x.id===id);let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:2000;padding:20px;overflow:auto;padding-bottom:80px';d.innerHTML=`<button onclick="document.getElementById('modal').remove()" style="background:red;color:white;border:none;padding:10px 20px;border-radius:20px">✖ Fechar</button><h2 style="margin:18px 0 5px;padding:0">${f.t}</h2><p>${f.ano} • ⭐ ${f.nota} • ${f.cat} • ${f.tipo}</p><p style="margin:12px 0;line-height:1.5">${f.desc}</p><iframe width="100%" height="300" style="border-radius:12px" src="${f.video}" frameborder="0" allowfullscreen></iframe><br><br><button onclick="favoritar(${f.id});document.getElementById('modal').remove()" style="background:#e50914;color:white;border:none;padding:13px 20px;border-radius:20px;width:100%">❤️ Adicionar aos Favoritos</button>`;document.body.appendChild(d);}
+
+function abrirAdmin(){
+let senha=prompt('🔐 Senha do Admin:');
+if(senha!=='1234'){alert('Senha errada! A senha é 1234');return;}
+isAdmin=true;fecharMenu();
+let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:#111;z-index:2000;padding:20px;overflow:auto';
+d.innerHTML=`<button onclick="document.getElementById('modal').remove();isAdmin=false;mostrar()" style="background:red;color:white;border:none;padding:10px 20px;border-radius:20px">✖ Sair do Admin</button>
+<h2 style="margin:15px 0;padding:0">🔐 Painel Admin - Only24</h2>
+<p style="color:#aaa;font-size:13px">Publica um novo filme ou série. Fica guardado e aparece para todos.</p>
+<input id="nTitulo" placeholder="Título * ex: Velozes e Furiosos 10">
+<select id="nTipo"><option value="filme">🎬 Filme</option><option value="serie">📺 Série</option></select>
+<select id="nCat"><option>Ação</option><option>Comédia</option><option>Drama</option><option>Terror</option><option>Fantasia</option><option>Aventura</option><option>Ficção</option></select>
+<input id="nAno" placeholder="Ano ex: 2024" type="number">
+<input id="nNota" placeholder="Nota ex: 8.5">
+<input id="nImg" placeholder="Link da imagem (poster) - cola URL da imagem">
+<input id="nVideo" placeholder="Link vídeo YouTube Embed - ex: https://www.youtube.com/embed/XXXX">
+<textarea id="nDesc" placeholder="Descrição do filme/série"></textarea>
+<button class="btn" onclick="salvarNovo()">✅ PUBLICAR AGORA</button>
+<p style="color:#888;font-size:12px;margin-top:12px">💡 Para imagem: vai no Google > pesquisa o filme > segura na imagem > Copiar link da imagem > cola aqui.<br>Para vídeo: YouTube > Partilhar > Incorporar > copia o link embed.</p>
+<h3 style="margin-top:20px">📋 Lista (${FILMES.length}) - Clica ✖ no card para apagar</h3>`;
+document.body.appendChild(d);mostrar();
+}
+function salvarNovo(){
+let t=document.getElementById('nTitulo').value.trim();
+if(!t){alert('Escreve o título!');return;}
+let novo={id:Date.now(),t:t,tipo:document.getElementById('nTipo').value,cat:document.getElementById('nCat').value,ano:document.getElementById('nAno').value||2024,nota:document.getElementById('nNota').value||'7.0',img:document.getElementById('nImg').value||'https://via.placeholder.com/300x450/e50914/fff?text='+encodeURIComponent(t),desc:document.getElementById('nDesc').value||'Novo lançamento no Only24',video:document.getElementById('nVideo').value||'https://www.youtube.com/embed/TcMBFSGVi1c'};
+MEUS.push(novo);FILMES.push(novo);localStorage.setItem('meus_filmes',JSON.stringify(MEUS));
+alert('✅ Publicado com sucesso!');document.getElementById('modal').remove();isAdmin=false;mostrar();
+}
+function editar(id){
+let f=FILMES.find(x=>x.id===id);
+let novoTitulo=prompt('Novo título:',f.t);
+if(novoTitulo){f.t=novoTitulo;let m=MEUS.find(x=>x.id===id);if(m)m.t=novoTitulo;localStorage.setItem('meus_filmes',JSON.stringify(MEUS));mostrar();alert('Editado!');}
+}
+mostrar();
+</script>
 </body>
-  </html>
+</html>
