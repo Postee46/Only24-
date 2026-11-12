@@ -1,146 +1,44 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Only24</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#000;color:#fff;padding-bottom:70px}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 15px;position:sticky;top:0;background:#000;z-index:100}
-.logo{font-size:28px;font-weight:900;cursor:pointer}.logo span{color:#e50914}
-.bell{font-size:22px;background:none;border:none;color:#fff;position:relative}
-.bell b{position:absolute;top:-5px;right:-5px;background:#e50914;font-size:10px;padding:2px 5px;border-radius:50%;display:none}
-.hero{margin:0 15px 15px;border-radius:15px;overflow:hidden;position:relative;height:220px;background:#222}
-.hero img{width:100%;height:100%;object-fit:cover}
-.hero-info{position:absolute;bottom:0;left:0;right:0;padding:15px;background:linear-gradient(transparent,rgba(0,0,0,.9))}
-.hero-info button{background:#e50914;color:#fff;border:none;padding:9px 18px;border-radius:20px;font-weight:bold;margin-right:8px}
-.hero-info button.out{background:#fff;color:#000}
-.search{margin:0 15px;background:#1a1a1a;border-radius:25px;padding:12px 18px}
-.search input{background:transparent;border:none;outline:none;color:#fff;width:100%;font-size:16px}
-.filtros{display:flex;gap:8px;padding:15px;overflow-x:auto}
-.filtros button{background:#222;color:#fff;border:none;padding:9px 16px;border-radius:20px;white-space:nowrap}
-.filtros button.active{background:#e50914}
-h2{padding:0 15px 10px;font-size:18px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 15px}
-.card{background:#111;border-radius:12px;overflow:hidden;position:relative}
-.card img{width:100%;height:220px;object-fit:cover;display:block;background:#222}
-.card-info{padding:10px}.card-info h3{font-size:14px}.card-info p{font-size:12px;color:#aaa;margin:5px 0 8px}
-.card-info button{background:#e50914;color:#fff;border:none;padding:7px;border-radius:15px;width:100%;margin-top:4px}
-.card-info button.sec{background:#333}.card-info button.down{background:#1db954}
-.del{position:absolute;top:5px;right:5px;background:red;color:#fff;border:none;border-radius:50%;width:28px;height:28px;z-index:5}
-.badge{position:absolute;top:8px;left:8px;background:#e50914;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:bold}
-#menu{position:fixed;top:0;left:-280px;width:260px;height:100%;background:#111;z-index:1000;transition:.3s;padding:20px}
-#menu.aberto{left:0}
-#menu a{display:block;color:#fff;text-decoration:none;padding:13px 0;border-bottom:1px solid #222}
-#menu button{background:#e50914;color:#fff;border:none;padding:11px;width:100%;border-radius:10px;margin-top:15px;font-weight:bold}
-#overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:999}
-#overlay.show{display:block}
-input,select,textarea{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none;background:#222;color:#fff}
-.btn{background:#e50914;color:#fff;border:none;padding:13px;border-radius:10px;width:100%;font-weight:bold}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;justify-content:space-around;padding:12px 0;z-index:100;border-top:1px solid #222}
-.bottom-nav button{background:none;border:none;color:#fff;font-size:13px}
-.file-box{background:#222;border:2px dashed #555;border-radius:12px;padding:15px;text-align:center;margin:6px 0}
-.chk{width:20px;height:20px;accent-color:#e50914}
-</style>
-</head>
-<body>
-<div id="overlay" onclick="fecharMenu()"></div>
-<div id="menu">
-<h2>Only<span style="color:#e50914">24</span></h2><p style="color:#888;font-size:12px">Filmes, Séries e Animes</p>
-<a href="#" onclick="ir('todos')">🏠 Início</a>
-<a href="#" onclick="ir('filme')">🎬 Filmes</a>
-<a href="#" onclick="ir('serie')">📺 Séries</a>
-<a href="#" onclick="ir('Anime')">🍥 Animes</a>
-<a href="#" onclick="ir('favoritos')">❤️ Favoritos</a>
-<a href="#" onclick="ir('downloads')">⬇️ Downloads</a>
-<button onclick="fecharMenu()" style="background:#333">✖ Fechar</button>
-<p style="color:#555;font-size:11px;margin-top:15px">Admin: toca 5x no logo</p>
-</div>
-<header><button onclick="abrirMenu()" style="font-size:26px;background:none;border:none;color:#fff">☰</button><div class="logo" onclick="tocarLogo()">Only<span>24</span></div><button class="bell" onclick="abrirNotificacoes()">🔔<b id="notifBadge">0</b></button></header>
-<div class="hero" id="hero"><div style="padding:80px 20px;text-align:center">A carregar...</div></div>
-<div class="search"><input id="busca" placeholder="🔍 Pesquisar filmes, séries, animes..." oninput="mostrar()"></div>
-<div id="conteudo"><p style="padding:20px;text-align:center;color:#888">A carregar filmes...</p></div>
-<div class="bottom-nav">
-<button onclick="ir('todos')">🏠<br>Início</button>
-<button onclick="ir('filme')">🎬<br>Filmes</button>
-<button onclick="ir('Anime')">🍥<br>Animes</button>
-<button onclick="ir('favoritos')">❤️<br>Favoritos</button>
-<button onclick="ir('downloads')">⬇️<br>Baixar</button>
-</div>
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Only24</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#000;color:#fff;padding-bottom:70px}header{display:flex;justify-content:space-between;padding:14px;position:sticky;top:0;background:#000;z-index:99}.logo{font-size:28px;font-weight:900;cursor:pointer}.logo span{color:#e50914}.hero{margin:0 15px 15px;border-radius:15px;position:relative;height:200px;background:#222;overflow:hidden}.hero img{width:100%;height:100%;object-fit:cover}.hero div{position:absolute;bottom:0;padding:15px;background:linear-gradient(transparent,#000)}.hero button{background:#e50914;color:#fff;border:none;padding:9px 16px;border-radius:20px;font-weight:bold}.search{margin:0 15px;background:#1a1a1a;border-radius:25px;padding:12px}.search input{background:0;border:0;outline:0;color:#fff;width:100%}.fil{display:flex;gap:8px;padding:15px;overflow-x:auto}.fil button{background:#222;color:#fff;border:0;padding:9px 14px;border-radius:20px;white-space:nowrap}.fil button.a{background:#e50914}h2{padding:0 15px 10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 15px}.card{background:#111;border-radius:12px;overflow:hidden;position:relative}.card img{width:100%;height:210px;object-fit:cover;background:#222}.card div{padding:10px}.card p{font-size:12px;color:#aaa;margin:4px 0}.card button{background:#e50914;color:#fff;border:0;padding:7px;border-radius:15px;width:100%;margin-top:4px}.card button.s{background:#333}.card button.d{background:#1db954}#menu{position:fixed;top:0;left:-280px;width:260px;height:100%;background:#111;z-index:1000;padding:20px;transition:.3s}#menu.o{left:0}#menu a{display:block;color:#fff;text-decoration:none;padding:12px 0;border-bottom:1px solid #222}#ov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:999}#ov.s{display:block}input,select,textarea{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:0;background:#222;color:#fff}.btn{background:#e50914;color:#fff;border:0;padding:13px;border-radius:10px;width:100%;font-weight:bold}.nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;justify-content:space-around;padding:12px 0;border-top:1px solid #222}.nav button{background:0;border:0;color:#fff}.chk{width:20px;height:20px}</style></head><body>
+<div id="ov" onclick="fechar()"></div><div id="menu"><h2>Only<span style="color:#e50914">24</span></h2><a href="#" onclick="ir('todos')">🏠 Início</a><a href="#" onclick="ir('filme')">🎬 Filmes</a><a href="#" onclick="ir('serie')">📺 Séries</a><a href="#" onclick="ir('Anime')">🍥 Animes</a><a href="#" onclick="ir('favoritos')">❤️ Favoritos</a><a href="#" onclick="ir('downloads')">⬇️ Downloads</a><button onclick="fechar()" style="background:#333;color:#fff;border:0;padding:11px;width:100%;border-radius:10px;margin-top:15px">✖ Fechar</button><p style="color:#555;font-size:11px;margin-top:10px">Admin: toca 5x no logo</p></div>
+<header><button onclick="abrir()" style="font-size:26px;background:0;border:0;color:#fff">☰</button><div class="logo" onclick="tocar()">Only<span>24</span></div><button onclick="notif()" style="font-size:22px;background:0;border:0">🔔<b id="nb" style="display:none;background:#e50914;font-size:10px;padding:2px 5px;border-radius:50%">!</b></button></header>
+<div class="hero" id="hero"></div><div class="search"><input id="busca" placeholder="🔍 Pesquisar..." oninput="mostrar()"></div><div id="box"></div>
+<div class="nav"><button onclick="ir('todos')">🏠<br>Início</button><button onclick="ir('filme')">🎬<br>Filmes</button><button onclick="ir('Anime')">🍥<br>Animes</button><button onclick="ir('favoritos')">❤️<br>Favoritos</button><button onclick="ir('downloads')">⬇️<br>Baixar</button></div>
 <script>
-// SE ESTIVER ?limpar=1 LIMPA TUDO E VOLTA AO NORMAL
-if(location.search.indexOf('limpar')!==-1){localStorage.clear();alert('✅ Memória limpa! Agora volta a abrir o site normal.');location.href=location.pathname;}
-function lerSeguro(chave,padrao){try{let v=localStorage.getItem(chave);if(!v)return padrao;let j=JSON.parse(v);if(!Array.isArray(j))return padrao;return j;}catch(e){localStorage.removeItem(chave);return padrao;}}
-let PADRAO=[
-{id:1,t:"Vingadores: Ultimato",tipo:"filme",cat:"Ação",ano:2019,nota:"8.4",img:"https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg",desc:"Os Vingadores tentam reverter o estalo.",video:"https://www.youtube.com/embed/TcMBFSGVi1c",eps:[]},
-{id:2,t:"Naruto Shippuden",tipo:"serie",cat:"Anime",ano:2007,nota:"8.7",img:"https://cdn.myanimelist.net/images/anime/5/17407.jpg",desc:"Naruto luta para se tornar Hokage.",video:"https://www.youtube.com/embed/JfVOs4VSpmA",eps:[{n:1,t:"Ep 1 - Naruto Volta"},{n:2,t:"Ep 2 - Treino"}]},
-{id:3,t:"Batman",tipo:"filme",cat:"Ação",ano:2022,nota:"7.7",img:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",desc:"Batman em Gotham.",video:"https://www.youtube.com/embed/mqqft2x_Aa4",eps:[]},
-{id:4,t:"Avatar 2",tipo:"filme",cat:"Aventura",ano:2022,nota:"7.6",img:"https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",desc:"Jake Sully protege Pandora.",video:"https://www.youtube.com/embed/d9MyW72ELq0",eps:[]},
-{id:6,t:"Stranger Things",tipo:"serie",cat:"Terror",ano:2016,nota:"8.7",img:"https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",desc:"Mundo Invertido.",video:"https://www.youtube.com/embed/b9EkMc79ZSU",eps:[{n:1,t:"T1 Ep1"}]},
-{id:10,t:"Wednesday",tipo:"serie",cat:"Comédia",ano:2022,nota:"8.5",img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg",desc:"Wednesday na Nevermore.",video:"https://www.youtube.com/embed/Q73UhUTs6y0",eps:[]},
-{id:12,t:"Joker",tipo:"filme",cat:"Drama",ano:2019,nota:"8.4",img:"https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg",desc:"Origem do Coringa.",video:"https://www.youtube.com/embed/zAGVQLHvwOY",eps:[]},
-{id:13,t:"One Piece",tipo:"serie",cat:"Anime",ano:1999,nota:"9.0",img:"https://cdn.myanimelist.net/images/anime/6/73245.jpg",desc:"Luffy procura o One Piece.",video:"https://www.youtube.com/embed/Way9Dexny3w",eps:[{n:1,t:"Ep 1 - Sou Luffy"},{n:2,t:"Ep 2 - Zoro"}]},
-{id:14,t:"Attack on Titan",tipo:"serie",cat:"Anime",ano:2013,nota:"9.1",img:"https://cdn.myanimelist.net/images/anime/10/47347.jpg",desc:"Eren luta contra os Titãs.",video:"https://www.youtube.com/embed/mqqft2x_Aa4",eps:[{n:1,t:"Ep 1"}]},
-{id:15,t:"Demon Slayer",tipo:"serie",cat:"Anime",ano:2019,nota:"8.9",img:"https://cdn.myanimelist.net/images/anime/1286/99889.jpg",desc:"Tanjiro caça demónios.",video:"https://www.youtube.com/embed/VQGCKyvzIM4",eps:[{n:1,t:"Ep 1 - Crueldade"}]}
+if(location.search.includes('limpar')){localStorage.clear();alert('Memoria limpa!');location.href=location.pathname}
+function L(k,d){try{let v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:d}catch(e){return d}}
+let P=[
+[1,"Vingadores: Ultimato","filme","Ação",2019,"8.4","https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg","Vingadores contra Thanos.","https://www.youtube.com/embed/TcMBFSGVi1c",""],
+[2,"Naruto Shippuden","serie","Anime",2007,"8.7","https://cdn.myanimelist.net/images/anime/5/17407.jpg","Naruto quer ser Hokage.","https://www.youtube.com/embed/JfVOs4VSpmA","Ep1,Ep2,Ep3"],
+[3,"Batman","filme","Ação",2022,"7.7","https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg","Batman em Gotham.","https://www.youtube.com/embed/mqqft2x_Aa4",""],
+[4,"One Piece","serie","Anime",1999,"9.0","https://cdn.myanimelist.net/images/anime/6/73245.jpg","Luffy procura One Piece.","https://www.youtube.com/embed/Way9Dexny3w","Ep1,Ep2"],
+[5,"Attack on Titan","serie","Anime",2013,"9.1","https://cdn.myanimelist.net/images/anime/10/47347.jpg","Eren contra Titãs.","https://www.youtube.com/embed/mqqft2x_Aa4","Ep1,Ep2"],
+[6,"Demon Slayer","serie","Anime",2019,"8.9","https://cdn.myanimelist.net/images/anime/1286/99889.jpg","Tanjiro caça demónios.","https://www.youtube.com/embed/VQGCKyvzIM4","Ep1,Ep2"],
+[7,"Stranger Things","serie","Terror",2016,"8.7","https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg","Mundo Invertido.","https://www.youtube.com/embed/b9EkMc79ZSU","Ep1,Ep2"],
+[8,"Wednesday","serie","Comédia",2022,"8.5","https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg","Wednesday na Nevermore.","https://www.youtube.com/embed/Q73UhUTs6y0",""],
+[9,"Joker","filme","Drama",2019,"8.4","https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg","Origem do Coringa.","https://www.youtube.com/embed/zAGVQLHvwOY",""],
+[10,"Avatar 2","filme","Aventura",2022,"7.6","https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg","Jake protege Pandora.","https://www.youtube.com/embed/d9MyW72ELq0",""]
 ];
-let MEUS=lerSeguro('meus_filmes',[]);
-// SE OS TEUS FILMES ANTIGOS ESTIVEREM COM VÍDEO PESADO, IGNORA-OS PARA NÃO FICAR PRETO
-MEUS=MEUS.filter(m=>m && m.t && (!m.video || m.video.length<2000));
-let FILMES=[...PADRAO,...MEUS];
-let fav=lerSeguro('fav',[]);
-let downs=lerSeguro('downloads',[]);
-let notifs=lerSeguro('notifs',[]);
-let codigos=lerSeguro('codigos',['ONLY24']);
-let filtro='todos';let isAdmin=false;let cliquesLogo=0;let selEps=new Set();
-function abrirMenu(){document.getElementById('menu').classList.add('aberto');document.getElementById('overlay').classList.add('show')}
-function fecharMenu(){document.getElementById('menu').classList.remove('aberto');document.getElementById('overlay').classList.remove('show')}
-function ir(f){filtro=f;fecharMenu();window.scrollTo(0,0);mostrar();}
-function tocarLogo(){cliquesLogo++;if(cliquesLogo>=5){cliquesLogo=0;abrirAdmin();}setTimeout(()=>cliquesLogo=0,2000);}
-function atualizarBadge(){let novas=notifs.filter(n=>!n.lida).length;let b=document.getElementById('notifBadge');if(b){b.textContent=novas;b.style.display=novas>0?'block':'none';}}
-function notificar(texto){try{notifs.unshift({texto:texto,data:new Date().toLocaleString(),lida:false});localStorage.setItem('notifs',JSON.stringify(notifs));}catch(e){}atualizarBadge();}
+let MEUS=L('meus',[]).filter(x=>x&&x[1]&&(!x[7]||x[7].length<2000));
+let F=[...P,...MEUS];let fav=L('fav',[]);let downs=L('downs',[]);let nfs=L('nfs',[]);let filtro='todos';let adm=false;let cl=0;let sel=new Set();let ti='';let tv='';
+function abrir(){document.getElementById('menu').classList.add('o');document.getElementById('ov').classList.add('s')}
+function fechar(){document.getElementById('menu').classList.remove('o');document.getElementById('ov').classList.remove('s')}
+function ir(f){filtro=f;fechar();mostrar()}
+function tocar(){cl++;if(cl>=5){cl=0;admin()}setTimeout(()=>cl=0,2000)}
 function mostrar(){
-try{
-let busca=(document.getElementById('busca').value||'').toLowerCase();
-let destaque=FILMES[0]||PADRAO[0];
-document.getElementById('hero').innerHTML=`<img src="${destaque.img}" onerror="this.src='https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg'"><div class="hero-info"><h1>🔥 ${destaque.t}</h1><p>${destaque.ano} • ⭐ ${destaque.nota} • ${destaque.cat}</p><button onclick="abrir(${destaque.id})">▶ Assistir</button><button class="out" onclick="baixarFilme(${destaque.id})">⬇ Baixar</button></div>`;
-let lista=FILMES.filter(f=>{
-if(!f||!f.t)return false;
-if(filtro==='filme'&&f.tipo!=='filme')return false;
-if(filtro==='serie'&&f.tipo!=='serie')return false;
-if(filtro==='Anime'&&f.cat!=='Anime')return false;
-if(filtro==='favoritos'&&!fav.includes(f.id))return false;
-if(filtro==='downloads'&&!downs.includes(f.id))return false;
-if(busca&&!f.t.toLowerCase().includes(busca))return false;
-return true;
-});
-let titulo=filtro==='todos'?'🔥 Em Alta - Todos':filtro==='Anime'?'🍥 Animes':filtro;
-document.getElementById('conteudo').innerHTML=`<div class="filtros"><button onclick="ir('todos')" class="${filtro==='todos'?'active':''}">Todos</button><button onclick="ir('filme')">🎬 Filmes</button><button onclick="ir('serie')">📺 Séries</button><button onclick="ir('Anime')">🍥 Animes</button><button onclick="ir('favoritos')">❤️ Favoritos</button><button onclick="ir('downloads')">⬇️ Downloads</button></div><h2>${titulo} (${lista.length})</h2><div class="grid">${lista.map(f=>`<div class="card" onclick="abrir(${f.id})"><span class="badge">${f.cat==='Anime'?'ANIME':f.tipo==='filme'?'FILME':'SÉRIE'}</span>${isAdmin?`<button class="del" onclick="event.stopPropagation();apagar(${f.id})">✖</button>`:''}<img src="${f.img}" onerror="this.src='https://via.placeholder.com/300x450/111/fff?text=Only24'"><div class="card-info"><h3>${f.t}</h3><p>${f.ano||''} • ⭐ ${f.nota||''} • ${f.cat||''}</p><button onclick="event.stopPropagation();abrir(${f.id})">▶ Assistir</button><button class="down" onclick="event.stopPropagation();baixarFilme(${f.id})">⬇ Baixar</button><button class="sec" onclick="event.stopPropagation();favoritar(${f.id})">${fav.includes(f.id)?'❤️ Favoritado':'🤍 Favoritar'}</button></div></div>`).join('')||'<p style="padding:20px">Nenhum conteúdo.</p>'}</div>`;
-}catch(err){document.getElementById('conteudo').innerHTML='<p style="padding:20px">Erro ao carregar, a recarregar... '+err.message+'</p>';}
+let b=(document.getElementById('busca').value||'').toLowerCase();let d=F[0];
+document.getElementById('hero').innerHTML=`<img src="${d[6]}" onerror="this.src='https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg'"><div><h1>${d[1]}</h1><p>${d[4]} ⭐ ${d[5]} • ${d[3]}</p><button onclick="abrirFilme(${d[0]})">▶ Assistir</button></div>`;
+let lista=F.filter(f=>{if(!f||!f[1])return false;if(filtro=='filme'&&f[2]!='filme')return false;if(filtro=='serie'&&f[2]!='serie')return false;if(filtro=='Anime'&&f[3]!='Anime')return false;if(filtro=='favoritos'&&!fav.includes(f[0]))return false;if(filtro=='downloads'&&!downs.includes(f[0]))return false;if(b&&!f[1].toLowerCase().includes(b))return false;return true});
+document.getElementById('box').innerHTML=`<div class="fil"><button onclick="ir('todos')" class="${filtro=='todos'?'a':''}">Todos</button><button onclick="ir('filme')">🎬 Filmes</button><button onclick="ir('serie')">📺 Séries</button><button onclick="ir('Anime')">🍥 Animes</button><button onclick="ir('favoritos')">❤️ Favoritos</button><button onclick="ir('downloads')">⬇️ Downloads</button></div><h2>${filtro=='todos'?'🔥 Em Alta':filtro} (${lista.length})</h2><div class="grid">${lista.map(f=>`<div class="card" onclick="abrirFilme(${f[0]})"><img src="${f[6]}" onerror="this.src='https://via.placeholder.com/300x450/111/fff?text=Only24'"><div><h3>${f[1]}</h3><p>${f[4]} • ⭐ ${f[5]} • ${f[3]}</p><button onclick="event.stopPropagation();abrirFilme(${f[0]})">▶ Assistir</button><button class="d" onclick="event.stopPropagation();baixar(${f[0]})">⬇ Baixar</button><button class="s" onclick="event.stopPropagation();favor(${f[0]})">${fav.includes(f[0])?'❤️ Favoritado':'🤍 Favoritar'}</button></div></div>`).join('')||'<p style="padding:20px">Nenhum filme.</p>'}</div>`;
+document.getElementById('nb').style.display=nfs.filter(n=>!n.l).length?'inline':'none';
 }
-function favoritar(id){if(fav.includes(id))fav=fav.filter(x=>x!==id);else fav.push(id);try{localStorage.setItem('fav',JSON.stringify(fav));}catch(e){}mostrar();}
-function baixarFilme(id){let f=FILMES.find(x=>x.id===id);if(!f)return;if(!downs.includes(id)){downs.push(id);try{localStorage.setItem('downloads',JSON.stringify(downs));}catch(e){}}let a=document.createElement('a');a.href=f.video;a.target='_blank';a.click();alert('⬇ Baixando: '+f.t);mostrar();}
-function apagar(id){if(!confirm('Apagar?'))return;FILMES=FILMES.filter(x=>x.id!==id);MEUS=MEUS.filter(x=>x.id!==id);try{localStorage.setItem('meus_filmes',JSON.stringify(MEUS));}catch(e){}mostrar();}
-function abrir(id){let f=FILMES.find(x=>x.id===id);if(!f)return;selEps=new Set();let epsHtml=(f.eps||[]).length?`<h3 style="margin:15px 0 8px">📺 Episódios - Marca para baixar de uma só vez</h3>${f.eps.map((e,i)=>`<label style="display:flex;gap:10px;align-items:center;background:#1a1a1a;padding:10px;border-radius:10px;margin:5px 0"><input type="checkbox" class="chk" onchange="toggleEp(${i})"><span>Ep ${e.n||i+1} - ${e.t||''}</span></label>`).join('')}<button onclick="baixarSelecionados(${f.id})" style="background:#1db954;color:#fff;border:none;padding:12px;border-radius:12px;width:100%;margin-top:10px;font-weight:bold">⬇ BAIXAR SELECIONADOS DE UMA SÓ VEZ</button><button onclick="selecionarTodos()" style="background:#333;color:#fff;border:none;padding:10px;border-radius:12px;width:100%;margin-top:8px">☑ Selecionar Todos</button>`:`<p style="color:#aaa;margin:10px 0">Sem episódios separados.</p>`;
-let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:2000;padding:20px;overflow:auto;padding-bottom:80px';d.innerHTML=`<button onclick="document.getElementById('modal').remove()" style="background:red;color:white;border:none;padding:10px 20px;border-radius:20px">✖ Fechar</button><h2 style="margin:15px 0 5px;padding:0">${f.t}</h2><p>${f.ano} • ⭐ ${f.nota} • ${f.cat}</p><p style="margin:10px 0">${f.desc||''}</p><iframe width="100%" height="300" style="border-radius:12px" src="${f.video}" frameborder="0" allowfullscreen></iframe><br><br><button onclick="baixarFilme(${f.id})" style="background:#1db954;color:#fff;border:none;padding:13px;border-radius:20px;width:100%;font-weight:bold">⬇ BAIXAR</button>${epsHtml}`;document.body.appendChild(d);}
-function toggleEp(i){if(selEps.has(i))selEps.delete(i);else selEps.add(i);}
-function selecionarTodos(){document.querySelectorAll('.chk').forEach((c,i)=>{c.checked=true;selEps.add(i);});alert('Todos selecionados!');}
-function baixarSelecionados(id){if(selEps.size===0){alert('Marca pelo menos 1!');return;}let f=FILMES.find(x=>x.id===id);alert('⬇ A baixar '+selEps.size+' episódios de '+f.t);selEps.forEach(()=>{let a=document.createElement('a');a.href=f.video;a.target='_blank';a.click();});}
-function abrirNotificacoes(){let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:#111;z-index:2000;padding:20px;overflow:auto';d.innerHTML=`<button onclick="document.getElementById('modal').remove()" style="background:red;color:#fff;border:none;padding:10px 20px;border-radius:20px">✖ Fechar</button><h2 style="margin:15px 0">🔔 Notificações</h2><button onclick="pedirNotificacao()" style="background:#1db954;color:#fff;border:none;padding:12px;border-radius:12px;width:100%">🔔 Ativar Notificações</button><div style="margin-top:15px">${notifs.length?notifs.map(n=>`<div style="background:#1a1a1a;padding:12px;border-radius:12px;margin:6px 0"><b>${n.texto}</b><br><small style="color:#888">${n.data}</small></div>`).join(''):'<p style="color:#888">Sem notificações ainda.</p>'}</div>`;document.body.appendChild(d);notifs.forEach(n=>n.lida=true);try{localStorage.setItem('notifs',JSON.stringify(notifs));}catch(e){}atualizarBadge();}
-function pedirNotificacao(){if(window.Notification){Notification.requestPermission().then(p=>alert(p==='granted'?'✅ Ativadas!':'❌ Não ativaste'));}else alert('Navegador não suporta');}
-function abrirAdmin(){
-let senha=prompt('🔐 Senha do Admin:');if(senha!=='1234'){alert('Senha errada!');return;}
-isAdmin=true;fecharMenu();
-let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:#111;z-index:2000;padding:20px;overflow:auto';
-d.innerHTML=`<button onclick="document.getElementById('modal').remove();isAdmin=false;mostrar()" style="background:red;color:white;border:none;padding:10px 20px;border-radius:20px">✖ Sair</button><h2 style="margin:15px 0;padding:0">🔐 Painel Admin</h2><input id="nTitulo" placeholder="Título *"><select id="nTipo"><option value="filme">🎬 Filme</option><option value="serie">📺 Série</option><option value="anime">🍥 Anime</option></select><select id="nCat"><option>Ação</option><option>Anime</option><option>Comédia</option><option>Drama</option><option>Terror</option><option>Fantasia</option><option>Aventura</option><option>Ficção</option></select><input id="nAno" placeholder="Ano" type="number"><input id="nNota" placeholder="Nota"><div class="file-box">📸 Foto do Poster - DO TEU TELEMÓVEL<br><input type="file" accept="image/*" onchange="lerFicheiro(this,'img')"></div><input id="nImg" placeholder="OU cola link da imagem"><div class="file-box">🎬 Vídeo - DO TEU TELEMÓVEL<br><input type="file" accept="video/*" onchange="lerFicheiro(this,'video')"><small style="color:#ffcc00">⚠️ Vídeo muito grande pode travar. Usa link YouTube se for grande.</small></div><input id="nVideo" placeholder="OU link YouTube Embed"><textarea id="nDesc" placeholder="Descrição"></textarea><input id="nEps" placeholder="Episódios ex: Ep1, Ep2, Ep3"><label style="display:flex;gap:8px;align-items:center;margin:10px 0"><input type="checkbox" id="nNotif" class="chk" checked> 🔔 Enviar notificação</label><button class="btn" onclick="salvarNovo()">✅ PUBLICAR</button><hr style="margin:20px 0;border-color:#333"><h3>👥 Códigos de Acesso</h3><input id="nCodigo" placeholder="Novo código ex: AMIGO123"><button class="btn" style="background:#333" onclick="criarCodigo()">+ Criar Código</button><div style="margin-top:10px">${codigos.map(c=>`<div style="background:#1a1a1a;padding:10px;border-radius:10px;margin:5px 0;display:flex;justify-content:space-between"><span>🔑 ${c}</span><button onclick="removerCodigo('${c}')" style="background:red;color:#fff;border:none;padding:5px 10px;border-radius:8px">Remover</button></div>`).join('')}</div>`;
-document.body.appendChild(d);mostrar();
-}
-let tempImg='';let tempVideo='';
-function lerFicheiro(input,tipo){let file=input.files[0];if(!file)return;if(file.size>8000000){alert('⚠️ Ficheiro muito grande! Escolhe uma foto menor ou usa link.');input.value='';return;}let r=new FileReader();r.onload=e=>{if(tipo==='img'){tempImg=e.target.result;document.getElementById('nImg').value='[Foto carregada ✅]';}else{tempVideo=e.target.result;document.getElementById('nVideo').value='[Vídeo carregado ✅]';}alert('✅ Carregado!');};r.readAsDataURL(file);}
-function criarCodigo(){let c=document.getElementById('nCodigo').value.trim().toUpperCase();if(!c)return alert('Escreve o código');codigos.push(c);try{localStorage.setItem('codigos',JSON.stringify(codigos));}catch(e){}alert('Código: '+c);document.getElementById('modal').remove();isAdmin=false;abrirAdmin();}
-function removerCodigo(c){codigos=codigos.filter(x=>x!==c);try{localStorage.setItem('codigos',JSON.stringify(codigos));}catch(e){}document.getElementById('modal').remove();isAdmin=false;abrirAdmin();}
-function salvarNovo(){
-let t=document.getElementById('nTitulo').value.trim();if(!t)return alert('Escreve o título!');
-let cat=document.getElementById('nCat').value;let tipo=document.getElementById('nTipo').value;if(tipo==='anime')cat='Anime';
-let epsRaw=document.getElementById('nEps').value;let eps=epsRaw?epsRaw.split(',').map((s,i)=>({n:i+1,t:s.trim()})): [];
-let novo={id:Date.now(),t:t,tipo:tipo==='anime'?'serie':tipo,cat:cat,ano:document.getElementById('nAno').value||2024,nota:document.getElementById('nNota').value||'7.0',img:tempImg||document.getElementById('nImg').value||'https://via.placeholder.com/300x450/e50914/fff?text='+encodeURIComponent(t),desc:document.getElementById('nDesc').value||'Novo no Only24',video:tempVideo||document.getElementById('nVideo').value||'https://www.youtube.com
+function favor(id){fav=fav.includes(id)?fav.filter(x=>x!=id):[...fav,id];try{localStorage.setItem('fav',JSON.stringify(fav))}catch(e){}mostrar()}
+function baixar(id){let f=F.find(x=>x[0]==id);if(!downs.includes(id)){downs.push(id);try{localStorage.setItem('downs',JSON.stringify(downs))}catch(e){}}let a=document.createElement('a');a.href=f[8];a.target='_blank';a.click();alert('⬇ Baixando: '+f[1]);mostrar()}
+function abrirFilme(id){let f=F.find(x=>x[0]==id);sel=new Set();let eps=f[9]?f[9].split(','):[];let eh=eps.length?`<h3 style="margin:12px 0">📺 Episódios - marca para baixar tudo</h3>${eps.map((e,i)=>`<label style="display:flex;gap:10px;background:#1a1a1a;padding:10px;border-radius:10px;margin:5px 0"><input type="checkbox" class="chk" onchange="sel.has(${i})?sel.delete(${i}):sel.add(${i})"> ${e}</label>`).join('')}<button onclick="baixarTodos(${id})" style="background:#1db954;color:#fff;border:0;padding:12px;border-radius:12px;width:100%;font-weight:bold">⬇ BAIXAR SELECIONADOS DE UMA SÓ VEZ</button><button onclick="document.querySelectorAll('.chk').forEach((c,i)=>{c.checked=true;sel.add(i)})" style="background:#333;color:#fff;border:0;padding:10px;border-radius:12px;width:100%;margin-top:8px">☑ Selecionar Todos</button>`:'';
+let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:2000;padding:20px;overflow:auto';d.innerHTML=`<button onclick="document.getElementById('modal').remove()" style="background:red;color:#fff;border:0;padding:10px 20px;border-radius:20px">✖ Fechar</button><h2 style="margin:12px 0;padding:0">${f[1]}</h2><p>${f[4]} • ⭐ ${f[5]} • ${f[3]}</p><p style="margin:10px 0">${f[7]}</p><iframe width="100%" height="280" src="${f[8]}" frameborder="0" allowfullscreen></iframe><br><br><button onclick="baixar(${id})" style="background:#1db954;color:#fff;border:0;padding:13px;border-radius:20px;width:100%;font-weight:bold">⬇ BAIXAR</button>${eh}`;document.body.appendChild(d)}
+function baixarTodos(id){if(!sel.size)return alert('Marca 1 episódio!');let f=F.find(x=>x[0]==id);alert('⬇ Baixando '+sel.size+' episódios de '+f[1]);sel.forEach(()=>{let a=document.createElement('a');a.href=f[8];a.target='_blank';a.click()})}
+function notif(){let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:#111;z-index:2000;padding:20px;overflow:auto';d.innerHTML=`<button onclick="document.getElementById('modal').remove()" style="background:red;color:#fff;border:0;padding:10px 20px;border-radius:20px">✖ Fechar</button><h2 style="margin:12px 0">🔔 Notificações</h2><button onclick="Notification.requestPermission().then(p=>alert(p))" style="background:#1db954;color:#fff;border:0;padding:12px;border-radius:12px;width:100%">🔔 Ativar Notificações</button><div style="margin-top:12px">${nfs.length?nfs.map(n=>`<div style="background:#1a1a1a;padding:12px;border-radius:12px;margin:6px 0">${n.t}<br><small style="color:#888">${n.d}</small></div>`).join(''):'<p style="color:#888">Sem notificações. Quando admin postar, aparece aqui.</p>'}</div>`;document.body.appendChild(d);nfs.forEach(n=>n.l=true);try{localStorage.setItem('nfs',JSON.stringify(nfs))}catch(e){}mostrar()}
+function admin(){let s=prompt('Senha Admin:');if(s!=='1234')return alert('Senha errada!');adm=true;fechar();let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:#111;z-index:2000;padding:20px;overflow:auto';d.innerHTML=`<button onclick="document.getElementById('modal').remove();adm=false;mostrar()" style="background:red;color:#fff;border:0;padding:10px 20px;border-radius:20px">✖ Sair</button><h2 style="margin:12px 0">🔐 Admin - Só tu entras</h2><input id="t" placeholder="Título *"><select id="tp"><option value="filme">🎬 Filme</option><option value="serie">📺 Série</option><option value="anime">🍥 Anime</option></select><select id="ct"><option>Ação</option><option>Anime</option><option>Comédia</option><option>Drama</option><option>Terror</option><option>Aventura</option></select><input id="an" placeholder="Ano" type="number"><input id="nt" placeholder="Nota"><p style="font-size:13px;color:#aaa">📸 Foto do telemóvel/PC:</p><input type="file" accept="image/*" onchange="ler(this,'img')"><input id="im" placeholder="OU link da imagem"><p style="font-size:13px;color:#aaa">🎬 Vídeo: usa link YouTube para não travar</p><input id="vd" placeholder="Link YouTube Embed"><textarea id="ds" placeholder="Descrição"></textarea><input id="ep" placeholder="Episódios: Ep1,Ep2,Ep3"><label><input type="checkbox" id="nn" class="chk" checked> 🔔 Enviar notificação</label><button class="btn" onclick="salvar()">✅ PUBLICAR</button>`;document.body.appendChild(d)}
+function ler(inp,t){let f=inp.files[0];if(!f)return;if(f.size>5000000)return alert('Foto muito grande! Usa foto menor ou link.');let r=new FileReader();r.onload=e=>{if(t=='img'){ti=e.target.result;document.getElementById('im').value='[Foto carregada ✅]'}alert('✅ Carregado!')};r.readAsDataURL(f)}
+function salvar(){let t=document.getElementById('t').value.trim();if(!t)return alert('Escreve título!');let tp=document.getElementById('tp').value;let ct=document.getElementById('ct').value;if(tp=='anime')ct='Anime';let n=[Date.now(),t,tp=='anime'?'serie':tp,ct,document.getElementById('an').value||2024,document.getElementById('nt').value||'7.0',ti||document.getElementById('im').value||'https://via.placeholder.com/300x450/e50914/fff?text='+encodeURIComponent(t),document.getElementById('ds').value||'Novo no Only24',document.getElementById('vd').value||'https://www.youtube.com/embed/TcMBFSGVi1c',document.getElementById('ep').value];try{MEUS.push(n);F.push(n);localStorage.setItem('meus',JSON.stringify(MEUS))}catch(e){return alert('Memória cheia! Usa LINK.')};if(document.getElementById('nn').checked){nfs.unshift({t:'🆕 Novo: '+t,d:new Date().toLocaleString(),l:false});try{localStorage.setItem('nfs',JSON.stringify(nfs))}catch(e){}}alert('✅ Publicado!');document.getElementById('modal').remove();adm=false;ti='';mostrar()}
+mostrar();
+</script></body></html>
