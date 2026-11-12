@@ -3,147 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ONLY24 - Angola</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#0a0a0a;color:#fff;padding-bottom:90px}
-header{display:flex;justify-content:space-between;align-items:center;padding:15px}
-.logo{font-size:28px;font-weight:900}.logo span{color:#f5c518}
-.pesquisa{padding:0 15px 10px}
-.pesquisa input{width:100%;padding:13px;border-radius:25px;border:none;background:#1e1e1e;color:#fff;font-size:15px;outline:none}
-.top{display:flex;gap:8px;padding:5px 15px;overflow:auto}
-.top button{background:#222;color:#fff;padding:8px 14px;border-radius:20px;border:none;font-size:14px;white-space:nowrap}
-.top button.ativo{background:#22c55e}
-h2{padding:20px 15px 10px}
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 15px}
-.card{background:#1a1a1a;border-radius:10px;overflow:hidden;text-align:center;padding-bottom:8px;cursor:pointer;position:relative}
-.card img{width:100%;height:160px;object-fit:cover;background:#333}
-.card b{font-size:13px;display:block;padding:6px}
-.card span{color:#f5c518;font-size:13px}
-.fav{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.7);border:none;font-size:18px;padding:4px 7px;border-radius:50%;color:#fff}
-.fav.on{color:#f5c518}
-footer{text-align:center;color:#888;padding:30px 10px;font-size:13px;line-height:20px}
-.bottom{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;justify-content:space-around;padding:12px;border-top:1px solid #222;z-index:10}
-.bottom a{color:#fff;text-decoration:none;text-align:center;font-size:13px}
-.bottom a.ativo{color:#22c55e}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;z-index:20;overflow:auto}
-.overlay.aberto{display:block}
-.box{background:#1a1a1a;margin:20px;border-radius:15px;padding:20px}
-.menu-box{background:#1a1a1a;position:absolute;bottom:0;left:0;right:0;padding:20px;border-radius:20px 20px 0 0}
-.menu-top{display:flex;align-items:center;gap:12px;padding-bottom:15px;border-bottom:1px solid #333}
-.avatar{width:50px;height:50px;background:#f5c518;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
-.menu-box a{display:block;padding:14px 0;color:#fff;text-decoration:none;border-bottom:1px solid #333}
-.btn-amarelo{width:100%;margin-top:15px;padding:13px;background:#f5c518;border:none;border-radius:10px;font-weight:900;color:#000;font-size:15px}
-.btn-verde{width:100%;margin-top:10px;padding:12px;background:#22c55e;border:none;border-radius:10px;font-weight:800}
-input,select{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:none;background:#222;color:#fff}
-.detalhe img{width:100%;height:280px;object-fit:cover;border-radius:10px}
-</style>
+<title>Only24 - Filmes e Séries</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<meta name="theme-color" content="#e50914">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header><div class="logo">ONLY<span>24</span></div><div style="font-size:22px" onclick="alert('Sem notificações novas')">🔔</div></header>
-<div class="pesquisa"><input id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar filmes, séries, animes..."></div>
-<div class="top" id="cats">
-<button class="ativo" onclick="setCat('todos',this)">Tendências</button>
-<button onclick="setCat('acao',this)">Ação</button>
-<button onclick="setCat('animacao',this)">Animação</button>
-<button onclick="setCat('crime',this)">Crime</button>
-<button onclick="setCat('comedia',this)">Comédia</button>
-<button onclick="setCat('drama',this)">Drama</button>
+<header>
+  <div class="logo">Only<span>24</span></div>
+  <button class="btn" onclick="document.getElementById('search').focus()">🔍 Pesquisar</button>
+</header>
+
+<div class="search">
+  <input id="search" type="text" placeholder="Pesquisar filmes, séries...">
 </div>
 
-<h2>CLASSIFICAÇÕES DE FILMES</h2>
-<div class="grid" id="gridFilmes"></div>
-<h2>CLASSIFICAÇÕES DA SÉRIE</h2>
-<div class="grid" id="gridSeries"></div>
-<h2>ANIMES</h2>
-<div class="grid" id="gridAnimes"></div>
+<main id="grid" class="grid"></main>
 
-<footer><b>Only24 - Angola</b><br>Admin & Poster — Dembe<br>© 2026 Only24</footer>
-
-<div class="bottom">
-<a href="#" class="ativo">🏠<br>Lar</a>
-<a href="javascript:void(0)" onclick="verTransferencias()">⬇<br>Transferências</a>
-<a href="javascript:void(0)" onclick="abrirMenu()">👤<br>Menu</a>
+<div id="modal" class="modal">
+  <div class="modal-box">
+    <div id="modalBody"></div>
+  </div>
 </div>
 
-<div id="menu" class="overlay"><div class="menu-box">
-<div class="menu-top"><div class="avatar">👤</div><div><b>Dembe</b><br><span style="color:#f5c518;font-size:13px">Admin & Poster</span></div></div>
-<a href="#" onclick="fecharTudo()">🏠 Início</a>
-<a href="javascript:void(0)" onclick="fecharTudo();setCat('acao',null)">🎬 Filmes</a>
-<a href="javascript:void(0)" onclick="fecharTudo();window.scrollTo(0,600)">📺 Séries</a>
-<a href="javascript:void(0)" onclick="fecharTudo();window.scrollTo(0,1100)">✨ Animes</a>
-<a href="javascript:void(0)" onclick="verTransferencias()">⬇ Minhas Transferências</a>
-<a href="javascript:void(0)" onclick="verFavoritos()">⭐ Favoritos</a>
-<a href="javascript:void(0)" onclick="alert('Definições: Tema Escuro | Angola | Qualidade HD')">⚙️ Definições</a>
-<button class="btn-amarelo" onclick="pedirCodigo()">🛠️ PAINEL ADMIN</button>
-<button class="btn-verde" onclick="fecharTudo()">Fechar Menu</button>
-</div></div>
-
-<div id="login" class="overlay"><div class="box">
-<h2>🔐 Acesso Admin</h2><p style="color:#aaa;margin:10px 0;font-size:13px">Só admins conhecem o código.</p>
-<input id="codigo" type="password" placeholder="Código de acesso">
-<button class="btn-amarelo" onclick="verificarCodigo()">ENTRAR</button>
-<button class="btn-verde" onclick="fecharTudo()">⬅ Voltar</button>
-<p id="erro" style="color:red;margin-top:10px;display:none">❌ Código errado!</p>
-</div></div>
-
-<div id="admin" class="overlay"><div class="box">
-<h2>🛠️ Painel Admin - Dembe</h2>
-<input id="nNome" placeholder="Nome do filme / série">
-<input id="nFoto" placeholder="Link da foto (poster)">
-<select id="nTipo"><option value="filme">Filme</option><option value="serie">Série</option><option value="anime">Anime</option></select>
-<select id="nCat"><option value="acao">Ação</option><option value="animacao">Animação</option><option value="crime">Crime</option><option value="comedia">Comédia</option><option value="drama">Drama</option></select>
-<input id="nNota" placeholder="Nota ex: 8.5">
-<button class="btn-amarelo" onclick="publicar()">✅ PUBLICAR</button>
-<button class="btn-verde" onclick="fecharTudo()">⬅ Voltar</button>
-</div></div>
-
-<div id="detalhe" class="overlay"><div class="box detalhe" id="detalheBox"></div></div>
-<div id="listaExtra" class="overlay"><div class="box" id="listaExtraBox"></div></div>
-
-<script>
-var CODIGO_ADMIN="DEMBE24";
-var catAtual='todos';
-var dados=[
-{n:"Velozes 10",f:"https://image.tmdb.org/t/p/w500/qnqGbB22YJIlODbM1bK4xxoYh5I.jpg",t:"filme",c:"acao",nota:"8.2"},
-{n:"John Wick 4",f:"https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg",t:"filme",c:"acao",nota:"8.5"},
-{n:"Super Mario",f:"https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",t:"filme",c:"animacao",nota:"7.8"},
-{n:"Guardiões 3",f:"https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",t:"filme",c:"acao",nota:"8.0"},
-{n:"The Batman",f:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",t:"filme",c:"crime",nota:"7.9"},
-{n:"Homem-Aranha 2",f:"https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",t:"filme",c:"animacao",nota:"8.6"},
-{n:"The Last of Us",f:"https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg",t:"serie",c:"drama",nota:"8.8"},
-{n:"Wednesday",f:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQyRUXUmmsAUvBhgeM.jpg",t:"serie",c:"comedia",nota:"8.4"},
-{n:"One Piece",f:"https://image.tmdb.org/t/p/w500/eVX05xRKS8JhEYQFObCi4lAnZT4.jpg",t:"anime",c:"acao",nota:"8.6"},
-{n:"Naruto",f:"https://image.tmdb.org/t/p/w500/6PobqL8YdI5kBBS1p5v8p5v8p5v8.jpg",t:"anime",c:"acao",nota:"8.9"}
-];
-try{var salvos=JSON.parse(localStorage.getItem('only24_novos')||'[]');dados=dados.concat(salvos);}catch(e){}
-var favs=JSON.parse(localStorage.getItem('only24_favs')||'[]');
-var downs=JSON.parse(localStorage.getItem('only24_downs')||'[]');
-function cardHTML(d,i){
-var isFav=favs.includes(d.n)?'on':'';
-return '<div class="card" data-nome="'+d.n.toLowerCase()+'" data-cat="'+d.c+'"><button class="fav '+isFav+'" onclick="event.stopPropagation();toggleFav(\''+d.n+'\')">★</button><img onclick="verDetalhe('+i+')" src="'+d.f+'" onerror="this.src=\'https://via.placeholder.com/300x450?text='+encodeURIComponent(d.n)+'\'"><b>'+d.n+'</b><span>⭐ '+d.nota+'</span></div>';
-}
-function render(){
-var busca=document.getElementById('busca').value.toLowerCase();
-var f=dados.filter(function(d){return (catAtual==='todos'||d.c===catAtual)&&d.n.toLowerCase().includes(busca)});
-document.getElementById('gridFilmes').innerHTML=f.filter(function(d){return d.t==='filme'}).map(function(d){return cardHTML(d,dados.indexOf(d))}).join('')||'<p style="padding:10px;color:#888">Nenhum filme</p>';
-document.getElementById('gridSeries').innerHTML=f.filter(function(d){return d.t==='serie'}).map(function(d){return cardHTML(d,dados.indexOf(d))}).join('')||'<p style="padding:10px;color:#888">Nenhuma série</p>';
-document.getElementById('gridAnimes').innerHTML=f.filter(function(d){return d.t==='anime'}).map(function(d){return cardHTML(d,dados.indexOf(d))}).join('')||'<p style="padding:10px;color:#888">Nenhum anime</p>';
-}
-function filtrar(){render()}
-function setCat(c,btn){catAtual=c;document.querySelectorAll('#cats button').forEach(function(b){b.classList.remove('ativo')});if(btn)btn.classList.add('ativo');render();window.scrollTo(0,150)}
-function abrirMenu(){document.getElementById('menu').classList.add('aberto')}
-function fecharTudo(){document.querySelectorAll('.overlay').forEach(function(o){o.classList.remove('aberto')})}
-function pedirCodigo(){fecharTudo();document.getElementById('login').classList.add('aberto');document.getElementById('erro').style.display='none'}
-function verificarCodigo(){var v=document.getElementById('codigo').value;if(v===CODIGO_ADMIN){fecharTudo();document.getElementById('admin').classList.add('aberto');document.getElementById('codigo').value='';}else{document.getElementById('erro').style.display='block'}}
-function publicar(){var n=document.getElementById('nNome').value;var f=document.getElementById('nFoto').value;var t=document.getElementById('nTipo').value;var c=document.getElementById('nCat').value;var nota=document.getElementById('nNota').value||'8.0';if(!n||!f){alert('Preenche nome e foto!');return}var novo={n:n,f:f,t:t,c:c,nota:nota};dados.push(novo);var salvos=JSON.parse(localStorage.getItem('only24_novos')||'[]');salvos.push(novo);localStorage.setItem('only24_novos',JSON.stringify(salvos));fecharTudo();render();alert('✅ Publicado! '+n+' já está no site.')}
-function toggleFav(nome){if(favs.includes(nome)){favs=favs.filter(function(x){return x!==nome})}else{favs.push(nome);alert('⭐ Adicionado aos Favoritos: '+nome)}localStorage.setItem('only24_favs',JSON.stringify(favs));render()}
-function verFavoritos(){fecharTudo();var lista=dados.filter(function(d){return favs.includes(d.n)});document.getElementById('listaExtraBox').innerHTML='<h2>⭐ Meus Favoritos</h2>'+(lista.length?lista.map(function(d){return '<p style="padding:12px 0;border-bottom:1px solid #333">⭐ '+d.n+' - '+d.nota+'</p>'}).join(''):'<p style="color:#888;margin-top:15px">Ainda não tens favoritos. Clica na ★ de um filme.</p>')+'<button class="btn-verde" onclick="fecharTudo()">⬅ Voltar</button>';document.getElementById('listaExtra').classList.add('aberto')}
-function verTransferencias(){fecharTudo();document.getElementById('listaExtraBox').innerHTML='<h2>⬇ Minhas Transferências</h2>'+(downs.length?downs.map(function(d){return '<p style="padding:12px 0;border-bottom:1px solid #333">⬇ '+d+'</p>'}).join(''):'<p style="color:#888;margin-top:15px">Nenhuma transferência ainda.<br>Abre um filme e clica em Transferir.</p>')+'<button class="btn-verde" onclick="fecharTudo()">⬅ Voltar</button>';document.getElementById('listaExtra').classList.add('aberto')}
-function verDetalhe(i){var d=dados[i];document.getElementById('detalheBox').innerHTML='<img src="'+d.f+'"><h2 style="margin-top:12px">'+d.n+'</h2><p style="color:#f5c518;margin:8px 0">⭐ '+d.nota+' | '+d.t+' | '+d.c+'</p><p style="color:#aaa;font-size:14px;line-height:20px">Assiste '+d.n+' em HD no ONLY24 Angola. Qualidade alta, sem travar.</p><button class="btn-amarelo" onclick="assistir(\''+d.n+'\')">▶ ASSISTIR AGORA</button><button class="btn-verde" onclick="baixar(\''+d.n+'\')">⬇ TRANSFERIR</button><button class="btn-verde" style="background:#333" onclick="fecharTudo()">⬅ Voltar</button>';document.getElementById('detalhe').classList.add('aberto')}
-function assistir(n){alert('▶ A reproduzir: '+n+'\nEm breve vídeo HD no ONLY24.')}
-function baixar(n){if(!downs.includes(n)){downs.push(n);localStorage.setItem('only24_downs',JSON.stringify(downs))}alert('⬇ Transferência iniciada: '+n);fecharTudo()}
-render();
-</script>
+<script type="module" src="js/app.js"></script>
 </body>
-</html>
+  </html>
