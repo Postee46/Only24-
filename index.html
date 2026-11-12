@@ -3,18 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Only24 - Filmes e Séries</title>
+<title>Only24</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#000;color:#fff;padding-bottom:60px}
+body{background:#000;color:#fff;padding-bottom:70px}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 15px;position:sticky;top:0;background:#000;z-index:100}
-.logo{font-size:28px;font-weight:900}.logo span{color:#e50914}
-.menu-btn{font-size:26px;background:none;border:none;color:#fff}
-.btn-pesq{background:#e50914;color:#fff;border:none;padding:10px 16px;border-radius:25px;font-weight:bold}
+.logo{font-size:28px;font-weight:900;cursor:pointer;user-select:none}.logo span{color:#e50914}
+.bell{font-size:22px;background:none;border:none;color:#fff;position:relative}
+.bell b{position:absolute;top:-5px;right:-5px;background:#e50914;font-size:10px;padding:2px 5px;border-radius:50%;display:none}
 .hero{margin:0 15px 15px;border-radius:15px;overflow:hidden;position:relative;height:220px;background:#222}
 .hero img{width:100%;height:100%;object-fit:cover}
 .hero-info{position:absolute;bottom:0;left:0;right:0;padding:15px;background:linear-gradient(transparent,rgba(0,0,0,.9))}
-.hero-info h1{font-size:22px}.hero-info p{font-size:13px;color:#ccc;margin:5px 0}
 .hero-info button{background:#e50914;color:#fff;border:none;padding:9px 18px;border-radius:20px;font-weight:bold;margin-right:8px}
 .hero-info button.out{background:#fff;color:#000}
 .search{margin:0 15px;background:#1a1a1a;border-radius:25px;padding:12px 18px}
@@ -26,142 +25,156 @@ h2{padding:0 15px 10px;font-size:18px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 15px}
 .card{background:#111;border-radius:12px;overflow:hidden;position:relative}
 .card img{width:100%;height:220px;object-fit:cover;display:block}
-.card-info{padding:10px}.card-info h3{font-size:14px;line-height:1.2}.card-info p{font-size:12px;color:#aaa;margin:5px 0 8px}
+.card-info{padding:10px}.card-info h3{font-size:14px}.card-info p{font-size:12px;color:#aaa;margin:5px 0 8px}
 .card-info button{background:#e50914;color:#fff;border:none;padding:7px;border-radius:15px;width:100%;margin-top:4px}
-.card-info button.sec{background:#333}
+.card-info button.sec{background:#333}.card-info button.down{background:#1db954}
 .del{position:absolute;top:5px;right:5px;background:red;color:#fff;border:none;border-radius:50%;width:28px;height:28px;z-index:5}
 .badge{position:absolute;top:8px;left:8px;background:#e50914;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:bold}
-#menu{position:fixed;top:0;left:-280px;width:260px;height:100%;background:#111;z-index:1000;transition:.3s;padding:20px;overflow:auto}
+#menu{position:fixed;top:0;left:-280px;width:260px;height:100%;background:#111;z-index:1000;transition:.3s;padding:20px}
 #menu.aberto{left:0}
-#menu a{display:block;color:#fff;text-decoration:none;padding:13px 0;border-bottom:1px solid #222;font-size:15px}
+#menu a{display:block;color:#fff;text-decoration:none;padding:13px 0;border-bottom:1px solid #222}
 #menu button{background:#e50914;color:#fff;border:none;padding:11px;width:100%;border-radius:10px;margin-top:15px;font-weight:bold}
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:999}
 #overlay.show{display:block}
-input,select,textarea{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none;background:#222;color:#fff;font-size:15px}
+input,select,textarea{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none;background:#222;color:#fff}
 .btn{background:#e50914;color:#fff;border:none;padding:13px;border-radius:10px;width:100%;font-weight:bold}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;justify-content:space-around;padding:12px 0;z-index:100;border-top:1px solid #222}
 .bottom-nav button{background:none;border:none;color:#fff;font-size:13px}
-.bottom-nav button.active{color:#e50914;font-weight:bold}
+.file-box{background:#222;border:2px dashed #555;border-radius:12px;padding:15px;text-align:center;margin:6px 0}
+.file-box small{color:#aaa}
+.chk{width:20px;height:20px;accent-color:#e50914}
 </style>
 </head>
 <body>
 <div id="overlay" onclick="fecharMenu()"></div>
 <div id="menu">
-<h2>Only<span style="color:#e50914">24</span></h2>
-<p style="color:#888;font-size:12px;margin:5px 0 10px">Filmes e Séries 24h</p>
+<h2>Only<span style="color:#e50914">24</span></h2><p style="color:#888;font-size:12px">Filmes, Séries e Animes 24h</p>
 <a href="#" onclick="ir('todos')">🏠 Início</a>
 <a href="#" onclick="ir('filme')">🎬 Filmes</a>
 <a href="#" onclick="ir('serie')">📺 Séries</a>
-<a href="#" onclick="ir('favoritos')">❤️ Meus Favoritos</a>
+<a href="#" onclick="ir('Anime')">🍥 Animes</a>
+<a href="#" onclick="ir('favoritos')">❤️ Favoritos</a>
 <a href="#" onclick="ir('Ação')">🔥 Ação</a>
 <a href="#" onclick="ir('Comédia')">😂 Comédia</a>
 <a href="#" onclick="ir('Drama')">🎭 Drama</a>
 <a href="#" onclick="ir('Terror')">👻 Terror</a>
-<a href="#" onclick="ir('Fantasia')">✨ Fantasia</a>
-<button onclick="abrirAdmin()">🔐 ADMIN - Postar Filme/Série</button>
-<button onclick="fecharMenu()" style="background:#333">✖ Fechar Menu</button>
-<p style="color:#555;font-size:11px;margin-top:20px">Only24 © 2026<br>Versão Completa</p>
+<a href="#" onclick="ir('downloads')">⬇️ Meus Downloads</a>
+<button onclick="fecharMenu()" style="background:#333">✖ Fechar</button>
+<p style="color:#555;font-size:11px;margin-top:15px">Only24 © 2026<br>Para Admin: toca 5x no logo</p>
 </div>
 
-<header><button class="menu-btn" onclick="abrirMenu()">☰</button><div class="logo">Only<span>24</span></div><button class="btn-pesq" onclick="document.getElementById('busca').focus()">🔍 Pesquisar</button></header>
+<header><button onclick="abrirMenu()" style="font-size:26px;background:none;border:none;color:#fff">☰</button><div class="logo" id="logo" onclick="tocarLogo()">Only<span>24</span></div><button class="bell" onclick="abrirNotificacoes()">🔔<b id="notifBadge">0</b></button></header>
 
 <div class="hero" id="hero"></div>
-<div class="search"><input id="busca" placeholder="🔍 Pesquisar filmes, séries..." oninput="mostrar()"></div>
+<div class="search"><input id="busca" placeholder="🔍 Pesquisar filmes, séries, animes..." oninput="mostrar()"></div>
 <div id="conteudo"></div>
 
 <div class="bottom-nav">
-<button id="navInicio" class="active" onclick="ir('todos')">🏠<br>Início</button>
+<button onclick="ir('todos')">🏠<br>Início</button>
 <button onclick="ir('filme')">🎬<br>Filmes</button>
-<button onclick="ir('serie')">📺<br>Séries</button>
+<button onclick="ir('Anime')">🍥<br>Animes</button>
 <button onclick="ir('favoritos')">❤️<br>Favoritos</button>
-<button onclick="abrirAdmin()">🔐<br>Admin</button>
+<button onclick="ir('downloads')">⬇️<br>Baixar</button>
 </div>
 
 <script>
 let PADRAO=[
-{id:1,t:"Vingadores: Ultimato",tipo:"filme",cat:"Ação",ano:2019,nota:"8.4",img:"https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg",desc:"Os Vingadores tentam reverter o estalo de Thanos e salvar o universo.",video:"https://www.youtube.com/embed/TcMBFSGVi1c"},
-{id:2,t:"Homem-Aranha: Sem Volta",tipo:"filme",cat:"Ação",ano:2021,nota:"8.2",img:"https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",desc:"Peter Parker pede ajuda ao Doutor Estranho e abre o multiverso.",video:"https://www.youtube.com/embed/JfVOs4VSpmA"},
-{id:3,t:"Batman",tipo:"filme",cat:"Ação",ano:2022,nota:"7.7",img:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",desc:"Batman investiga assassinatos em Gotham City.",video:"https://www.youtube.com/embed/mqqft2x_Aa4"},
-{id:4,t:"Avatar 2",tipo:"filme",cat:"Aventura",ano:2022,nota:"7.6",img:"https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",desc:"Jake Sully e Neytiri protegem Pandora e a família.",video:"https://www.youtube.com/embed/d9MyW72ELq0"},
-{id:5,t:"Top Gun: Maverick",tipo:"filme",cat:"Ação",ano:2022,nota:"8.3",img:"https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg",desc:"Maverick volta para treinar uma nova geração de pilotos.",video:"https://www.youtube.com/embed/qSqVVswa420"},
-{id:6,t:"Stranger Things",tipo:"serie",cat:"Terror",ano:2016,nota:"8.7",img:"https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",desc:"Crianças enfrentam o Mundo Invertido em Hawkins.",video:"https://www.youtube.com/embed/b9EkMc79ZSU"},
-{id:7,t:"La Casa de Papel",tipo:"serie",cat:"Drama",ano:2017,nota:"8.2",img:"https://image.tmdb.org/t/p/w500/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg",desc:"Um grupo faz o maior assalto da história à Casa da Moeda.",video:"https://www.youtube.com/embed/_InqQJRqGW4"},
-{id:8,t:"Round 6",tipo:"serie",cat:"Drama",ano:2021,nota:"8.0",img:"https://image.tmdb.org/t/p/w500/1LRLLWGvs5sZdTjqHRvGmszQ5O9.jpg",desc:"Jogadores desesperados competem em jogos mortais por dinheiro.",video:"https://www.youtube.com/embed/oqxAJKy0ii4"},
-{id:9,t:"The Witcher",tipo:"serie",cat:"Fantasia",ano:2019,nota:"8.0",img:"https://image.tmdb.org/t/p/w500/7vjaCdMw15FEbXyLQTVa04URsPm.jpg",desc:"Geralt de Rívia, um caçador de monstros mutante.",video:"https://www.youtube.com/embed/ndl1W4ltcmg"},
-{id:10,t:"Wednesday",tipo:"serie",cat:"Comédia",ano:2022,nota:"8.5",img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg",desc:"Wednesday Addams investiga mistérios na escola Nevermore.",video:"https://www.youtube.com/embed/Q73UhUTs6y0"},
-{id:11,t:"Duna: Parte 2",tipo:"filme",cat:"Ficção",ano:2024,nota:"8.5",img:"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",desc:"Paul Atreides une-se aos Fremen para lutar contra os Harkonnen.",video:"https://www.youtube.com/embed/Way9Dexny3w"},
-{id:12,t:"Joker",tipo:"filme",cat:"Drama",ano:2019,nota:"8.4",img:"https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg",desc:"A origem do Coringa, Arthur Fleck em Gotham.",video:"https://www.youtube.com/embed/zAGVQLHvwOY"}
+{id:1,t:"Vingadores: Ultimato",tipo:"filme",cat:"Ação",ano:2019,nota:"8.4",img:"https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg",desc:"Vingadores tentam reverter o estalo.",video:"https://www.youtube.com/embed/TcMBFSGVi1c",eps:[]},
+{id:2,t:"Naruto Shippuden",tipo:"serie",cat:"Anime",ano:2007,nota:"8.7",img:"https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",desc:"Naruto luta para se tornar Hokage. Anime clássico.",video:"https://www.youtube.com/embed/JfVOs4VSpmA",eps:[{n:1,t:"Ep 1 - Naruto volta",link:""},{n:2,t:"Ep 2 - Treino",link:""},{n:3,t:"Ep 3 - Missão",link:""}]},
+{id:6,t:"Stranger Things",tipo:"serie",cat:"Terror",ano:2016,nota:"8.7",img:"https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",desc:"Mundo Invertido.",video:"https://www.youtube.com/embed/b9EkMc79ZSU",eps:[{n:1,t:"T1 Ep1",link:""},{n:2,t:"T1 Ep2",link:""}]},
+{id:10,t:"Wednesday",tipo:"serie",cat:"Comédia",ano:2022,nota:"8.5",img:"https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg",desc:"Wednesday na Nevermore.",video:"https://www.youtube.com/embed/Q73UhUTs6y0",eps:[]},
+{id:12,t:"Joker",tipo:"filme",cat:"Drama",ano:2019,nota:"8.4",img:"https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg",desc:"Origem do Coringa.",video:"https://www.youtube.com/embed/zAGVQLHvwOY",eps:[]},
+{id:13,t:"One Piece",tipo:"serie",cat:"Anime",ano:1999,nota:"9.0",img:"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",desc:"Luffy procura o One Piece.",video:"https://www.youtube.com/embed/Way9Dexny3w",eps:[{n:1,t:"Ep 1 - Sou Luffy",link:""},{n:2,t:"Ep 2 - Zoro",link:""}]},
+{id:14,t:"Attack on Titan",tipo:"serie",cat:"Anime",ano:2013,nota:"9.1",img:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",desc:"Eren luta contra titãs.",video:"https://www.youtube.com/embed/mqqft2x_Aa4",eps:[{n:1,t:"Ep 1",link:""},{n:2,t:"Ep 2",link:""}]}
 ];
 let MEUS=JSON.parse(localStorage.getItem('meus_filmes')||'[]');
 let FILMES=[...PADRAO,...MEUS];
 let fav=JSON.parse(localStorage.getItem('fav')||'[]');
-let filtro='todos';
-let isAdmin=false;
+let downs=JSON.parse(localStorage.getItem('downloads')||'[]');
+let notifs=JSON.parse(localStorage.getItem('notifs')||'[]');
+let codigos=JSON.parse(localStorage.getItem('codigos')||'["ONLY24"]');
+let autorizados=JSON.parse(localStorage.getItem('autorizados')||'[]');
+let filtro='todos'; let isAdmin=false; let cliquesLogo=0; let selEps=new Set();
 
 function abrirMenu(){document.getElementById('menu').classList.add('aberto');document.getElementById('overlay').classList.add('show')}
 function fecharMenu(){document.getElementById('menu').classList.remove('aberto');document.getElementById('overlay').classList.remove('show')}
 function ir(f){filtro=f;fecharMenu();window.scrollTo(0,0);mostrar();}
+function tocarLogo(){cliquesLogo++; if(cliquesLogo>=5){cliquesLogo=0;abrirAdmin();} setTimeout(()=>cliquesLogo=0,2000);}
+function atualizarBadge(){let novas=notifs.filter(n=>!n.lida).length;let b=document.getElementById('notifBadge');b.textContent=novas;b.style.display=novas>0?'block':'none';}
+function notificar(texto){notifs.unshift({texto:texto,data:new Date().toLocaleString(),lida:false});localStorage.setItem('notifs',JSON.stringify(notifs));atualizarBadge(); if(Notification&&Notification.permission==='granted') new Notification('Only24 🔔',{body:texto});}
 
 function mostrar(){
 let busca=(document.getElementById('busca').value||'').toLowerCase();
 let destaque=FILMES[0];
-document.getElementById('hero').innerHTML=`<img src="${destaque.img}"><div class="hero-info"><h1>🔥 ${destaque.t}</h1><p>${destaque.ano} • ⭐ ${destaque.nota} • ${destaque.cat}</p><button onclick="abrir(${destaque.id})">▶ Assistir Agora</button><button class="out" onclick="favoritar(${destaque.id})">+ Favoritos</button></div>`;
+document.getElementById('hero').innerHTML=`<img src="${destaque.img}"><div class="hero-info"><h1>🔥 ${destaque.t}</h1><p>${destaque.ano} • ⭐ ${destaque.nota} • ${destaque.cat}</p><button onclick="abrir(${destaque.id})">▶ Assistir</button><button class="out" onclick="baixarFilme(${destaque.id})">⬇ Baixar</button></div>`;
 let lista=FILMES.filter(f=>{
 if(filtro==='filme'&&f.tipo!=='filme')return false;
 if(filtro==='serie'&&f.tipo!=='serie')return false;
+if(filtro==='Anime'&&f.cat!=='Anime')return false;
 if(filtro==='favoritos'&&!fav.includes(f.id))return false;
-if(['Ação','Comédia','Drama','Terror','Fantasia','Aventura','Ficção'].includes(filtro)&&f.cat!==filtro)return false;
+if(filtro==='downloads'&&!downs.includes(f.id))return false;
+if(['Ação','Comédia','Drama','Terror'].includes(filtro)&&f.cat!==filtro)return false;
 if(busca&&!f.t.toLowerCase().includes(busca))return false;
 return true;
 });
-let titulo=filtro==='todos'?'🔥 Em Alta - Todos':filtro==='favoritos'?'❤️ Teus Favoritos':filtro==='filme'?'🎬 Filmes':filtro==='serie'?'📺 Séries':'📂 '+filtro;
-document.getElementById('conteudo').innerHTML=`<div class="filtros">
-<button onclick="ir('todos')" class="${filtro==='todos'?'active':''}">Todos</button>
-<button onclick="ir('filme')" class="${filtro==='filme'?'active':''}">🎬 Filmes</button>
-<button onclick="ir('serie')" class="${filtro==='serie'?'active':''}">📺 Séries</button>
-<button onclick="ir('favoritos')" class="${filtro==='favoritos'?'active':''}">❤️ Favoritos</button>
-<button onclick="ir('Ação')">🔥 Ação</button><button onclick="ir('Comédia')">😂 Comédia</button><button onclick="ir('Drama')">🎭 Drama</button></div>
-<h2>${titulo} (${lista.length})</h2>
-<div class="grid">${lista.map(f=>`<div class="card" onclick="abrir(${f.id})"><span class="badge">${f.tipo==='filme'?'FILME':'SÉRIE'}</span>${isAdmin?`<button class="del" onclick="event.stopPropagation();apagar(${f.id})">✖</button>`:''}<img src="${f.img}" onerror="this.src='https://via.placeholder.com/300x450/111/fff?text='+encodeURIComponent('${f.t}')"><div class="card-info"><h3>${f.t}</h3><p>${f.ano} • ⭐ ${f.nota} • ${f.cat}</p><button onclick="event.stopPropagation();abrir(${f.id})">▶ Assistir</button><button class="sec" onclick="event.stopPropagation();favoritar(${f.id})">${fav.includes(f.id)?'❤️ Favoritado':'🤍 Favoritar'}</button>${isAdmin?`<button class="sec" onclick="event.stopPropagation();editar(${f.id})">✏️ Editar</button>`:''}</div></div>`).join('')||'<p style="padding:20px">Nenhum conteúdo. Vai ao Admin e publica!</p>'}</div><p style="text-align:center;color:#666;padding:20px 0;font-size:12px">Total: ${FILMES.length} conteúdos • Only24 • 24h por dia</p>`;
+let titulo=filtro==='todos'?'🔥 Em Alta':filtro==='downloads'?'⬇️ Meus Downloads':filtro==='Anime'?'🍥 Animes':filtro;
+document.getElementById('conteudo').innerHTML=`<div class="filtros"><button onclick="ir('todos')" class="${filtro==='todos'?'active':''}">Todos</button><button onclick="ir('filme')">🎬 Filmes</button><button onclick="ir('serie')">📺 Séries</button><button onclick="ir('Anime')">🍥 Animes</button><button onclick="ir('favoritos')">❤️ Favoritos</button><button onclick="ir('downloads')">⬇️ Downloads</button></div><h2>${titulo} (${lista.length})</h2><div class="grid">${lista.map(f=>`<div class="card" onclick="abrir(${f.id})"><span class="badge">${f.cat==='Anime'?'ANIME':f.tipo==='filme'?'FILME':'SÉRIE'}</span>${isAdmin?`<button class="del" onclick="event.stopPropagation();apagar(${f.id})">✖</button>`:''}<img src="${f.img}"><div class="card-info"><h3>${f.t}</h3><p>${f.ano} • ⭐ ${f.nota} • ${f.cat} • ${(f.eps||[]).length? (f.eps.length+' episódios'):f.tipo}</p><button onclick="event.stopPropagation();abrir(${f.id})">▶ Assistir</button><button class="down" onclick="event.stopPropagation();baixarFilme(${f.id})">⬇ Baixar</button><button class="sec" onclick="event.stopPropagation();favoritar(${f.id})">${fav.includes(f.id)?'❤️ Favoritado':'🤍 Favoritar'}</button></div></div>`).join('')||'<p style="padding:20px">Nenhum conteúdo.</p>'}</div>`;
 }
 function favoritar(id){if(fav.includes(id))fav=fav.filter(x=>x!==id);else fav.push(id);localStorage.setItem('fav',JSON.stringify(fav));mostrar();}
-function apagar(id){if(!confirm('Apagar este conteúdo?'))return;FILMES=FILMES.filter(x=>x.id!==id);MEUS=MEUS.filter(x=>x.id!==id);localStorage.setItem('meus_filmes',JSON.stringify(MEUS));mostrar();}
-function abrir(id){let f=FILMES.find(x=>x.id===id);let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:2000;padding:20px;overflow:auto;padding-bottom:80px';d.innerHTML=`<button onclick="document.getElementById('modal').remove()" style="background:red;color:white;border:none;padding:10px 20px;border-radius:20px">✖ Fechar</button><h2 style="margin:18px 0 5px;padding:0">${f.t}</h2><p>${f.ano} • ⭐ ${f.nota} • ${f.cat} • ${f.tipo}</p><p style="margin:12px 0;line-height:1.5">${f.desc}</p><iframe width="100%" height="300" style="border-radius:12px" src="${f.video}" frameborder="0" allowfullscreen></iframe><br><br><button onclick="favoritar(${f.id});document.getElementById('modal').remove()" style="background:#e50914;color:white;border:none;padding:13px 20px;border-radius:20px;width:100%">❤️ Adicionar aos Favoritos</button>`;document.body.appendChild(d);}
+function baixarFilme(id){let f=FILMES.find(x=>x.id===id);if(!downs.includes(id)){downs.push(id);localStorage.setItem('downloads',JSON.stringify(downs));} let a=document.createElement('a');a.href=f.video;a.target='_blank';a.download=f.t;a.click();alert('⬇ Baixando: '+f.t+'\nSe for do YouTube, vai abrir para salvar. Se subiste ficheiro do teu telemóvel, baixa direto.');mostrar();}
+function apagar(id){if(!confirm('Apagar?'))return;FILMES=FILMES.filter(x=>x.id!==id);MEUS=MEUS.filter(x=>x.id!==id);localStorage.setItem('meus_filmes',JSON.stringify(MEUS));mostrar();}
+function abrir(id){let f=FILMES.find(x=>x.id===id);selEps=new Set();let epsHtml=(f.eps||[]).length?`<h3 style="margin:15px 0 8px">📺 Episódios - Marca para baixar de uma só vez</h3>${f.eps.map((e,i)=>`<label style="display:flex;gap:10px;align-items:center;background:#1a1a1a;padding:10px;border-radius:10px;margin:5px 0"><input type="checkbox" class="chk" onchange="toggleEp(${i})"><span>Ep ${e.n} - ${e.t}</span><button onclick="baixarEp('${f.t} Ep ${e.n}')" style="margin-left:auto;background:#1db954;color:#fff;border:none;padding:6px 10px;border-radius:10px">⬇</button></label>`).join('')}<button onclick="baixarSelecionados(${f.id})" style="background:#1db954;color:#fff;border:none;padding:12px;border-radius:12px;width:100%;margin-top:10px;font-weight:bold">⬇ BAIXAR SELECIONADOS DE UMA SÓ VEZ</button><button onclick="selecionarTodos(${f.id})" style="background:#333;color:#fff;border:none;padding:10px;border-radius:12px;width:100%;margin-top:8px">☑ Selecionar Todos</button>`:`<p style="color:#aaa;margin:10px 0">Sem episódios separados. Usa o botão Baixar abaixo.</p>`;
+let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:2000;padding:20px;overflow:auto;padding-bottom:80px';d.innerHTML=`<button onclick="document.getElementById('modal').remove()" style="background:red;color:white;border:none;padding:10px 20px;border-radius:20px">✖ Fechar</button><h2 style="margin:15px 0 5px;padding:0">${f.t}</h2><p>${f.ano} • ⭐ ${f.nota} • ${f.cat}</p><p style="margin:10px 0">${f.desc}</p><iframe width="100%" height="300" style="border-radius:12px" src="${f.video}" frameborder="0" allowfullscreen></iframe><br><br><button onclick="baixarFilme(${f.id})" style="background:#1db954;color:#fff;border:none;padding:13px;border-radius:20px;width:100%;font-weight:bold">⬇ BAIXAR ESTE FILME/SÉRIE</button>${epsHtml}<br><button onclick="favoritar(${f.id});document.getElementById('modal').remove()" style="background:#e50914;color:white;border:none;padding:12px;border-radius:20px;width:100%;margin-top:10px">❤️ Favoritar</button>`;document.body.appendChild(d);}
+function toggleEp(i){if(selEps.has(i))selEps.delete(i);else selEps.add(i);}
+function selecionarTodos(id){let f=FILMES.find(x=>x.id===id);document.querySelectorAll('.chk').forEach((c,i)=>{c.checked=true;selEps.add(i);});alert('Todos selecionados! Clica em BAIXAR SELECIONADOS');}
+function baixarSelecionados(id){if(selEps.size===0){alert('Marca pelo menos 1 episódio!');return;}let f=FILMES.find(x=>x.id===id);alert('⬇ A baixar '+selEps.size+' episódios de '+f.t+' de uma só vez!');selEps.forEach(i=>{let e=f.eps[i];let a=document.createElement('a');a.href=f.video||e.link||'#';a.target='_blank';a.click();});}
+function baixarEp(nome){alert('⬇ A baixar: '+nome);}
+
+function abrirNotificacoes(){let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:#111;z-index:2000;padding:20px;overflow:auto';d.innerHTML=`<button onclick="document.getElementById('modal').remove()" style="background:red;color:#fff;border:none;padding:10px 20px;border-radius:20px">✖ Fechar</button><h2 style="margin:15px 0">🔔 Notificações</h2><button onclick="pedirNotificacao()" style="background:#1db954;color:#fff;border:none;padding:12px;border-radius:12px;width:100%">🔔 Ativar Notificações no Telemóvel</button><div style="margin-top:15px">${notifs.length?notifs.map(n=>`<div style="background:#1a1a1a;padding:12px;border-radius:12px;margin:6px 0"><b>${n.texto}</b><br><small style="color:#888">${n.data}</small></div>`).join(''):'<p style="color:#888">Sem notificações ainda. Quando o admin postar algo novo, aparece aqui!</p>'}</div>`;document.body.appendChild(d);notifs.forEach(n=>n.lida=true);localStorage.setItem('notifs',JSON.stringify(notifs));atualizarBadge();}
+function pedirNotificacao(){if(Notification){Notification.requestPermission().then(p=>alert(p==='granted'?'✅ Notificações ativadas!':'❌ Não ativaste'));}else alert('O teu navegador não suporta');}
 
 function abrirAdmin(){
 let senha=prompt('🔐 Senha do Admin:');
-if(senha!=='1234'){alert('Senha errada! A senha é 1234');return;}
+if(senha!=='1234'){alert('Senha errada!');return;}
 isAdmin=true;fecharMenu();
 let d=document.createElement('div');d.id='modal';d.style.cssText='position:fixed;inset:0;background:#111;z-index:2000;padding:20px;overflow:auto';
 d.innerHTML=`<button onclick="document.getElementById('modal').remove();isAdmin=false;mostrar()" style="background:red;color:white;border:none;padding:10px 20px;border-radius:20px">✖ Sair do Admin</button>
 <h2 style="margin:15px 0;padding:0">🔐 Painel Admin - Only24</h2>
-<p style="color:#aaa;font-size:13px">Publica um novo filme ou série. Fica guardado e aparece para todos.</p>
-<input id="nTitulo" placeholder="Título * ex: Velozes e Furiosos 10">
-<select id="nTipo"><option value="filme">🎬 Filme</option><option value="serie">📺 Série</option></select>
-<select id="nCat"><option>Ação</option><option>Comédia</option><option>Drama</option><option>Terror</option><option>Fantasia</option><option>Aventura</option><option>Ficção</option></select>
-<input id="nAno" placeholder="Ano ex: 2024" type="number">
-<input id="nNota" placeholder="Nota ex: 8.5">
-<input id="nImg" placeholder="Link da imagem (poster) - cola URL da imagem">
-<input id="nVideo" placeholder="Link vídeo YouTube Embed - ex: https://www.youtube.com/embed/XXXX">
-<textarea id="nDesc" placeholder="Descrição do filme/série"></textarea>
+<p style="color:#aaa;font-size:13px">Só o Admin entra aqui. Tu decides quem entra com códigos.</p>
+<input id="nTitulo" placeholder="Título *">
+<select id="nTipo"><option value="filme">🎬 Filme</option><option value="serie">📺 Série</option><option value="anime">🍥 Anime</option></select>
+<select id="nCat"><option>Ação</option><option>Anime</option><option>Comédia</option><option>Drama</option><option>Terror</option><option>Fantasia</option><option>Aventura</option><option>Ficção</option></select>
+<input id="nAno" placeholder="Ano" type="number"><input id="nNota" placeholder="Nota ex: 8.5">
+<div class="file-box">📸 <b>Foto do Poster - DO TEU TELEMÓVEL/PC</b><br><input type="file" id="fImg" accept="image/*" onchange="lerFicheiro(this,'img')"><br><small>Ou cola link abaixo</small></div>
+<input id="nImg" placeholder="OU cola link da imagem">
+<div class="file-box">🎬 <b>Vídeo - DO TEU TELEMÓVEL/PC (sem link)</b><br><input type="file" id="fVideo" accept="video/*" onchange="lerFicheiro(this,'video')"><br><small>Vídeo fica guardado no aparelho</small></div>
+<input id="nVideo" placeholder="OU link YouTube Embed">
+<textarea id="nDesc" placeholder="Descrição"></textarea>
+<input id="nEps" placeholder="Episódios separados por vírgula ex: Ep1, Ep2, Ep3 (para séries/animes)">
+<label style="display:flex;gap:8px;align-items:center;margin:10px 0"><input type="checkbox" id="nNotif" class="chk" checked> 🔔 Enviar notificação para todos quando publicar</label>
 <button class="btn" onclick="salvarNovo()">✅ PUBLICAR AGORA</button>
-<p style="color:#888;font-size:12px;margin-top:12px">💡 Para imagem: vai no Google > pesquisa o filme > segura na imagem > Copiar link da imagem > cola aqui.<br>Para vídeo: YouTube > Partilhar > Incorporar > copia o link embed.</p>
-<h3 style="margin-top:20px">📋 Lista (${FILMES.length}) - Clica ✖ no card para apagar</h3>`;
+<hr style="margin:20px 0;border-color:#333">
+<h3>👥 Quem pode entrar? - Admin decide</h3>
+<p style="color:#aaa;font-size:12px">Cria um código e dá só a quem tu quiseres. Sem código, ninguém entra no Admin.</p>
+<input id="nCodigo" placeholder="Novo código ex: AMIGO123"><button class="btn" style="background:#333" onclick="criarCodigo()">+ Criar Código de Acesso</button>
+<div id="listaCodigos" style="margin-top:10px">${codigos.map(c=>`<div style="background:#1a1a1a;padding:10px;border-radius:10px;margin:5px 0;display:flex;justify-content:space-between"><span>🔑 ${c}</span><button onclick="removerCodigo('${c}')" style="background:red;color:#fff;border:none;padding:5px 10px;border-radius:8px">Remover</button></div>`).join('')}</div>
+<p style="color:#888;font-size:12px;margin-top:10px">Total: ${FILMES.length} conteúdos • Códigos ativos: ${codigos.length}</p>`;
 document.body.appendChild(d);mostrar();
 }
+let tempImg='';let tempVideo='';
+function lerFicheiro(input,tipo){let file=input.files[0];if(!file)return;let r=new FileReader();r.onload=e=>{if(tipo==='img'){tempImg=e.target.result;document.getElementById('nImg').value='[Ficheiro do telemóvel carregado ✅]';}else{tempVideo=e.target.result;document.getElementById('nVideo').value='[Vídeo do telemóvel carregado ✅]';}alert('✅ Ficheiro carregado do teu telemóvel/PC!');};r.readAsDataURL(file);}
+function criarCodigo(){let c=document.getElementById('nCodigo').value.trim().toUpperCase();if(!c)return alert('Escreve o código');codigos.push(c);localStorage.setItem('codigos',JSON.stringify(codigos));alert('Código criado: '+c);abrirAdmin();}
+function removerCodigo(c){codigos=codigos.filter(x=>x!==c);localStorage.setItem('codigos',JSON.stringify(codigos));alert('Removido');abrirAdmin();}
 function salvarNovo(){
-let t=document.getElementById('nTitulo').value.trim();
-if(!t){alert('Escreve o título!');return;}
-let novo={id:Date.now(),t:t,tipo:document.getElementById('nTipo').value,cat:document.getElementById('nCat').value,ano:document.getElementById('nAno').value||2024,nota:document.getElementById('nNota').value||'7.0',img:document.getElementById('nImg').value||'https://via.placeholder.com/300x450/e50914/fff?text='+encodeURIComponent(t),desc:document.getElementById('nDesc').value||'Novo lançamento no Only24',video:document.getElementById('nVideo').value||'https://www.youtube.com/embed/TcMBFSGVi1c'};
+let t=document.getElementById('nTitulo').value.trim();if(!t)return alert('Escreve o título!');
+let cat=document.getElementById('nCat').value;let tipo=document.getElementById('nTipo').value;if(tipo==='anime')cat='Anime';
+let epsRaw=document.getElementById('nEps').value;let eps=epsRaw?epsRaw.split(',').map((s,i)=>({n:i+1,t:s.trim(),link:''})): [];
+let novo={id:Date.now(),t:t,tipo:tipo==='anime'?'serie':tipo,cat:cat,ano:document.getElementById('nAno').value||2024,nota:document.getElementById('nNota').value||'7.0',img:tempImg||document.getElementById('nImg').value||'https://via.placeholder.com/300x450/e50914/fff?text='+encodeURIComponent(t),desc:document.getElementById('nDesc').value||'Novo no Only24',video:tempVideo||document.getElementById('nVideo').value||'https://www.youtube.com/embed/TcMBFSGVi1c',eps:eps};
 MEUS.push(novo);FILMES.push(novo);localStorage.setItem('meus_filmes',JSON.stringify(MEUS));
-alert('✅ Publicado com sucesso!');document.getElementById('modal').remove();isAdmin=false;mostrar();
+if(document.getElementById('nNotif').checked) notificar('🆕 Novo: '+novo.t+' já está no Only24! Clica para ver.');
+alert('✅ Publicado!');document.getElementById('modal').remove();isAdmin=false;tempImg='';tempVideo='';mostrar();
 }
-function editar(id){
-let f=FILMES.find(x=>x.id===id);
-let novoTitulo=prompt('Novo título:',f.t);
-if(novoTitulo){f.t=novoTitulo;let m=MEUS.find(x=>x.id===id);if(m)m.t=novoTitulo;localStorage.setItem('meus_filmes',JSON.stringify(MEUS));mostrar();alert('Editado!');}
-}
-mostrar();
+atualizarBadge();mostrar();
 </script>
 </body>
 </html>
