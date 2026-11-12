@@ -1,107 +1,65 @@
 <!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
+<html lang="pt"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Only24</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
 body{background:#0a0a0a;color:#fff;padding-bottom:80px}
-header{display:flex;justify-content:space-between;align-items:center;padding:15px}
-.logo{font-size:28px;font-weight:900;cursor:pointer}
-.logo span{color:#f5c518}
-.search-box{display:flex;gap:5px;background:#1c1c1c;padding:5px 10px;border-radius:20px}
-.search-box input{background:none;border:none;color:#fff;outline:none;width:100px}
-.search-box button{background:#22c55e;border:none;padding:5px 12px;border-radius:15px;font-weight:700}
-.bell{font-size:22px;background:none;border:none}
-nav{display:flex;gap:20px;padding:0 15px;font-weight:700;color:#aaa;overflow-x:auto}
-nav b{color:#fff;border-bottom:2px solid #22c55e}
-h2{padding:20px 15px 10px;font-size:20px}
-.filtros{display:flex;gap:8px;padding:0 15px;overflow-x:auto}
-.filtros button{background:#222;border:none;color:#fff;padding:8px 14px;border-radius:20px;white-space:nowrap}
-.filtros button.ativo{background:#22c55e}
+header{display:flex;justify-content:space-between;padding:15px;align-items:center}
+.logo{font-size:28px;font-weight:900;cursor:pointer}.logo span{color:#f5c518}
+button{cursor:pointer}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:15px}
-.card{background:#1a1a1a;border-radius:10px;overflow:hidden;position:relative}
+.card{background:#1a1a1a;border-radius:10px;overflow:hidden}
 .card img{width:100%;height:210px;object-fit:cover}
-.card p{padding:8px;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card small{padding:0 8px 32px;display:block;color:#f5c518;white-space:nowrap;overflow:hidden;font-size:12px}
-.fav{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.7);border:none;font-size:18px;border-radius:50%;width:30px;height:30px}
-.del{position:absolute;top:5px;left:5px;background:red;color:#fff;border:none;border-radius:50%;width:26px;height:26px}
-.dl{position:absolute;bottom:8px;right:5px;background:#22c55e;border:none;border-radius:50%;width:30px;height:30px}
-footer{text-align:center;color:#888;padding:30px 10px;font-size:13px}
-.bottom{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;justify-content:space-around;padding:12px;border-top:1px solid #222;z-index:100}
-.bottom button{background:none;border:none;color:#fff;font-size:14px}
-#menu{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:flex-end;z-index:1000}
-#menu.aberto{display:flex}
-.menu-box{background:#1a1a1a;width:100%;padding:20px;border-radius:20px 20px 0 0}
-.menu-box a{display:block;padding:14px 0;color:#fff;text-decoration:none;border-bottom:1px solid #333}
-.menu-box button{width:100%;margin-top:15px;padding:12px;background:#22c55e;border:none;border-radius:10px;font-weight:800}
-input,select,textarea{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none;background:#222;color:#fff}
-.btn{background:#e50914;color:#fff;border:none;padding:12px;border-radius:10px;width:100%;font-weight:bold}
-.btn2{background:#22c55e;color:#fff;border:none;padding:12px;border-radius:10px;width:100%;font-weight:bold;margin-top:8px}
-video{width:100%;border-radius:10px;background:#000}
-iframe{width:100%;height:300px;border:none;border-radius:10px}
-.ep{display:flex;gap:8px;align-items:center;background:#1c1c1c;padding:10px;border-radius:10px;margin:6px 0}
-.ep input{width:20px;height:20px}
-.ep button{width:auto;padding:6px 12px;background:#22c55e;border:none;color:#fff;border-radius:8px}
-.toast{position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#22c55e;padding:12px 18px;border-radius:20px;z-index:3000;font-weight:bold;display:none}
-.notif{position:fixed;top:60px;right:10px;background:#1a1a1a;width:300px;max-width:90vw;border-radius:12px;padding:12px;z-index:2000;display:none}
-</style>
-</head>
-<body>
-<div id="toast" class="toast"></div>
-<div id="notifBox" class="notif"></div>
-<header>
-<div style="display:flex;gap:10px;align-items:center">
-<button onclick="abrirMenu()" style="background:none;border:none;color:#fff;font-size:26px">☰</button>
-<div class="logo" onclick="clickLogo()">Only<span>24</span></div>
-</div>
-<div class="search-box">
-<input id="pesquisa" placeholder="Pesquisar..." oninput="pesquisar()">
-<button onclick="pesquisar()">Procurar</button>
-</div>
-<button class="bell" onclick="abrirNotif()">🔔</button>
-</header>
-<nav><b onclick="setNav('todos')">Tendendo</b><span onclick="setNav('filme')">Filme</span><span onclick="setNav('serie')">TV</span><span onclick="setNav('anime')">Anime</span></nav>
-<h2>CLASSIFICAÇÕES DE FILMES</h2>
-<div class="filtros">
-<button class="ativo" onclick="filtrar(this,'todos')">Tendências</button>
-<button onclick="filtrar(this,'acao')">Ação</button>
-<button onclick="filtrar(this,'animacao')">Animação</button>
-<button onclick="filtrar(this,'crime')">Crime</button>
-<button onclick="filtrar(this,'comedia')">Comédia</button>
-<button onclick="filtrar(this,'drama')">Drama</button>
-<button onclick="filtrar(this,'terror')">Terror</button>
-</div>
-<div class="grid" id="filmes"></div>
-<h2>CLASSIFICAÇÕES DA SÉRIE</h2>
-<div class="grid" id="series"></div>
-<h2>ANIMES</h2>
-<div class="grid" id="animes"></div>
-<footer><b>Only24</b><br>© 2026 Only24 - Todos os direitos reservados</footer>
-<div class="bottom">
-<button onclick="setNav('todos')">🏠<br>Lar</button>
-<button onclick="abrirNotif()">🔔<br>Notificações</button>
-<button onclick="abrirMenu()">👤<br>Menu</button>
-</div>
-<div id="menu" onclick="fecharMenu()">
-<div class="menu-box" onclick="event.stopPropagation()">
-<a href="#" onclick="setNav('todos');fecharMenu()">🏠 Início</a>
-<a href="#" onclick="setNav('filme');fecharMenu()">🎬 Filmes</a>
-<a href="#" onclick="setNav('serie');fecharMenu()">📺 Séries</a>
-<a href="#" onclick="setNav('anime');fecharMenu()">✨ Animes</a>
-<a href="#" onclick="mostrarFav();fecharMenu()">❤️ Favoritos</a>
-<a href="#" onclick="abrirNotif();fecharMenu()">🔔 Notificações</a>
-<a href="#" onclick="fecharMenu()">⬇ Minhas Transferências</a>
-<a href="#" onclick="fecharMenu()">⚙️ Definições</a>
-<button onclick="fecharMenu()">Fechar Menu</button>
-</div>
-</div>
+.card p{padding:8px;font-size:13px;font-weight:700}
+.card small{padding:0 8px 10px;display:block;color:#f5c518}
+#menu{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;padding:20px;z-index:99}
+#menu.on{display:block}
+input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none;background:#222;color:#fff}
+</style></head><body>
+<header><div><button onclick="abrirMenu()" style="background:none;border:none;color:#fff;font-size:26px">☰</button> <span class="logo" onclick="clickLogo()">Only<span>24</span></span></div>
+<input id="pesq" placeholder="Pesquisar..." oninput="mostrar()" style="width:130px"></header>
+<h2 style="padding:10px 15px">FILMES</h2><div class="grid" id="filmes"></div>
+<h2 style="padding:10px 15px">SÉRIES</h2><div class="grid" id="series"></div>
+<h2 style="padding:10px 15px">ANIMES</h2><div class="grid" id="animes"></div>
+<footer style="text-align:center;color:#888;padding:20px">Only24<br>© 2026 Only24</footer>
+<div id="menu"><h2>MENU</h2><p onclick="mostrar();fecharMenu()" style="padding:12px 0">🏠 Início</p><p onclick="alert('Favoritos OK')" style="padding:12px 0">❤️ Favoritos</p><button onclick="fecharMenu()" style="padding:12px;background:#22c55e;border:none;border-radius:10px;width:100%">Fechar</button></div>
 <script>
-var SUP_URL="https://hvhznhdtswrmyozlpyq.supabase.co";
-var SUP_KEY="sb_publishable_-jxOZASMNQj1HDP1tq89Rw_rRTrbpyy";
-var filmes=[
-{t:"Velozes e Furiosos 10",c:"acao",tipo:"filme",n:"8.2",ano:2023,img:"https://image.tmdb.org/t/p/w500/fiVW06jE7z9YnO4trhaMEdghSi5.jpg",desc:"Corrida e ação.",video:"",eps:[]},
-{t:"John Wick 4",c:"acao",tipo:"filme",n:"8.5",ano:2023,img:"https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg",desc:"John Wick de volta.",video:"",eps:[]},
-{t:"Super Mario Bros",c:"animacao",tipo:"filme",n:"7.8",ano:2023,img:"https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",desc:"Mario no cinema.",video:"",eps:[]},
-{t:"The Batman",c:"crime",tipo:"filme",n:"7.9",ano:2022,img:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",desc:"Batman em Gotham.",video:"https://www.youtube
+var F=[
+{t:"Velozes 10",n:"8.2",ano:2023,img:"https://image.tmdb.org/t/p/w500/fiVW06jE7z9YnO4trhaMEdghSi5.jpg",tipo:"filme"},
+{t:"John Wick 4",n:"8.5",ano:2023,img:"https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg",tipo:"filme"},
+{t:"The Batman",n:"7.9",ano:2022,img:"https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",tipo:"filme"}
+];
+var S=[
+{t:"The Last of Us",n:"8.8",ano:2023,img:"https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg",tipo:"serie"},
+{t:"Wednesday",n:"8.4",ano:2022,img:"https://image.tmdb.org/t/p/w500/7Bx65Itkp8tXvDajs01rxIVZ9dw.jpg",tipo:"serie"}
+];
+var A=[
+{t:"Naruto",n:"8.9",ano:2002,img:"https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",tipo:"anime"},
+{t:"One Piece",n:"9.0",ano:1999,img:"https://image.tmdb.org/t/p/w500/tXFvfEdRDWz5Wm7pb7IkGPq6Rt4.jpg",tipo:"anime"},
+{t:"Dragon Ball Super",n:"8.5",ano:2015,img:"https://cdn.europosters.eu/image/1300/85466.jpg",tipo:"anime"}
+];
+var cliques=0, ultimo=0;
+function criar(lista,el){
+var b=document.getElementById(el), h="";
+for(var i=0;i<lista.length;i++){
+var f=lista[i];
+h+='<div class="card" onclick="alert(\'Abriu: '+f.t+'\')"><img src="'+f.img+'" onerror="this.src=\'https://via.placeholder.com/300x450?text=Only24\'"><p>'+f.t+'</p><small>⭐ '+f.n+' • '+f.ano+'</small></div>';
+}
+b.innerHTML=h;
+}
+function mostrar(){
+var v=document.getElementById('pesq').value.toLowerCase();
+function fil(arr){ return arr.filter(function(f){ return !v || f.t.toLowerCase().indexOf(v)>=0; }); }
+criar(fil(F),'filmes'); criar(fil(S),'series'); criar(fil(A),'animes');
+}
+function abrirMenu(){ document.getElementById('menu').classList.add('on'); }
+function fecharMenu(){ document.getElementById('menu').classList.remove('on'); }
+function clickLogo(){
+var agora=Date.now();
+if(agora-ultimo>1000) cliques=0;
+cliques++; ultimo=agora;
+if(cliques>=5){ cliques=0; var s=prompt('Senha Admin:'); if(s==='1234'){ alert('✅ Admin OK! O sistema está a funcionar!'); } else { alert('Senha errada'); } }
+}
+mostrar();
+</script></body></html>
