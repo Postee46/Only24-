@@ -1,0 +1,106 @@
+// ONLY24 v3 - app.js
+let supabaseClient = null;
+let currentUser = null;
+let isAdminUser = false;
+let allTitles = [];
+let currentTitle = null;
+let currentEpisode = null;
+let authMode = 'login';
+let deferredPrompt = null;
+
+const $ = id => document.getElementById(id);
+
+function toast(msg){
+  const t = $('toast'); if(!t) return;
+  t.textContent = msg; t.classList.remove('hidden');
+  setTimeout(()=>t.classList.add('hidden'), 3000);
+}
+function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function initSupabase(){
+  if (typeof window.ONLY24_CONFIG === 'undefined'){ console.error('config.js em falta'); return; }
+  if (!window.ONLY24_CONFIG.SUPABASE_URL || window.ONLY24_CONFIG.SUPABASE_URL.includes('TEU')){
+    console.warn('Configura js/config.js com a tua URL e chave');
+  }
+  supabaseClient = supabase.createClient(window.ONLY24_CONFIG.SUPABASE_URL, window.ONLY24_CONFIG.SUPABASE_ANON_KEY);
+}
+
+async function loadTitles(){
+  const { data, error } = await supabaseClient.from('titles').select('*').order('created_at',{ascending:false});
+  if(error){ console.error(error); return; }
+  allTitles = data || [];
+  renderAll();
+}
+
+function cardHTML(t){
+  const badge = t.featured ? '<span class="badge">Destaque</span>' : '';
+  const img = t.poster || 'icon.svg';
+  return `<div class="card" onclick="openTitle('${t.id}')">
+    ${badge}
+    <img src="${esc(img)}" loading="lazy" onerror="this.src='icon.svg'">
+    <div class="card-info"><h3>${esc(t.name)}</h3><p>${esc(t.type)} • ${t.year||''} • ⭐ ${t.rating||'8.0'}</p></div>
+  </div>`;
+}
+
+function renderAll(){
+  const filmes = allTitles.filter(t=>t.type==='filme');
+  const series = allTitles.filter(t=>t.type==='serie');
+  const animes = allTitles.filter(t=>t.type==='anime');
+  const featured = allTitles.filter(t=>t.featured);
+
+  if($('catGrid')) $('catGrid').innerHTML = (featured.length?featured:allTitles.slice(0,12)).map(cardHTML).join('') || '<p class="empty">Ainda não há títulos. Admin adiciona no painel.</p>';
+  if($('seriesGrid')) $('seriesGrid').innerHTML = series.map(cardHTML).join('') || '<p class="empty">Sem séries ainda.</p>';
+  if($('animeGrid')) $('animeGrid').innerHTML = animes.map(cardHTML).join('') || '<p class="empty">Sem animes ainda.</p>';
+
+  const heroItem = featured[0] || allTitles[0];
+  if(heroItem){
+    if($('heroBg')) $('heroBg').src = heroItem.backdrop || heroItem.poster || '';
+    if($('heroTitle')) $('heroTitle').textContent = heroItem.name;
+    if($('heroMeta')) $('heroMeta').textContent = `${heroItem.type} • ${heroItem.year||''} • ⭐ ${heroItem.rating||'8.0'}`;
+    if($('heroDesc')) $('heroDesc').textContent = heroItem.synopsis || '';
+    if($('heroPlay')) $('heroPlay').onclick = ()=>openTitle(heroItem.id);
+    if($('heroInfo')) $('heroInfo').onclick = ()=>openTitle(heroItem.id);
+  }
+  loadContinue(); loadHistory(); loadMyList();
+}
+
+async function loadContinue(){
+  if(!currentUser || !$('continueRow')) return;
+  const { data } = await supabaseClient.from('history').select('*, titles(*)').eq('user_id', currentUser.id).order('updated_at',{ascending:false}).limit(10);
+  if(!data || !data.length){ $('continueRow').innerHTML = '<p class="empty">Ainda não assististe nada.</p>'; return; }
+  $('continueRow').innerHTML = data.map(h=> h.titles ? cardHTML(h.titles) : '').join('');
+}
+async function loadHistory(){
+  if(!currentUser || !$('historyRow')) return;
+  const { data } = await supabaseClient.from('history').select('*, titles(*)').eq('user_id', currentUser.id).order('updated_at',{ascending:false}).limit(10);
+  if(!data || !data.length){ $('historyRow').innerHTML = '<p class="empty">Sem histórico.</p>'; return; }
+  $('historyRow').innerHTML = data.map(h=> h.titles ? cardHTML(h.titles) : '').join('');
+}
+async function loadMyList(){
+  if(!currentUser || !$('myList')) return;
+  const { data } = await supabaseClient.from('favorites').select('*, titles(*)').eq('user_id', currentUser.id).order('created_at',{ascending:false});
+  if(!data || !data.length){ $('myList').innerHTML = '<p class="empty">A tua lista está vazia. Clica em ＋ Minha Lista num título.</p>'; return; }
+  $('myList').innerHTML = data.map(f=> f.titles ? cardHTML(f.titles) : '').join('');
+}
+
+window.openTitle = async function(id){
+  const t = allTitles.find(x=>x.id===id); if(!t) return;
+  currentTitle = t;
+  $('tmBackdrop').src = t.backdrop || t.poster || '';
+  $('tmPoster').src = t.poster || 'icon.svg';
+  $('tmTitle').textContent = t.name;
+  $('tmMeta').textContent = `${t.type} • ${t.year||''} • ⭐ ${t.rating||'8.0'} • ${t.cat||''}`;
+  $('tmDesc').textContent = t.synopsis || 'Sem sinopse.';
+  $('tmCast').textContent = t.cast_list ? 'Elenco: '+t.cast_list : '';
+  $('tmTrailer').style.display = t.trailer ? 'inline-block' : 'none';
+  $('tmTrailer').onclick = ()=> t.trailer && window.open(t.trailer,'_blank');
+  $('tmPlay').onclick = ()=> playTitle(t);
+  $('tmFav').onclick = ()=> toggleFav(t.id);
+  $('tmFav').textContent = '＋ Minha Lista';
+
+  const epBox = $('tmEpisodes');
+  if(t.type !== 'filme'){
+    const { data: eps } = await supabaseClient.from('episodes').select('*').eq('title_id', t.id).order('season').order('ep_number');
+    if(eps && eps.length){
+      epBox.innerHTML = '<h3>Episódios</h3>' + eps.map(e=>`<div class="ep-item"><span>T${e.season} E${e.ep_number} - ${esc(e.title||'Episódio '+e.ep_number)}</span><button class="btn-primary" onclick="playEpisode('${e.id}')">▶ Ver</button></div>`).join('');
+    } else epBox.innerHTML = '<p class="empty">Sem
