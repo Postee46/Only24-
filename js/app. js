@@ -122,4 +122,4 @@ window.openTitle = async function(id){
   const doInstall = async ()=>{ if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; } };
   $('installBtn').onclick = doInstall; $('installNow').onclick = doInstall;
   $('installLater').onclick = ()=> $('installBanner').classList.add('hidden');
-});
+})
