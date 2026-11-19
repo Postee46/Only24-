@@ -1,4 +1,4 @@
-// ONLY24 v3 - app.js
+já// ONLY24 v3 - app.js
 let supabaseClient = null;
 let currentUser = null;
 let isAdminUser = false;
@@ -103,4 +103,23 @@ window.openTitle = async function(id){
     const { data: eps } = await supabaseClient.from('episodes').select('*').eq('title_id', t.id).order('season').order('ep_number');
     if(eps && eps.length){
       epBox.innerHTML = '<h3>Episódios</h3>' + eps.map(e=>`<div class="ep-item"><span>T${e.season} E${e.ep_number} - ${esc(e.title||'Episódio '+e.ep_number)}</span><button class="btn-primary" onclick="playEpisode('${e.id}')">▶ Ver</button></div>`).join('');
-    } else epBox.innerHTML = '<p class="empty">Sem
+    } else epBox.innerHTML = '<p class="empty">Sem notificações.</p>'; };
+
+  const openAdmin = ()=>{ if(!isAdminUser) return toast('Só admin'); $('adminPanel').classList.remove('hidden'); loadAdminList(); };
+  $('adminBtn').onclick = openAdmin; $('fabAdmin').onclick = openAdmin; $('fabAdd').onclick = openAdmin;
+  $('adminClose').onclick = ()=> $('adminPanel').classList.add('hidden');
+  $('addEp').onclick = ()=> addEpRow();
+  $('saveTitle').onclick = saveTitle;
+  $('sendNotif').onclick = async ()=>{
+    $('sendNotif').onclick = async ()=>{
+    const title=$('notifTitle').value.trim(); if(!title) return toast('Título da notificação obrigatório');
+    const { error } = await supabaseClient.from('notifications').insert({ title, body:$('notifBody').value, title_id:$('notifTitleId').value||null });
+    if(error) return toast(error.message);
+    toast('Notificação enviada!'); loadNotifications();
+  };
+
+  window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; $('installBtn').classList.remove('hidden'); $('installBanner').classList.remove('hidden'); });
+  const doInstall = async ()=>{ if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; } };
+  $('installBtn').onclick = doInstall; $('installNow').onclick = doInstall;
+  $('installLater').onclick = ()=> $('installBanner').classList.add('hidden');
+});
