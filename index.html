@@ -211,5 +211,15 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 </script>
+<script>
+// FORÇAR SAÍDA DO SPLASH
+setTimeout(function(){
+  var s = document.getElementById('splash') || document.querySelector('.splash');
+  if(s) s.style.display = 'none';
+  var loader = document.querySelector('.loader');
+  if(loader) loader.style.display = 'none';
+  document.body.style.overflow = 'auto';
+}, 3000);
+</script>
 </body>
 </html>
