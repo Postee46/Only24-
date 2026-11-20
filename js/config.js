@@ -1,3 +1,4 @@
+
 // ONLY24 - Configuração Supabase
 window.ONLY24_CONFIG = {
   SUPABASE_URL: "https://hvhznhdtswrmyozlpyq.supabase.co",
