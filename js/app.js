@@ -438,3 +438,368 @@
     await prepareEpisodes(t);
     playFromModal();
   }
+/* ============ DOWNLOADS ============ */
+  function fileName(t, ep) {
+    const base = (t.name + (ep ? ' T' + (ep.season || 1) + 'E' + ep.ep_number : ''))
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w]+/g, '_');
+    const url = ep ? ep.video_url : t.video_url;
+    const m = /\.(mp4|mkv|webm|mov|m4v|avi)(\?|$)/i.exec(url || '');
+    return base + '.' + (m ? m[1].toLowerCase() : 'mp4');
+  }
+  function dlHref(url, name) {
+    if (url.indexOf('/storage/v1/object/public/') !== -1 && url.indexOf('?') === -1) {
+      return url + '?download=' + encodeURIComponent(name);
+    }
+    return url;
+  }
+  function triggerDownload(url, name) {
+    const a = document.createElement('a');
+    a.href = dlHref(url, name);
+    a.download = name;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  async function downloadSelected() {
+    const ids = Array.prototype.map.call(document.querySelectorAll('#tmEpisodes .epChk:checked'), (x) => x.value);
+    if (!ids.length) return toast('Seleciona pelo menos um episódio.');
+    const list = S.episodes.filter((e) => ids.indexOf(e.id) !== -1 && e.video_url);
+    if (!list.length) return toast('Os episódios selecionados não têm vídeo.');
+    toast('A iniciar ' + list.length + ' download(s)...');
+    for (const e of list) {
+      triggerDownload(e.video_url, fileName(S.current, e));
+      await sleep(900);
+    }
+  }
+
+  /* ============ PLAYER UNIVERSAL ============ */
+  let hlsInstance = null;
+
+  function destroyHls() {
+    if (hlsInstance) {
+      hlsInstance.destroy();
+      hlsInstance = null;
+    }
+  }
+
+  function parseVideoSource(raw) {
+    let url = String(raw || '').trim();
+    if (!url) return null;
+
+    // Se colarem um código <iframe src="...">, extrai o link automaticamente
+    const ifr = /<iframe[^>]+src=["']([^"']+)["']/i.exec(url);
+    if (ifr) url = ifr[1].trim();
+
+    // YouTube (watch, youtu.be, shorts, live, embed)
+    const yt = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i.exec(url);
+    if (yt) {
+      return { kind: 'iframe', url: 'https://www.youtube.com/embed/' + yt[1] + '?autoplay=1&rel=0', isEmbed: true };
+    }
+
+    // Google Drive
+    const gd = /drive\.google\.com\/(?:file\/d\/|open\?id=)([^/?&#]+)/i.exec(url);
+    if (gd) {
+      return { kind: 'iframe', url: 'https://drive.google.com/file/d/' + gd[1] + '/preview', isEmbed: true };
+    }
+
+    // Vimeo
+    const vm = /vimeo\.com\/(?:video\/)?(\d+)/i.exec(url);
+    if (vm && url.indexOf('player.vimeo.com') === -1) {
+      return { kind: 'iframe', url: 'https://player.vimeo.com/video/' + vm[1] + '?autoplay=1', isEmbed: true };
+    }
+
+    // Dailymotion
+    const dm = /(?:dailymotion\.com\/video\/|dai\.ly\/)([A-Za-z0-9]+)/i.exec(url);
+    if (dm) {
+      return { kind: 'iframe', url: 'https://www.dailymotion.com/embed/video/' + dm[1] + '?autoplay=1', isEmbed: true };
+    }
+
+    // Outros links de embed/iframe
+    if (/(\/embed\/|\/preview\b|player\.vimeo\.com|ok\.ru\/videoembed|streamtape\.com\/e\/|dood\.)/i.test(url)) {
+      return { kind: 'iframe', url: url, isEmbed: true };
+    }
+
+    // Stream HLS (.m3u8)
+    if (/\.m3u8(\?|$)/i.test(url)) {
+      return { kind: 'hls', url: url, isEmbed: false };
+    }
+
+    // Vídeo direto (MP4, WebM, MOV, MKV, OGG, etc.)
+    return { kind: 'video', url: url, isEmbed: false };
+  }
+
+  function setMediaSource(rawUrl, autoplay) {
+    const v = $('player');
+    const emb = $('embedPlayer');
+    const parsed = parseVideoSource(rawUrl);
+    destroyHls();
+    v.pause();
+    v.removeAttribute('src');
+    v.load();
+
+    if (!parsed) return null;
+
+    if (parsed.kind === 'iframe') {
+      hide(v);
+      if (emb) {
+        emb.src = parsed.url;
+        show(emb);
+      }
+      return parsed;
+    }
+
+    if (emb) {
+      emb.src = 'about:blank';
+      hide(emb);
+    }
+    show(v);
+
+    if (parsed.kind === 'hls' && window.Hls && window.Hls.isSupported()) {
+      hlsInstance = new window.Hls();
+      hlsInstance.loadSource(parsed.url);
+      hlsInstance.attachMedia(v);
+      hlsInstance.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        if (S.seekSec != null) { v.currentTime = S.seekSec; S.seekSec = null; }
+        else if (S.resumeFrac && isFinite(v.duration)) { v.currentTime = S.resumeFrac * v.duration; S.resumeFrac = 0; }
+        if (autoplay) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+      });
+      hlsInstance.on(window.Hls.Events.ERROR, (ev, data) => {
+        if (data && data.fatal) toast('Erro ao carregar o stream (.m3u8).');
+      });
+    } else {
+      v.src = parsed.url;
+      if (autoplay) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+    }
+    return parsed;
+  }
+
+  function setupQualities(t, ep, src) {
+    const sel = $('qualityList');
+    if (!sel) return;
+    const q = ep ? [] : parseQualities(t.qualities);
+    if (!q.length) { hide(sel); return; }
+    show(sel);
+    sel.innerHTML = '<option value="">Qualidade / Servidor</option><option value="' + esc(src) + '">Original</option>' +
+      q.map((x) => '<option value="' + esc(x.url) + '">' + esc(x.label || 'Opção') + '</option>').join('');
+    sel.value = '';
+  }
+
+  function setupSubtitles(t, v, isEmbed) {
+    const sel = $('subtitleList');
+    if (!sel) return;
+    if (isEmbed || !t.subtitle) { hide(sel); return; }
+    show(sel);
+    sel.innerHTML = '<option value="">Sem legendas</option><option value="pt">Português</option>';
+    sel.value = '';
+    const tr = document.createElement('track');
+    tr.kind = 'subtitles';
+    tr.label = 'Português';
+    tr.srclang = 'pt';
+    tr.src = t.subtitle;
+    v.appendChild(tr);
+    tr.track.mode = 'disabled';
+  }
+
+  function setupDownloads(t, ep, src, isEmbed) {
+    const box = $('dlList');
+    const btn = $('downloadBtn');
+    if (!box) return;
+    const name = fileName(t, ep);
+    const links = [];
+    if (t.download && !ep) links.push({ label: 'Download', url: t.download });
+    if (!ep && !isEmbed) parseQualities(t.qualities).forEach((q) => links.push({ label: 'Download ' + (q.label || ''), url: q.url }));
+    if (!links.length && src && !isEmbed) links.push({ label: 'Download vídeo', url: src });
+    S.dlFirst = links[0] ? { url: links[0].url, name } : null;
+    if (btn) S.dlFirst ? show(btn) : hide(btn);
+    box.innerHTML = links.map((l) =>
+      '<a class="btn-secondary o24-dl" href="' + esc(dlHref(l.url, name)) + '" target="_blank" rel="noopener" download="' + esc(name) + '">⬇ ' + esc(l.label) + '</a>'
+    ).join('');
+  }
+
+  function playItem(t, ep) {
+    const src = ep ? ep.video_url : t.video_url;
+    if (!src) { toast('Este conteúdo ainda não tem vídeo.'); return; }
+    const v = $('player');
+    S.playing = { title: t, ep: ep || null };
+    $('playerTitle').textContent = t.name +
+      (ep ? ' — T' + (ep.season || 1) + ' EP' + ep.ep_number + (ep.title ? ': ' + ep.title : '') : '');
+    v.querySelectorAll('track').forEach((x) => x.remove());
+    const h = S.history.find((x) => x.title_id === t.id && (!ep || x.episode_id === ep.id));
+    S.seekSec = null;
+    S.resumeFrac = h && h.progress > 0.02 && h.progress < 0.95 ? h.progress : 0;
+
+    const parsed = setMediaSource(src, true);
+    if (!parsed) { toast('Link de vídeo inválido.'); return; }
+    setupQualities(t, ep, src);
+    setupSubtitles(t, v, parsed.isEmbed);
+    setupDownloads(t, ep, src, parsed.isEmbed);
+    showModal('playerModal');
+    t.views = (t.views || 0) + 1;
+    sb.rpc('increment_views', { tid: t.id }).then(() => {}, () => {});
+  }
+
+  function playTrailer(t) {
+    if (!t || !t.trailer) return;
+    const v = $('player');
+    S.playing = null;
+    S.seekSec = null;
+    S.resumeFrac = 0;
+    $('playerTitle').textContent = t.name + ' — Trailer';
+    v.querySelectorAll('track').forEach((x) => x.remove());
+    hide($('qualityList'));
+    hide($('subtitleList'));
+    hide($('downloadBtn'));
+    $('dlList').innerHTML = '';
+    const parsed = setMediaSource(t.trailer, true);
+    if (!parsed) return toast('Link do trailer inválido.');
+    showModal('playerModal');
+  }
+
+  async function saveProgress(force) {
+    if (!S.user || !S.playing) return;
+    const v = $('player');
+    if (v.classList.contains('hidden') || !v.duration || !isFinite(v.duration)) return;
+    const now = Date.now();
+    if (!force && now - S.lastSave < 10000) return;
+    S.lastSave = now;
+    const row = {
+      user_id: S.user.id,
+      title_id: S.playing.title.id,
+      episode_id: S.playing.ep ? S.playing.ep.id : null,
+      progress: Number(Math.min(1, v.currentTime / v.duration).toFixed(4)),
+      updated_at: new Date().toISOString()
+    };
+    const { error } = await sb.from('history').upsert(row, { onConflict: 'user_id,title_id' });
+    if (error) { console.error(error); return; }
+    const i = S.history.findIndex((h) => h.title_id === row.title_id);
+    if (i >= 0) S.history.splice(i, 1);
+    S.history.unshift(row);
+  }
+
+  async function closePlayer() {
+    const v = $('player');
+    const emb = $('embedPlayer');
+    v.pause();
+    destroyHls();
+    hideModal('playerModal');
+    await saveProgress(true);
+    S.playing = null;
+    v.removeAttribute('src');
+    v.querySelectorAll('track').forEach((x) => x.remove());
+    v.load();
+    if (emb) {
+      emb.src = 'about:blank';
+      hide(emb);
+    }
+    renderView();
+  }
+
+  function playNext() {
+    if (!S.playing || !S.playing.ep || !S.current || S.current.id !== S.playing.title.id) return;
+    const i = S.episodes.findIndex((e) => e.id === S.playing.ep.id);
+    const next = i >= 0 ? S.episodes[i + 1] : null;
+    if (next) { toast('A seguir: EP ' + next.ep_number); playItem(S.playing.title, next); }
+  }
+
+  /* ============ NOTIFICAÇÕES ============ */
+  function visibleNotifs() {
+    const c = Number(lsGet('o24_notif_clear') || 0);
+    return S.notifs.filter((n) => ts(n.created_at) > c);
+  }
+  function updateBell() {
+    const seen = Number(lsGet('o24_notif_seen') || 0);
+    const has = visibleNotifs().some((n) => ts(n.created_at) > seen);
+    has ? show($('bellDot')) : hide($('bellDot'));
+  }
+  async function openNotifs() {
+    await loadNotifs();
+    const list = visibleNotifs();
+    $('notifList').innerHTML = list.length
+      ? list.map((n) =>
+        '<div class="o24-notif"' + (n.title_id ? ' data-open="' + esc(n.title_id) + '"' : '') + '>' +
+        '<b>' + esc(n.title) + '</b><span>' + esc(n.description || '') + '</span><small>' + esc(fmtDate(n.created_at)) + '</small></div>'
+      ).join('')
+      : '<p class="o24-empty">Sem notificações.</p>';
+    lsSet('o24_notif_seen', String(Date.now()));
+    updateBell();
+    showModal('notifModal');
+  }
+
+  /* ============ ADMIN ============ */
+  const TEXT_FIELDS = ['fTitle', 'fYear', 'fRating', 'fSynopsis', 'fCast', 'fTrailer', 'fSubtitle', 'fDownload', 'fVideoUrl', 'fQualities', 'fPoster', 'fBackdrop'];
+  const FILE_FIELDS = ['fPosterFile', 'fVideoFile', 'fSubtitleFile'];
+
+  function resetAdminForm() {
+    TEXT_FIELDS.forEach((id) => { const el = $(id); if (el) el.value = ''; });
+    FILE_FIELDS.forEach((id) => { const el = $(id); if (el) el.value = ''; });
+    $('fFeatured').checked = false;
+    $('fType').selectedIndex = 0;
+    setGenreOptions('filme');
+    $('episodesWrap').innerHTML = '';
+    S.editingId = null;
+    S.removedEps = [];
+    $('saveAdmin').textContent = 'Salvar Título';
+  }
+
+  function fillNotifSelect() {
+    const sel = $('notifTitleId');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Sem título ligado</option>' +
+      S.titles.map((t) => '<option value="' + esc(t.id) + '">' + esc(t.name) + '</option>').join('');
+  }
+
+  function renderAdminList() {
+    const box = $('adminList');
+    const list = S.titles.slice().sort((a, b) => (b.views || 0) - (a.views || 0));
+    box.innerHTML = list.length
+      ? list.map((t) =>
+        '<div class="o24-arow"><div class="o24-ainfo"><b>' + esc(t.name) + '</b><small>' + esc(TYPE_LABEL[typeOf(t)]) + ' • 👁 ' + (t.views || 0) + '</small></div>' +
+        '<button type="button" class="btn-secondary" data-edit="' + esc(t.id) + '">Editar</button>' +
+        '<button type="button" class="btn-secondary" data-del="' + esc(t.id) + '">Apagar</button></div>'
+      ).join('')
+      : '<p class="o24-empty">Ainda não há títulos.</p>';
+  }
+
+  function openAdmin(fresh) {
+    if (!S.isAdmin) return toast('Só o administrador pode abrir o painel.');
+    if (fresh) resetAdminForm();
+    renderAdminList();
+    fillNotifSelect();
+    showModal('adminPanel');
+  }
+
+  function addEpRow(ep) {
+    ep = ep || {};
+    const wrapEl = $('episodesWrap');
+    const next = wrapEl.querySelectorAll('.o24-eprow').length + 1;
+    const div = document.createElement('div');
+    div.className = 'o24-eprow';
+    if (ep.id) div.dataset.id = ep.id;
+    div.innerHTML =
+      '<input class="ep-season" type="number" min="1" placeholder="Temporada" value="' + esc(ep.season || 1) + '">' +
+      '<input class="ep-num" type="number" min="1" placeholder="Episódio" value="' + esc(ep.ep_number || next) + '">' +
+      '<input class="ep-title" placeholder="Título do episódio" value="' + esc(ep.title || '') + '">' +
+      '<input class="ep-url" placeholder="Link do vídeo" value="' + esc(ep.video_url || '') + '">' +
+      '<label class="ep-filelbl">Vídeo ficheiro <input class="ep-file" type="file" accept="video/*"></label>' +
+      '<button type="button" class="btn-secondary ep-del">Remover episódio</button>';
+    wrapEl.appendChild(div);
+  }
+
+  async function uploadFile(file, folder) {
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+    const path = folder + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    const opts = { cacheControl: '31536000', upsert: false };
+    if (ext === 'vtt') opts.contentType = 'text/vtt';
+    else if (file.type) opts.contentType = file.type;
+    const { error } = await sb.storage.from('media').upload(path, file, opts);
+    if (error) {
+      if (/size|large|exceed/i.test(error.message)) {
+        throw new Error('Ficheiro demasiado grande (limite grátis: 50 MB). Usa um link externo.');
+      }
+      throw new Error('Falha no upload: ' + error.message);
+    }
+    return sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+  }
