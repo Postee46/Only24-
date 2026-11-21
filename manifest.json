@@ -1,18 +1,28 @@
 {
-  "name": "ONLY24 - Filmes, Séries e Animes",
-  "short_name": "ONLY24",
-  "description": "Assiste filmes, séries e animes em HD.",
+  "id": "./",
+  "name": "ONLY24²⁴ - Filmes, Séries e Animes",
+  "short_name": "ONLY24²⁴",
+  "description": "Assiste filmes, séries, animes e entretenimento em HD.",
+  "lang": "pt",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0a0a0f",
   "theme_color": "#0a0a0f",
+  "categories": ["entertainment", "video"],
   "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "icon.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }
