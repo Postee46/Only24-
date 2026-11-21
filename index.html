@@ -22,8 +22,9 @@
 
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Supabase -->
+  <!-- Supabase e HLS (.m3u8) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 </head>
 
 <body>
@@ -43,12 +44,7 @@
       </button>
 
       <div class="search-box">
-        <input
-          id="searchInput"
-          type="search"
-          placeholder="Pesquisar filmes, séries, animes..."
-          autocomplete="off"
-        >
+        <input id="searchInput" type="search" placeholder="Pesquisar filmes, séries, animes..." autocomplete="off">
         <button type="button" id="searchBtn" aria-label="Pesquisar">🔍</button>
       </div>
 
@@ -69,9 +65,7 @@
           <button type="button" id="logoutBtn">Sair</button>
         </div>
 
-        <button type="button" id="installBtn" class="install-btn hidden">
-          Instalar App
-        </button>
+        <button type="button" id="installBtn" class="install-btn hidden">Instalar App</button>
 
       </div>
     </div>
@@ -98,12 +92,8 @@
       <p id="heroDesc"></p>
 
       <div class="hero-btns">
-        <button type="button" id="heroPlay" class="btn-primary">
-          ▶ Assistir
-        </button>
-        <button type="button" id="heroInfo" class="btn-secondary">
-          ℹ️ Detalhes
-        </button>
+        <button type="button" id="heroPlay" class="btn-primary">▶ Assistir</button>
+        <button type="button" id="heroInfo" class="btn-secondary">ℹ️ Detalhes</button>
       </div>
     </div>
   </section>
@@ -148,98 +138,51 @@
   </main>
 
   <!-- ADMIN BUTTONS -->
-  <button type="button" id="fabAdmin" class="fab hidden" aria-label="Admin">
-    ⚙️
-  </button>
-
-  <button type="button" id="fabAdd" class="fab fab-add hidden" aria-label="Adicionar conteúdo">
-    ＋
-  </button>
+  <button type="button" id="fabAdmin" class="fab hidden" aria-label="Admin">⚙️</button>
+  <button type="button" id="fabAdd" class="fab fab-add hidden" aria-label="Adicionar conteúdo">＋</button>
 
   <!-- AUTH MODAL -->
   <div id="authModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <div class="modal-box">
-
       <button type="button" id="closeAuth" class="close" aria-label="Fechar">✕</button>
-
       <h2 id="authTitle">Entrar</h2>
-
-      <input
-        id="authName"
-        type="text"
-        placeholder="Nome"
-        class="hidden"
-      >
-
-      <input
-        id="authEmail"
-        type="email"
-        placeholder="Email"
-        autocomplete="email"
-      >
-
-      <input
-        id="authPass"
-        type="password"
-        placeholder="Senha"
-        autocomplete="current-password"
-      >
-
-      <button type="button" id="authSubmit" class="btn-primary full">
-        Entrar
-      </button>
-
-      <p>
-        <button type="button" id="authSwitch" class="link">
-          Criar conta nova
-        </button>
-      </p>
-
+      <input id="authName" type="text" placeholder="Nome" class="hidden">
+      <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
+      <input id="authPass" type="password" placeholder="Senha" autocomplete="current-password">
+      <button type="button" id="authSubmit" class="btn-primary full">Entrar</button>
+      <p><button type="button" id="authSwitch" class="link">Criar conta nova</button></p>
     </div>
   </div>
 
   <!-- TITLE MODAL -->
   <div id="titleModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
     <div class="modal-box large">
-
       <button type="button" id="tmClose" class="close" aria-label="Fechar">✕</button>
-
       <img id="tmBackdrop" alt="Imagem de destaque">
 
       <div class="tm-body">
         <img id="tmPoster" alt="Cartaz">
-
         <div>
           <h2 id="tmTitle"></h2>
           <p id="tmMeta"></p>
           <p id="tmDesc"></p>
           <p id="tmCast"></p>
-
           <div class="tm-btns">
-            <button type="button" id="tmPlay" class="btn-primary">
-              ▶ Assistir
-            </button>
-            <button type="button" id="tmFav" class="btn-secondary">
-              ＋ Minha Lista
-            </button>
-            <button type="button" id="tmTrailer" class="btn-secondary">
-              ▶ Trailer
-            </button>
+            <button type="button" id="tmPlay" class="btn-primary">▶ Assistir</button>
+            <button type="button" id="tmFav" class="btn-secondary">＋ Minha Lista</button>
+            <button type="button" id="tmTrailer" class="btn-secondary">▶ Trailer</button>
           </div>
         </div>
       </div>
 
       <div id="tmEpisodes"></div>
-
     </div>
   </div>
 
   <!-- PLAYER MODAL -->
   <div id="playerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="playerTitle">
     <div class="modal-box player-box">
-
       <button type="button" id="closePlayer" class="close" aria-label="Fechar player">✕</button>
-
       <h3 id="playerTitle"></h3>
 
       <video
@@ -250,52 +193,45 @@
         controlsList="nodownload"
       ></video>
 
-      <div class="player-tools">
-        <button type="button" id="downloadBtn" class="btn-secondary">
-          ⬇ Download
-        </button>
+      <iframe
+        id="embedPlayer"
+        class="hidden"
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
 
+      <div class="player-tools">
+        <button type="button" id="downloadBtn" class="btn-secondary">⬇ Download</button>
         <select id="qualityList" aria-label="Qualidade de vídeo">
           <option value="">Qualidade</option>
         </select>
-
         <select id="subtitleList" aria-label="Legendas">
           <option value="">Legendas</option>
         </select>
       </div>
 
       <div id="dlList"></div>
-
     </div>
   </div>
 
   <!-- NOTIFICATIONS -->
   <div id="notifModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-box">
-
       <button type="button" id="notifClose" class="close" aria-label="Fechar">✕</button>
-
       <h2>Notificações</h2>
-
       <div id="notifList"></div>
-
-      <button type="button" id="notifClear" class="btn-secondary full">
-        Limpar
-      </button>
-
+      <button type="button" id="notifClear" class="btn-secondary full">Limpar</button>
     </div>
   </div>
 
   <!-- ADMIN PANEL -->
   <div id="adminPanel" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-box large admin-box">
-
       <button type="button" id="adminClose" class="close" aria-label="Fechar">✕</button>
-
       <h2>Painel Admin</h2>
 
       <div class="admin-grid">
-
         <input id="fTitle" placeholder="Título *">
 
         <select id="fType">
@@ -317,11 +253,8 @@
         </select>
 
         <input id="fYear" type="number" placeholder="Ano">
-
         <input id="fRating" type="number" step="0.1" placeholder="Nota: 8.5">
-
         <input id="fCast" placeholder="Elenco">
-
         <textarea id="fSynopsis" placeholder="Sinopse"></textarea>
 
         <label class="admin-full">
@@ -329,13 +262,10 @@
           Em destaque
         </label>
 
-        <input id="fTrailer" placeholder="Link Trailer YouTube">
-
+        <input id="fTrailer" placeholder="Link Trailer (YouTube / MP4)">
         <input id="fSubtitle" placeholder="Link Legenda .vtt">
-
         <input id="fDownload" placeholder="Link Download autorizado">
-
-        <input id="fVideoUrl" placeholder="Link do vídeo MP4 (filmes / clipes)">
+        <input id="fVideoUrl" placeholder="Link do vídeo (MP4, M3U8, YouTube, Drive, Embed)">
 
         <input
           id="fQualities"
@@ -344,7 +274,6 @@
         >
 
         <input id="fPoster" placeholder="Link Poster">
-
         <input id="fBackdrop" placeholder="Link Backdrop">
 
         <label>
@@ -361,19 +290,13 @@
           Legenda ficheiro (.vtt)
           <input id="fSubtitleFile" type="file" accept=".vtt">
         </label>
-
       </div>
 
       <h3>Episódios (séries / animes)</h3>
       <div id="episodesWrap"></div>
 
-      <button type="button" id="addEp" class="btn-secondary">
-        ＋ Adicionar Episódio
-      </button>
-
-      <button type="button" id="saveAdmin" class="btn-primary full">
-        Salvar Título
-      </button>
+      <button type="button" id="addEp" class="btn-secondary">＋ Adicionar Episódio</button>
+      <button type="button" id="saveAdmin" class="btn-primary full">Salvar Título</button>
 
       <h3>Títulos existentes</h3>
       <div id="adminList"></div>
@@ -384,11 +307,7 @@
       <select id="notifTitleId">
         <option value="">Sem título ligado</option>
       </select>
-
-      <button type="button" id="sendNotif" class="btn-secondary full">
-        Enviar Notificação
-      </button>
-
+      <button type="button" id="sendNotif" class="btn-secondary full">Enviar Notificação</button>
     </div>
   </div>
 
