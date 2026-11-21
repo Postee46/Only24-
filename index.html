@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -7,7 +6,7 @@
 
   <title>ONLY24²⁴ - Filmes, Séries e Animes</title>
 
-  <meta name="description" content="ONLY24²⁴ - Descobre filmes, séries e animes num só lugar.">
+  <meta name="description" content="ONLY24²⁴ - Descobre filmes, séries, animes e entretenimento num só lugar.">
   <meta name="theme-color" content="#0a0a0f">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,7 +18,6 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
@@ -40,7 +38,7 @@
   <header id="topbar">
     <div class="topbar-inner">
 
-      <button id="logo" class="logo">
+      <button type="button" id="logo" class="logo">
         ONLY<span>24²⁴</span>
       </button>
 
@@ -51,27 +49,27 @@
           placeholder="Pesquisar filmes, séries, animes..."
           autocomplete="off"
         >
-        <button id="searchBtn" aria-label="Pesquisar">🔍</button>
+        <button type="button" id="searchBtn" aria-label="Pesquisar">🔍</button>
       </div>
 
       <div class="top-actions">
 
-        <button id="bellBtn" class="icon-btn" aria-label="Notificações">
+        <button type="button" id="bellBtn" class="icon-btn" aria-label="Notificações">
           🔔
           <span id="bellDot" class="dot hidden"></span>
         </button>
 
-        <button id="avatarBtn" class="avatar-btn" aria-label="Perfil">
-          <img id="avatarImg" src="" alt="Foto do perfil">
-          <span id="avatarLetter">U</span>
+        <button type="button" id="avatarBtn" class="avatar-btn" aria-label="Perfil">
+          <img id="avatarImg" class="hidden" alt="Foto do perfil">
+          <span id="avatarLetter">👤</span>
         </button>
 
         <div id="userMenu" class="user-menu hidden">
-          <button id="adminBtn" class="hidden">Painel Admin</button>
-          <button id="logoutBtn">Sair</button>
+          <button type="button" id="adminBtn" class="hidden">Painel Admin</button>
+          <button type="button" id="logoutBtn">Sair</button>
         </div>
 
-        <button id="installBtn" class="install-btn hidden">
+        <button type="button" id="installBtn" class="install-btn hidden">
           Instalar App
         </button>
 
@@ -80,39 +78,33 @@
 
     <!-- NAVIGATION -->
     <nav id="mainNav">
-      <button class="nav-btn active" data-nav="home">Início</button>
-      <button class="nav-btn" data-nav="filmes">Filmes</button>
-      <button class="nav-btn" data-nav="series">Séries</button>
-      <button class="nav-btn" data-nav="anime">Animes</button>
-      <button class="nav-btn" data-nav="mylist">Minha Lista</button>
+      <button type="button" class="nav-btn active" data-nav="home">Início</button>
+      <button type="button" class="nav-btn" data-nav="filmes">Filmes</button>
+      <button type="button" class="nav-btn" data-nav="series">Séries</button>
+      <button type="button" class="nav-btn" data-nav="anime">Animes</button>
+      <button type="button" class="nav-btn" data-nav="musica">Entretenimento</button>
+      <button type="button" class="nav-btn" data-nav="mylist">Minha Lista</button>
     </nav>
   </header>
 
   <!-- HERO -->
   <section id="hero">
-
-    <img id="heroBg" src="" alt="Destaque">
-
+    <img id="heroBg" class="hidden" alt="Destaque">
     <div class="hero-overlay"></div>
 
     <div class="hero-content">
-
       <h1 id="heroTitle">Bem-vindo ao ONLY24²⁴</h1>
-
       <p id="heroMeta"></p>
-
       <p id="heroDesc"></p>
 
       <div class="hero-btns">
-        <button id="heroPlay" class="btn-primary">
+        <button type="button" id="heroPlay" class="btn-primary">
           ▶ Assistir
         </button>
-
-        <button id="heroInfo" class="btn-secondary">
+        <button type="button" id="heroInfo" class="btn-secondary">
           ℹ️ Detalhes
         </button>
       </div>
-
     </div>
   </section>
 
@@ -134,11 +126,17 @@
       <h2>Em destaque</h2>
       <div id="catGrid" class="grid"></div>
 
+      <h2>Filmes</h2>
+      <div id="filmGrid" class="grid"></div>
+
       <h2>Séries</h2>
       <div id="seriesGrid" class="grid"></div>
 
       <h2>Animes</h2>
       <div id="animeGrid" class="grid"></div>
+
+      <h2>Entretenimento</h2>
+      <div id="musicGrid" class="grid"></div>
 
       <h2>Histórico</h2>
       <div id="historyRow" class="row"></div>
@@ -150,19 +148,19 @@
   </main>
 
   <!-- ADMIN BUTTONS -->
-  <button id="fabAdmin" class="fab hidden" aria-label="Admin">
+  <button type="button" id="fabAdmin" class="fab hidden" aria-label="Admin">
     ⚙️
   </button>
 
-  <button id="fabAdd" class="fab fab-add hidden" aria-label="Adicionar conteúdo">
+  <button type="button" id="fabAdd" class="fab fab-add hidden" aria-label="Adicionar conteúdo">
     ＋
   </button>
 
   <!-- AUTH MODAL -->
-  <div id="authModal" class="modal hidden">
+  <div id="authModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <div class="modal-box">
 
-      <button id="closeAuth" class="close">X</button>
+      <button type="button" id="closeAuth" class="close" aria-label="Fechar">✕</button>
 
       <h2 id="authTitle">Entrar</h2>
 
@@ -187,12 +185,12 @@
         autocomplete="current-password"
       >
 
-      <button id="authSubmit" class="btn-primary full">
+      <button type="button" id="authSubmit" class="btn-primary full">
         Entrar
       </button>
 
       <p>
-        <button id="authSwitch" class="link">
+        <button type="button" id="authSwitch" class="link">
           Criar conta nova
         </button>
       </p>
@@ -201,42 +199,33 @@
   </div>
 
   <!-- TITLE MODAL -->
-  <div id="titleModal" class="modal hidden">
+  <div id="titleModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
     <div class="modal-box large">
 
-      <button id="tmClose" class="close">X</button>
+      <button type="button" id="tmClose" class="close" aria-label="Fechar">✕</button>
 
-      <img id="tmBackdrop" src="" alt="Imagem de destaque">
+      <img id="tmBackdrop" alt="Imagem de destaque">
 
       <div class="tm-body">
-
-        <img id="tmPoster" src="" alt="Cartaz">
+        <img id="tmPoster" alt="Cartaz">
 
         <div>
           <h2 id="tmTitle"></h2>
-
           <p id="tmMeta"></p>
-
           <p id="tmDesc"></p>
-
           <p id="tmCast"></p>
 
           <div class="tm-btns">
-
-            <button id="tmPlay" class="btn-primary">
+            <button type="button" id="tmPlay" class="btn-primary">
               ▶ Assistir
             </button>
-
-            <button id="tmFav" class="btn-secondary">
+            <button type="button" id="tmFav" class="btn-secondary">
               ＋ Minha Lista
             </button>
-
-            <button id="tmTrailer" class="btn-secondary">
+            <button type="button" id="tmTrailer" class="btn-secondary">
               ▶ Trailer
             </button>
-
           </div>
-
         </div>
       </div>
 
@@ -246,10 +235,10 @@
   </div>
 
   <!-- PLAYER MODAL -->
-  <div id="playerModal" class="modal hidden">
+  <div id="playerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="playerTitle">
     <div class="modal-box player-box">
 
-      <button id="closePlayer" class="close">X</button>
+      <button type="button" id="closePlayer" class="close" aria-label="Fechar player">✕</button>
 
       <h3 id="playerTitle"></h3>
 
@@ -262,9 +251,8 @@
       ></video>
 
       <div class="player-tools">
-
-        <button id="downloadBtn" class="btn-secondary">
-          Download
+        <button type="button" id="downloadBtn" class="btn-secondary">
+          ⬇ Download
         </button>
 
         <select id="qualityList" aria-label="Qualidade de vídeo">
@@ -274,7 +262,6 @@
         <select id="subtitleList" aria-label="Legendas">
           <option value="">Legendas</option>
         </select>
-
       </div>
 
       <div id="dlList"></div>
@@ -283,16 +270,16 @@
   </div>
 
   <!-- NOTIFICATIONS -->
-  <div id="notifModal" class="modal hidden">
+  <div id="notifModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-box">
 
-      <button id="notifClose" class="close">X</button>
+      <button type="button" id="notifClose" class="close" aria-label="Fechar">✕</button>
 
       <h2>Notificações</h2>
 
       <div id="notifList"></div>
 
-      <button id="notifClear" class="btn-secondary full">
+      <button type="button" id="notifClear" class="btn-secondary full">
         Limpar
       </button>
 
@@ -300,10 +287,10 @@
   </div>
 
   <!-- ADMIN PANEL -->
-  <div id="adminPanel" class="modal hidden">
+  <div id="adminPanel" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-box large admin-box">
 
-      <button id="adminClose" class="close">X</button>
+      <button type="button" id="adminClose" class="close" aria-label="Fechar">✕</button>
 
       <h2>Painel Admin</h2>
 
@@ -315,6 +302,7 @@
           <option value="filme">Filme</option>
           <option value="serie">Série</option>
           <option value="anime">Anime</option>
+          <option value="musica">Vídeo musical (Entretenimento)</option>
         </select>
 
         <select id="fGenre">
@@ -332,11 +320,11 @@
 
         <input id="fRating" type="number" step="0.1" placeholder="Nota: 8.5">
 
-        <textarea id="fSynopsis" placeholder="Sinopse"></textarea>
-
         <input id="fCast" placeholder="Elenco">
 
-        <label>
+        <textarea id="fSynopsis" placeholder="Sinopse"></textarea>
+
+        <label class="admin-full">
           <input id="fFeatured" type="checkbox">
           Em destaque
         </label>
@@ -347,8 +335,11 @@
 
         <input id="fDownload" placeholder="Link Download autorizado">
 
+        <input id="fVideoUrl" placeholder="Link do vídeo MP4 (filmes / clipes)">
+
         <input
           id="fQualities"
+          class="admin-full"
           placeholder='Qualidades JSON: [{"label":"720p","url":"https://..."}]'
         >
 
@@ -366,40 +357,35 @@
           <input id="fVideoFile" type="file" accept="video/*">
         </label>
 
-        <label>
-          Legenda ficheiro
+        <label class="admin-full">
+          Legenda ficheiro (.vtt)
           <input id="fSubtitleFile" type="file" accept=".vtt">
         </label>
 
       </div>
 
       <h3>Episódios (séries / animes)</h3>
-
       <div id="episodesWrap"></div>
 
-      <button id="addEp" class="btn-secondary">
+      <button type="button" id="addEp" class="btn-secondary">
         ＋ Adicionar Episódio
       </button>
 
-      <button id="saveAdmin" class="btn-primary full">
+      <button type="button" id="saveAdmin" class="btn-primary full">
         Salvar Título
       </button>
 
       <h3>Títulos existentes</h3>
-
       <div id="adminList"></div>
 
       <h3>Enviar Notificação</h3>
-
       <input id="notifTitle" placeholder="Título da notificação">
-
       <input id="notifBody" placeholder="Mensagem">
-
       <select id="notifTitleId">
         <option value="">Sem título ligado</option>
       </select>
 
-      <button id="sendNotif" class="btn-secondary full">
+      <button type="button" id="sendNotif" class="btn-secondary full">
         Enviar Notificação
       </button>
 
@@ -408,27 +394,19 @@
 
   <!-- INSTALL BANNER -->
   <div id="installBanner" class="install-banner hidden">
-
     <span>Instala o ONLY24²⁴ para melhor experiência</span>
-
-    <button id="installNow" class="btn-primary">
-      Instalar
-    </button>
-
-    <button id="installLater" class="btn-secondary">
-      Depois
-    </button>
-
+    <button type="button" id="installNow" class="btn-primary">Instalar</button>
+    <button type="button" id="installLater" class="btn-secondary">Depois</button>
   </div>
 
   <!-- TOAST -->
-  <div id="toast" class="toast hidden"></div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <!-- APPLICATION SCRIPTS -->
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
 
-  <!-- SERVICE WORKER -->
+  <!-- SERVICE WORKER & SPLASH FALLBACK -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
@@ -441,13 +419,13 @@
     }
 
     window.addEventListener('load', function () {
-      const splash = document.getElementById('splash');
-
-      if (splash) {
-        setTimeout(function () {
-          splash.style.display = 'none';
-        }, 2500);
-      }
+      setTimeout(function () {
+        var splash = document.getElementById('splash');
+        if (splash && !splash.classList.contains('hidden')) {
+          splash.classList.add('fade-out');
+          setTimeout(function () { splash.classList.add('hidden'); }, 400);
+        }
+      }, 4500);
     });
   </script>
 
