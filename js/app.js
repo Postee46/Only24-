@@ -261,3 +261,230 @@
     }
   }
 
+  /* ============ RENDER ============ */
+  function cardHTML(t, progress) {
+    const bar = progress != null ? '<div class="bar"><i style="width:' + Math.round(progress * 100) + '%"></i></div>' : '';
+    return '<div class="o24-card" data-open="' + esc(t.id) + '">' +
+      (t.featured && progress == null ? '<span class="o24-badge">DESTAQUE</span>' : '') +
+      '<img loading="lazy" src="' + esc(t.poster || PLACEHOLDER) + '" alt="' + esc(t.name) + '">' + bar +
+      '<div class="cn">' + esc(t.name) + '</div>' +
+      '<div class="cm">' + esc(TYPE_LABEL[typeOf(t)] + (t.year ? ' • ' + t.year : '')) + '</div></div>';
+  }
+  const wrap = (list) => list.map((t) => ({ t, p: null }));
+
+  function fill(id, items, emptyMsg) {
+    const el = $(id);
+    if (!el) return;
+    el.innerHTML = items.length
+      ? items.map((x) => cardHTML(x.t, x.p)).join('')
+      : '<p class="o24-empty">' + esc(emptyMsg) + '</p>';
+  }
+
+  function favTitles() { return S.titles.filter((t) => S.favs.has(t.id)); }
+  function histItems() { return S.history.map((h) => ({ t: S.map.get(h.title_id), p: h.progress })).filter((x) => x.t); }
+
+  function renderHero() {
+    const pool = S.titles.filter((t) => t.featured);
+    const list = pool.length ? pool : S.titles;
+    if (!list.length) {
+      S.hero = null;
+      $('heroTitle').textContent = 'Bem-vindo ao ONLY24²⁴';
+      $('heroMeta').textContent = '';
+      $('heroDesc').textContent = 'Filmes, séries e animes num só lugar.';
+      return;
+    }
+    const t = list[S.heroIdx % list.length];
+    S.hero = t;
+    $('heroBg').src = t.backdrop || t.poster || PLACEHOLDER;
+    $('heroTitle').textContent = t.name;
+    $('heroMeta').textContent = metaLine(t);
+    $('heroDesc').textContent = cut(t.synopsis, 180);
+  }
+
+  function renderHome() {
+    const all = S.titles;
+    const feat = all.filter((t) => t.featured);
+    const needLogin = 'Entra na tua conta para ver isto.';
+    fill('catGrid', wrap((feat.length ? feat : all).slice(0, 18)), 'Ainda não há títulos. O administrador pode adicionar conteúdo.');
+    fill('filmGrid', wrap(all.filter((t) => typeOf(t) === 'filme').slice(0, 24)), 'Sem filmes por agora.');
+    fill('seriesGrid', wrap(all.filter((t) => typeOf(t) === 'serie').slice(0, 24)), 'Sem séries por agora.');
+    fill('animeGrid', wrap(all.filter((t) => typeOf(t) === 'anime').slice(0, 24)), 'Sem animes por agora.');
+    const hist = histItems();
+    fill('continueRow', hist.filter((x) => x.p > 0.02 && x.p < 0.95), S.user ? 'Nada para continuar.' : needLogin);
+    fill('historyRow', hist, S.user ? 'O teu histórico está vazio.' : needLogin);
+    fill('myList', wrap(favTitles()), S.user ? 'A tua lista está vazia.' : needLogin);
+  }
+
+  function searchTitles(q) {
+    const n = norm(q);
+    return S.titles.filter((t) => norm([t.name, t.cast_list, t.cat, CAT_LABEL[t.cat], t.type, t.synopsis, t.year].join(' ')).indexOf(n) !== -1);
+  }
+
+  function renderView() {
+    const sr = $('searchResults');
+    const hs = $('homeSections');
+    const h2 = sr.querySelector('h2');
+    const q = S.query.trim();
+    const hero = $('hero');
+
+    if (q) {
+      hide(hero); show(sr); hide(hs);
+      h2.textContent = 'Resultados para "' + q + '"';
+      fill('gridHome', wrap(searchTitles(q)), 'Nada encontrado.');
+      return;
+    }
+    if (S.nav === 'home') {
+      show(hero); hide(sr); show(hs);
+      renderHome();
+      return;
+    }
+    hide(hero); show(sr); hide(hs);
+    h2.textContent = NAV_LABEL[S.nav] || '';
+    if (S.nav === 'mylist') {
+      fill('gridHome', wrap(favTitles()), S.user ? 'A tua lista está vazia.' : 'Entra na tua conta para ver a tua lista.');
+    } else {
+      const type = NAV_TYPE[S.nav];
+      fill('gridHome', wrap(S.titles.filter((t) => typeOf(t) === type)), 'Sem conteúdo nesta categoria.');
+    }
+  }
+
+  function renderAll() { renderHero(); renderView(); }
+
+  function setNav(n) {
+    S.nav = n;
+    S.query = '';
+    const si = $('searchInput');
+    if (si) si.value = '';
+    document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.nav === n));
+    renderView();
+    window.scrollTo(0, 0);
+  }
+
+  /* ============ FAVORITOS ============ */
+  function updateFavBtn() {
+    const b = $('tmFav');
+    if (!b || !S.current) return;
+    b.textContent = S.favs.has(S.current.id) ? '✓ Na Minha Lista' : '＋ Minha Lista';
+  }
+
+  async function toggleFav(id) {
+    if (!S.user) { openAuth('login'); return toast('Entra para guardar na tua lista.'); }
+    if (S.favs.has(id)) {
+      const { error } = await sb.from('favorites').delete().eq('user_id', S.user.id).eq('title_id', id);
+      if (error) return toast('Erro ao remover.');
+      S.favs.delete(id);
+      toast('Removido da lista.');
+    } else {
+      const { error } = await sb.from('favorites').insert({ user_id: S.user.id, title_id: id });
+      if (error) return toast('Erro ao guardar.');
+      S.favs.add(id);
+      toast('Adicionado à lista.');
+    }
+    updateFavBtn();
+    renderView();
+  }
+
+  /* ============ FICHA DO TÍTULO ============ */
+  function prepareEpisodes(t) {
+    S.episodes = [];
+    if (typeOf(t) === 'filme') { S.epsPromise = Promise.resolve([]); renderEpisodes(); return S.epsPromise; }
+    S.epsPromise = loadEpisodes(t.id).then((list) => {
+      if (S.current && S.current.id === t.id) { S.episodes = list; renderEpisodes(); }
+      return list;
+    });
+    return S.epsPromise;
+  }
+
+  function renderEpisodes() {
+    const box = $('tmEpisodes');
+    const eps = S.episodes;
+    if (!eps.length) { box.innerHTML = ''; return; }
+    const seasons = {};
+    eps.forEach((e) => { const s = e.season || 1; (seasons[s] = seasons[s] || []).push(e); });
+    let h = '<div class="o24-eps"><div class="o24-eps-head"><label><input type="checkbox" id="epAll"> Selecionar tudo</label>' +
+      '<button type="button" class="btn-secondary" id="epDl">⬇ Baixar selecionados</button></div>';
+    Object.keys(seasons).sort((a, b) => a - b).forEach((s) => {
+      h += '<h4>Temporada ' + esc(s) + '</h4>';
+      seasons[s].forEach((e) => {
+        h += '<div class="ep"><input type="checkbox" class="epChk" value="' + esc(e.id) + '">' +
+          '<div class="ep-info"><b>EP ' + esc(e.ep_number) + '</b> ' + esc(e.title || '') + '</div>' +
+          '<button type="button" class="btn-secondary" data-play-ep="' + esc(e.id) + '">▶</button></div>';
+      });
+    });
+    box.innerHTML = h + '</div>';
+  }
+
+  function openTitle(id) {
+    const t = S.map.get(id);
+    if (!t) return;
+    S.current = t;
+    $('tmBackdrop').src = t.backdrop || t.poster || PLACEHOLDER;
+    $('tmPoster').src = t.poster || PLACEHOLDER;
+    $('tmTitle').textContent = t.name;
+    $('tmMeta').textContent = metaLine(t);
+    $('tmDesc').textContent = t.synopsis || '';
+    $('tmCast').textContent = t.cast_list ? 'Elenco: ' + t.cast_list : '';
+    t.trailer ? show($('tmTrailer')) : hide($('tmTrailer'));
+    updateFavBtn();
+    $('tmEpisodes').innerHTML = '';
+    show($('titleModal'));
+    prepareEpisodes(t);
+  }
+
+  async function playFromModal() {
+    const t = S.current;
+    if (!t) return;
+    await S.epsPromise;
+    if (typeOf(t) !== 'filme' && S.episodes.length) {
+      const h = S.history.find((x) => x.title_id === t.id);
+      const ep = h && h.episode_id ? S.episodes.find((e) => e.id === h.episode_id) : null;
+      playItem(t, ep || S.episodes[0]);
+    } else {
+      playItem(t, null);
+    }
+  }
+
+  async function quickPlay(t) {
+    if (!t) return toast('Ainda não há conteúdo.');
+    S.current = t;
+    await prepareEpisodes(t);
+    playFromModal();
+  }
+
+  /* ============ DOWNLOADS ============ */
+  function fileName(t, ep) {
+    const base = (t.name + (ep ? ' T' + (ep.season || 1) + 'E' + ep.ep_number : ''))
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w]+/g, '_');
+    const url = ep ? ep.video_url : t.video_url;
+    const m = /\.(mp4|mkv|webm|mov|m4v|avi)(\?|$)/i.exec(url || '');
+    return base + '.' + (m ? m[1].toLowerCase() : 'mp4');
+  }
+  function dlHref(url, name) {
+    if (url.indexOf('/storage/v1/object/public/') !== -1 && url.indexOf('?') === -1) {
+      return url + '?download=' + encodeURIComponent(name);
+    }
+    return url;
+  }
+  function triggerDownload(url, name) {
+    const a = document.createElement('a');
+    a.href = dlHref(url, name);
+    a.download = name;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  async function downloadSelected() {
+    const ids = Array.prototype.map.call(document.querySelectorAll('#tmEpisodes .epChk:checked'), (x) => x.value);
+    if (!ids.length) return toast('Seleciona pelo menos um episódio.');
+    const list = S.episodes.filter((e) => ids.indexOf(e.id) !== -1 && e.video_url);
+    if (!list.length) return toast('Os episódios selecionados não têm vídeo.');
+    toast('A iniciar ' + list.length + ' download(s)...');
+    for (const e of list) {
+      triggerDownload(e.video_url, fileName(S.current, e));
+      await sleep(900);
+    }
+  }
+
