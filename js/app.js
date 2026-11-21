@@ -836,3 +836,249 @@
     }
   }
 
+  async function editTitle(id) {
+    const t = S.map.get(id);
+    if (!t) return;
+    resetAdminForm();
+    S.editingId = id;
+    $('fTitle').value = t.name || '';
+    $('fType').value = typeOf(t);
+    setGenreOptions(typeOf(t), t.cat);
+    $('fYear').value = t.year || '';
+    $('fRating').value = t.rating || '';
+    $('fSynopsis').value = t.synopsis || '';
+    $('fCast').value = t.cast_list || '';
+    $('fFeatured').checked = !!t.featured;
+    $('fTrailer').value = t.trailer || '';
+    $('fSubtitle').value = t.subtitle || '';
+    $('fDownload').value = t.download || '';
+    $('fVideoUrl').value = t.video_url || '';
+    const q = parseQualities(t.qualities);
+    $('fQualities').value = q.length ? JSON.stringify(q) : '';
+    $('fPoster').value = t.poster || '';
+    $('fBackdrop').value = t.backdrop || '';
+    $('saveAdmin').textContent = 'Atualizar Título';
+    if (hasEpisodes(t)) {
+      const eps = await loadEpisodes(id);
+      eps.forEach(addEpRow);
+    }
+    const box = $('adminPanel').querySelector('.modal-box');
+    $('adminPanel').scrollTop = 0;
+    if (box) box.scrollTop = 0;
+    toast('A editar: ' + t.name);
+  }
+
+  async function deleteTitle(id) {
+    const t = S.map.get(id);
+    if (!t) return;
+    if (!confirm('Apagar "' + t.name + '"? Não pode ser desfeito.')) return;
+    try {
+      await sb.from('episodes').delete().eq('title_id', id);
+      await sb.from('favorites').delete().eq('title_id', id);
+      await sb.from('history').delete().eq('title_id', id);
+      const { error } = await sb.from('titles').delete().eq('id', id);
+      if (error) throw error;
+      toast('Título apagado.');
+      await loadTitles();
+      renderAll();
+      renderAdminList();
+      fillNotifSelect();
+    } catch (e) {
+      toast('Erro ao apagar: ' + (e.message || e));
+    }
+  }
+
+  async function sendNotif() {
+    if (!S.isAdmin) return;
+    const title = $('notifTitle').value.trim();
+    if (!title) return toast('Escreve o título da notificação.');
+    const row = {
+      title: title,
+      description: $('notifBody').value.trim() || null,
+      title_id: $('notifTitleId').value || null
+    };
+    const { error } = await sb.from('notifications').insert(row);
+    if (error) return toast('Erro: ' + error.message);
+    $('notifTitle').value = '';
+    $('notifBody').value = '';
+    $('notifTitleId').value = '';
+    toast('Notificação enviada ✅');
+    loadNotifs();
+  }
+
+  /* ============ INSTALAR APP (PWA) ============ */
+  let deferredPrompt = null;
+  async function doInstall() {
+    if (!deferredPrompt) return toast('A instalação não está disponível neste momento.');
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch (e) { /* ignore */ }
+    deferredPrompt = null;
+    hide($('installBtn'));
+    hide($('installBanner'));
+  }
+
+  /* ============ EVENTOS ============ */
+  function bindEvents() {
+    // imagens quebradas
+    document.addEventListener('error', (e) => {
+      const el = e.target;
+      if (el && el.tagName === 'IMG' && el.getAttribute('src') !== PLACEHOLDER && el.id !== 'avatarImg') el.src = PLACEHOLDER;
+    }, true);
+
+    // cartões / notificações -> abrir ficha
+    document.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-open]');
+      if (c) { hide($('notifModal')); openTitle(c.dataset.open); return; }
+      if (!e.target.closest('#userMenu') && !e.target.closest('#avatarBtn')) hide($('userMenu'));
+    });
+
+    // fechar ao tocar fora
+    ['titleModal', 'notifModal', 'authModal'].forEach((id) => {
+      const m = $(id);
+      if (m) m.addEventListener('click', (e) => { if (e.target === m) hide(m); });
+    });
+
+    // topo
+    on('logo', 'click', () => setNav('home'));
+    document.querySelectorAll('.nav-btn').forEach((b) => b.addEventListener('click', () => setNav(b.dataset.nav)));
+
+    let st;
+    on('searchInput', 'input', () => { clearTimeout(st); st = setTimeout(() => { S.query = $('searchInput').value; renderView(); }, 250); });
+    on('searchInput', 'keydown', (e) => { if (e.key === 'Enter') { S.query = $('searchInput').value; renderView(); e.target.blur(); } });
+    on('searchBtn', 'click', () => { S.query = $('searchInput').value; renderView(); });
+
+    on('bellBtn', 'click', openNotifs);
+    on('notifClose', 'click', () => hide($('notifModal')));
+    on('notifClear', 'click', () => {
+      lsSet('o24_notif_clear', String(Date.now()));
+      $('notifList').innerHTML = '<p class="o24-empty">Sem notificações.</p>';
+      updateBell();
+    });
+
+    on('avatarBtn', 'click', () => {
+      if (!S.user) return openAuth('login');
+      const m = $('userMenu');
+      m.classList.toggle('hidden');
+    });
+    on('logoutBtn', 'click', async () => { hide($('userMenu')); await sb.auth.signOut(); toast('Sessão terminada.'); });
+    on('adminBtn', 'click', () => { hide($('userMenu')); openAdmin(false); });
+    on('fabAdmin', 'click', () => openAdmin(false));
+    on('fabAdd', 'click', () => openAdmin(true));
+
+    // auth
+    on('closeAuth', 'click', () => hide($('authModal')));
+    on('authSwitch', 'click', () => setAuthMode(S.authMode === 'login' ? 'signup' : 'login'));
+    on('authSubmit', 'click', submitAuth);
+    on('authPass', 'keydown', (e) => { if (e.key === 'Enter') submitAuth(); });
+
+    // hero
+    on('heroPlay', 'click', () => quickPlay(S.hero));
+    on('heroInfo', 'click', () => { if (S.hero) openTitle(S.hero.id); });
+
+    // ficha
+    on('tmClose', 'click', () => hide($('titleModal')));
+    on('tmPlay', 'click', playFromModal);
+    on('tmFav', 'click', () => { if (S.current) toggleFav(S.current.id); });
+    on('tmTrailer', 'click', () => { if (S.current && S.current.trailer) window.open(S.current.trailer, '_blank', 'noopener'); });
+    const eb = $('tmEpisodes');
+    eb.addEventListener('click', (e) => {
+      const p = e.target.closest('[data-play-ep]');
+      if (p) {
+        const ep = S.episodes.find((x) => x.id === p.dataset.playEp);
+        if (ep && S.current) playItem(S.current, ep);
+        return;
+      }
+      if (e.target.id === 'epDl') downloadSelected();
+    });
+    eb.addEventListener('change', (e) => {
+      if (e.target.id === 'epAll') eb.querySelectorAll('.epChk').forEach((c) => { c.checked = e.target.checked; });
+    });
+
+    // player
+    const v = $('player');
+    on('closePlayer', 'click', closePlayer);
+    v.addEventListener('loadedmetadata', () => {
+      if (S.seekSec != null) { v.currentTime = S.seekSec; S.seekSec = null; }
+      else if (S.resumeFrac && isFinite(v.duration)) { v.currentTime = S.resumeFrac * v.duration; S.resumeFrac = 0; }
+    });
+    v.addEventListener('timeupdate', () => saveProgress(false));
+    v.addEventListener('pause', () => saveProgress(true));
+    v.addEventListener('ended', () => { saveProgress(true).then(playNext); });
+    on('qualityList', 'change', () => {
+      const url = $('qualityList').value;
+      if (!url) return;
+      const was = !v.paused;
+      S.seekSec = v.currentTime;
+      v.src = url;
+      if (was) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+    });
+    on('subtitleList', 'change', () => {
+      const on_ = !!$('subtitleList').value;
+      for (let i = 0; i < v.textTracks.length; i++) v.textTracks[i].mode = on_ ? 'showing' : 'disabled';
+    });
+    on('downloadBtn', 'click', () => {
+      if (S.dlFirst) triggerDownload(S.dlFirst.url, S.dlFirst.name);
+      else toast('Sem link de download.');
+    });
+
+    // admin
+    on('adminClose', 'click', () => hide($('adminPanel')));
+    on('fType', 'change', () => setGenreOptions($('fType').value));
+    on('addEp', 'click', () => addEpRow());
+    on('saveAdmin', 'click', saveAdmin);
+    on('sendNotif', 'click', sendNotif);
+    $('episodesWrap').addEventListener('click', (e) => {
+      if (!e.target.classList.contains('ep-del')) return;
+      const row = e.target.closest('.o24-eprow');
+      if (row && row.dataset.id) S.removedEps.push(row.dataset.id);
+      if (row) row.remove();
+    });
+    $('adminList').addEventListener('click', (e) => {
+      const ed = e.target.closest('[data-edit]');
+      const dl = e.target.closest('[data-del]');
+      if (ed) editTitle(ed.dataset.edit);
+      else if (dl) deleteTitle(dl.dataset.del);
+    });
+
+    // instalar
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      show($('installBtn'));
+      show($('installBanner'));
+    });
+    window.addEventListener('appinstalled', () => { hide($('installBtn')); hide($('installBanner')); deferredPrompt = null; });
+    on('installBtn', 'click', doInstall);
+    on('installNow', 'click', doInstall);
+    on('installLater', 'click', () => hide($('installBanner')));
+  }
+
+  /* ============ INÍCIO ============ */
+  async function init() {
+    injectStyles();
+    prepareUI();
+    bindEvents();
+    try {
+      await refreshUser();
+      await Promise.all([loadTitles(), loadNotifs()]);
+    } catch (e) {
+      console.error(e);
+      toast('Erro ao ligar ao servidor.');
+    }
+    renderAll();
+
+    setInterval(() => {
+      if (S.nav === 'home' && !S.query && S.titles.length > 1) { S.heroIdx++; renderHero(); }
+    }, 8000);
+
+    sb.auth.onAuthStateChange((evt) => {
+      if (evt === 'INITIAL_SESSION') return;
+      setTimeout(async () => {
+        await refreshUser();
+        renderAll();
+      }, 0);
+    });
+  }
+
+  init();
+})();
