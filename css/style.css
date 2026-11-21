@@ -1040,3 +1040,12 @@ textarea:focus {
     transition-duration: 0.01ms !important;
   }
 }
+
+#embedPlayer {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: 0;
+  border-radius: 12px;
+  background: #000;
+  margin: 12px 0;
+}
