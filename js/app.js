@@ -803,3 +803,379 @@
     }
     return sb.storage.from('media').getPublicUrl(path).data.publicUrl;
   }
+async function saveAdmin() {
+    if (!S.isAdmin) return;
+    const name = $('fTitle').value.trim();
+    if (!name) return toast('Escreve o título.');
+    let qualities = null;
+    const qraw = $('fQualities').value.trim();
+    if (qraw) {
+      try { qualities = JSON.parse(qraw); if (!Array.isArray(qualities)) throw new Error('x'); }
+      catch (e) { return toast('Qualidades: JSON inválido.'); }
+    }
+    const btn = $('saveAdmin');
+    btn.disabled = true;
+    btn.textContent = 'A guardar...';
+    try {
+      let poster = $('fPoster').value.trim();
+      const pf = $('fPosterFile').files[0];
+      if (pf) { toast('A enviar poster...'); poster = await uploadFile(pf, 'posters'); }
+
+      let video = $('fVideoUrl').value.trim();
+      const vf = $('fVideoFile').files[0];
+      if (vf) { toast('A enviar vídeo (pode demorar)...'); video = await uploadFile(vf, 'videos'); }
+      if (!video && qualities && qualities[0] && qualities[0].url) video = qualities[0].url;
+
+      let subtitle = $('fSubtitle').value.trim();
+      const sf = $('fSubtitleFile').files[0];
+      if (sf) { toast('A enviar legenda...'); subtitle = await uploadFile(sf, 'subs'); }
+
+      const type = $('fType').value;
+      const row = {
+        name: name,
+        type: type,
+        cat: $('fGenre').value,
+        year: toInt($('fYear').value),
+        rating: toNum($('fRating').value),
+        synopsis: $('fSynopsis').value.trim() || null,
+        cast_list: $('fCast').value.trim() || null,
+        featured: $('fFeatured').checked,
+        trailer: $('fTrailer').value.trim() || null,
+        poster: poster || null,
+        backdrop: $('fBackdrop').value.trim() || null,
+        video_url: video || null,
+        subtitle: subtitle || null,
+        download: $('fDownload').value.trim() || null,
+        qualities: qualities
+      };
+
+      let id = S.editingId;
+      if (id) {
+        const { error } = await sb.from('titles').update(row).eq('id', id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await sb.from('titles').insert(row).select('id').single();
+        if (error) throw error;
+        id = data.id;
+      }
+
+      if (type === 'serie' || type === 'anime') {
+        if (S.removedEps.length) {
+          const { error } = await sb.from('episodes').delete().in('id', S.removedEps);
+          if (error) throw error;
+        }
+        const rows = Array.prototype.slice.call($('episodesWrap').querySelectorAll('.o24-eprow'));
+        for (const r of rows) {
+          let vurl = r.querySelector('.ep-url').value.trim();
+          const f = r.querySelector('.ep-file').files[0];
+          if (f) { toast('A enviar episódio...'); vurl = await uploadFile(f, 'videos'); }
+          const ep = {
+            title_id: id,
+            season: toInt(r.querySelector('.ep-season').value) || 1,
+            ep_number: toInt(r.querySelector('.ep-num').value) || 1,
+            title: r.querySelector('.ep-title').value.trim() || null,
+            video_url: vurl || null
+          };
+          const res = r.dataset.id
+            ? await sb.from('episodes').update(ep).eq('id', r.dataset.id)
+            : await sb.from('episodes').insert(ep);
+          if (res.error) throw res.error;
+        }
+      }
+
+      toast('Título guardado ✅');
+      resetAdminForm();
+      await loadTitles();
+      renderAll();
+      renderAdminList();
+      fillNotifSelect();
+    } catch (e) {
+      console.error(e);
+      toast('Erro: ' + (e.message || e));
+      btn.textContent = S.editingId ? 'Atualizar Título' : 'Salvar Título';
+    } finally {
+      btn.disabled = false;
+      if (!S.editingId) btn.textContent = 'Salvar Título';
+    }
+  }
+
+  async function editTitle(id) {
+    const t = S.map.get(id);
+    if (!t) return;
+    resetAdminForm();
+    S.editingId = id;
+    $('fTitle').value = t.name || '';
+    $('fType').value = typeOf(t);
+    setGenreOptions(typeOf(t), t.cat);
+    $('fYear').value = t.year || '';
+    $('fRating').value = t.rating || '';
+    $('fSynopsis').value = t.synopsis || '';
+    $('fCast').value = t.cast_list || '';
+    $('fFeatured').checked = !!t.featured;
+    $('fTrailer').value = t.trailer || '';
+    $('fSubtitle').value = t.subtitle || '';
+    $('fDownload').value = t.download || '';
+    $('fVideoUrl').value = t.video_url || '';
+    const q = parseQualities(t.qualities);
+    $('fQualities').value = q.length ? JSON.stringify(q) : '';
+    $('fPoster').value = t.poster || '';
+    $('fBackdrop').value = t.backdrop || '';
+    $('saveAdmin').textContent = 'Atualizar Título';
+    if (hasEpisodes(t)) {
+      const eps = await loadEpisodes(id);
+      eps.forEach(addEpRow);
+    }
+    const box = $('adminPanel').querySelector('.modal-box');
+    $('adminPanel').scrollTop = 0;
+    if (box) box.scrollTop = 0;
+    toast('A editar: ' + t.name);
+  }
+
+  async function deleteTitle(id) {
+    const t = S.map.get(id);
+    if (!t) return;
+    if (!confirm('Apagar "' + t.name + '"? Não pode ser desfeito.')) return;
+    try {
+      await sb.from('episodes').delete().eq('title_id', id);
+      await sb.from('favorites').delete().eq('title_id', id);
+      await sb.from('history').delete().eq('title_id', id);
+      const { error } = await sb.from('titles').delete().eq('id', id);
+      if (error) throw error;
+      toast('Título apagado.');
+      await loadTitles();
+      renderAll();
+      renderAdminList();
+      fillNotifSelect();
+    } catch (e) {
+      toast('Erro ao apagar: ' + (e.message || e));
+    }
+  }
+
+  async function sendNotif() {
+    if (!S.isAdmin) return;
+    const title = $('notifTitle').value.trim();
+    if (!title) return toast('Escreve o título da notificação.');
+    const btn = $('sendNotif');
+    btn.disabled = true;
+    try {
+      const row = {
+        title: title,
+        description: $('notifBody').value.trim() || null,
+        title_id: $('notifTitleId').value || null
+      };
+      const { error } = await sb.from('notifications').insert(row);
+      if (error) throw error;
+      $('notifTitle').value = '';
+      $('notifBody').value = '';
+      $('notifTitleId').value = '';
+      toast('Notificação enviada ✅');
+      loadNotifs();
+    } catch (e) {
+      toast('Erro: ' + (e.message || e));
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* ============ INSTALAR APP (PWA) ============ */
+  let deferredPrompt = null;
+  async function doInstall() {
+    if (!deferredPrompt) return toast('A instalação não está disponível neste momento.');
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch (e) { /* ignore */ }
+    deferredPrompt = null;
+    hide($('installBtn'));
+    hide($('installBanner'));
+  }
+
+  /* ============ EVENTOS ============ */
+  function bindEvents() {
+    // imagens quebradas
+    document.addEventListener('error', (e) => {
+      const el = e.target;
+      if (el && el.tagName === 'IMG' && el.getAttribute('src') !== PLACEHOLDER && el.id !== 'avatarImg') el.src = PLACEHOLDER;
+    }, true);
+
+    // cartões / notificações -> abrir ficha
+    document.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-open]');
+      if (c) { hideModal('notifModal'); openTitle(c.dataset.open); return; }
+      if (!e.target.closest('#userMenu') && !e.target.closest('#avatarBtn')) hide($('userMenu'));
+    });
+
+    // acessibilidade teclado nos cards + ESC para fechar modais
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.matches('.o24-card[data-open]')) {
+        openTitle(e.target.dataset.open);
+        return;
+      }
+      if (e.key === 'Escape') {
+        if (!$('playerModal').classList.contains('hidden')) { closePlayer(); return; }
+        for (const id of ['authModal', 'notifModal', 'adminPanel', 'titleModal']) {
+          if ($(id) && !$(id).classList.contains('hidden')) { hideModal(id); return; }
+        }
+      }
+    });
+
+    // fechar ao tocar fora
+    ['titleModal', 'notifModal', 'authModal'].forEach((id) => {
+      const m = $(id);
+      if (m) m.addEventListener('click', (e) => { if (e.target === m) hideModal(id); });
+    });
+
+    // topo
+    on('logo', 'click', () => setNav('home'));
+    document.querySelectorAll('.nav-btn').forEach((b) => b.addEventListener('click', () => setNav(b.dataset.nav)));
+
+    let st;
+    on('searchInput', 'input', () => { clearTimeout(st); st = setTimeout(() => { S.query = $('searchInput').value; renderView(); }, 250); });
+    on('searchInput', 'keydown', (e) => { if (e.key === 'Enter') { S.query = $('searchInput').value; renderView(); e.target.blur(); } });
+    on('searchBtn', 'click', () => { S.query = $('searchInput').value; renderView(); });
+
+    on('bellBtn', 'click', openNotifs);
+    on('notifClose', 'click', () => hideModal('notifModal'));
+    on('notifClear', 'click', () => {
+      lsSet('o24_notif_clear', String(Date.now()));
+      $('notifList').innerHTML = '<p class="o24-empty">Sem notificações.</p>';
+      updateBell();
+    });
+
+    on('avatarBtn', 'click', () => {
+      if (!S.user) return openAuth('login');
+      const m = $('userMenu');
+      m.classList.toggle('hidden');
+    });
+    on('logoutBtn', 'click', async () => { hide($('userMenu')); await sb.auth.signOut(); toast('Sessão terminada.'); });
+    on('adminBtn', 'click', () => { hide($('userMenu')); openAdmin(false); });
+    on('fabAdmin', 'click', () => openAdmin(false));
+    on('fabAdd', 'click', () => openAdmin(true));
+
+    // auth
+    on('closeAuth', 'click', () => hideModal('authModal'));
+    on('authSwitch', 'click', () => setAuthMode(S.authMode === 'login' ? 'signup' : 'login'));
+    on('authSubmit', 'click', submitAuth);
+    on('authPass', 'keydown', (e) => { if (e.key === 'Enter') submitAuth(); });
+
+    // hero
+    on('heroPlay', 'click', () => quickPlay(S.hero));
+    on('heroInfo', 'click', () => { if (S.hero) openTitle(S.hero.id); });
+
+    // ficha
+    on('tmClose', 'click', () => hideModal('titleModal'));
+    on('tmPlay', 'click', playFromModal);
+    on('tmFav', 'click', () => { if (S.current) toggleFav(S.current.id); });
+    on('tmTrailer', 'click', () => { if (S.current && S.current.trailer) playTrailer(S.current); });
+    const eb = $('tmEpisodes');
+    eb.addEventListener('click', (e) => {
+      const p = e.target.closest('[data-play-ep]');
+      if (p) {
+        const ep = S.episodes.find((x) => x.id === p.dataset.playEp);
+        if (ep && S.current) playItem(S.current, ep);
+        return;
+      }
+      if (e.target.id === 'epDl') downloadSelected();
+    });
+    eb.addEventListener('change', (e) => {
+      if (e.target.id === 'epAll') eb.querySelectorAll('.epChk').forEach((c) => { c.checked = e.target.checked; });
+    });
+
+    // player
+    const v = $('player');
+    on('closePlayer', 'click', closePlayer);
+    v.addEventListener('loadedmetadata', () => {
+      if (S.seekSec != null) { v.currentTime = S.seekSec; S.seekSec = null; }
+      else if (S.resumeFrac && isFinite(v.duration)) { v.currentTime = S.resumeFrac * v.duration; S.resumeFrac = 0; }
+    });
+    v.addEventListener('error', () => {
+      const src = v.getAttribute('src');
+      if (!src) return;
+      if (location.protocol === 'https:' && /^http:\/\//i.test(src)) {
+        toast('Links http:// são bloqueados pelo navegador em sites HTTPS. Usa https://.');
+      } else if (S.playing) {
+        toast('Erro ao carregar o vídeo. Verifica o link ou formato.');
+      }
+    });
+    v.addEventListener('timeupdate', () => saveProgress(false));
+    v.addEventListener('pause', () => saveProgress(true));
+    v.addEventListener('ended', () => { saveProgress(true).then(playNext); });
+    on('qualityList', 'change', () => {
+      const url = $('qualityList').value;
+      if (!url) return;
+      const was = !v.paused || !$('embedPlayer').classList.contains('hidden');
+      S.seekSec = !v.classList.contains('hidden') && v.currentTime ? v.currentTime : null;
+      const parsed = setMediaSource(url, was);
+      if (parsed && S.playing) setupSubtitles(S.playing.title, v, parsed.isEmbed);
+    });
+    on('subtitleList', 'change', () => {
+      const on_ = !!$('subtitleList').value;
+      for (let i = 0; i < v.textTracks.length; i++) v.textTracks[i].mode = on_ ? 'showing' : 'disabled';
+    });
+    on('downloadBtn', 'click', () => {
+      if (S.dlFirst) triggerDownload(S.dlFirst.url, S.dlFirst.name);
+      else toast('Sem link de download.');
+    });
+
+    // admin
+    on('adminClose', 'click', () => hideModal('adminPanel'));
+    on('fType', 'change', () => setGenreOptions($('fType').value));
+    on('addEp', 'click', () => addEpRow());
+    on('saveAdmin', 'click', saveAdmin);
+    on('sendNotif', 'click', sendNotif);
+    $('episodesWrap').addEventListener('click', (e) => {
+      if (!e.target.classList.contains('ep-del')) return;
+      const row = e.target.closest('.o24-eprow');
+      if (row && row.dataset.id) S.removedEps.push(row.dataset.id);
+      if (row) row.remove();
+    });
+    $('adminList').addEventListener('click', (e) => {
+      const ed = e.target.closest('[data-edit]');
+      const dl = e.target.closest('[data-del]');
+      if (ed) editTitle(ed.dataset.edit);
+      else if (dl) deleteTitle(dl.dataset.del);
+    });
+
+    // instalar
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      show($('installBtn'));
+      show($('installBanner'));
+    });
+    window.addEventListener('appinstalled', () => { hide($('installBtn')); hide($('installBanner')); deferredPrompt = null; });
+    on('installBtn', 'click', doInstall);
+    on('installNow', 'click', doInstall);
+    on('installLater', 'click', () => hide($('installBanner')));
+  }
+
+  /* ============ INÍCIO ============ */
+  async function init() {
+    setGenreOptions('filme');
+    bindEvents();
+    try {
+      await refreshUser();
+      await Promise.all([loadTitles(), loadNotifs()]);
+    } catch (e) {
+      console.error(e);
+      toast('Erro ao ligar ao servidor.');
+    }
+    renderAll();
+    hideSplash();
+
+    setInterval(() => {
+      if (S.nav === 'home' && !S.query && S.titles.length > 1 && !hasOpenModal()) {
+        S.heroIdx++;
+        renderHero();
+      }
+    }, 8000);
+
+    sb.auth.onAuthStateChange((evt) => {
+      if (evt === 'INITIAL_SESSION') return;
+      setTimeout(async () => {
+        await refreshUser();
+        renderAll();
+      }, 0);
+    });
+  }
+
+  init();
+})();
