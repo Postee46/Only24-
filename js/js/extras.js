@@ -117,3 +117,67 @@ async function fillFromTmdb(id, mediaType) {
       notify(e.message || 'Erro ao preencher.');
     }
         }
+/* ============ PEDIDOS E REPORTES ============ */
+  function openReqModal(kind, prefillTitle) {
+    const m = $('reqModal');
+    if (!m) return;
+    $('reqKind').value = kind || 'pedido';
+    $('reqTitle').value = prefillTitle || '';
+    $('reqDetails').value = '';
+    m.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+  }
+
+  function closeReqModal() {
+    const m = $('reqModal');
+    if (!m) return;
+    m.classList.add('hidden');
+    const anyOpen = ['playerModal', 'authModal', 'profileModal', 'notifModal', 'adminPanel', 'titleModal']
+      .some((id) => $(id) && !$(id).classList.contains('hidden'));
+    document.body.classList.toggle('modal-open', anyOpen);
+  }
+
+  async function submitRequest() {
+    const titleName = $('reqTitle').value.trim();
+    if (!titleName) return notify('Escreve o nome do conteúdo.');
+    const btn = $('reqSubmit');
+    btn.disabled = true;
+    try {
+      const { data: sess } = await sb.auth.getSession();
+      const uid = sess && sess.session ? sess.session.user.id : null;
+      const { error } = await sb.from('requests').insert({
+        user_id: uid,
+        kind: $('reqKind').value,
+        title_name: titleName,
+        details: $('reqDetails').value.trim() || null
+      });
+      if (error) throw error;
+      closeReqModal();
+      notify('Enviado com sucesso! Obrigado pelo feedback ✅');
+    } catch (e) {
+      notify('Erro ao enviar: ' + (e.message || e));
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function loadAdminRequests() {
+    const box = $('adminRequestsList');
+    if (!box) return;
+    const { data, error } = await sb.from('requests').select('*').order('created_at', { ascending: false }).limit(40);
+    if (error) { box.innerHTML = '<p class="o24-empty">Sem pedidos por agora.</p>'; return; }
+    const list = data || [];
+    if (!list.length) { box.innerHTML = '<p class="o24-empty">Nenhum pedido ou reporte recebido.</p>'; return; }
+    box.innerHTML = list.map((r) => {
+      const done = r.status === 'resolvido';
+      const icon = r.kind === 'reporte' ? '⚠️ Reporte' : '🎬 Pedido';
+      return '<div class="o24-req-row">' +
+        '<div class="o24-req-top"><b>' + icon + ': ' + esc(r.title_name) + '</b>' +
+        '<span class="o24-req-tag' + (done ? ' done' : '') + '">' + esc(r.status) + '</span></div>' +
+        (r.details ? '<p>' + esc(r.details) + '</p>' : '') +
+        '<div class="o24-req-actions">' +
+        (!done ? '<button type="button" class="btn-secondary" data-req-done="' + esc(r.id) + '">✓ Marcar resolvido</button>' : '') +
+        '<button type="button" class="btn-secondary" data-req-del="' + esc(r.id) + '">Apagar</button>' +
+        '</div></div>';
+    }).join('');
+  }
