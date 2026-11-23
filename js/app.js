@@ -1256,3 +1256,243 @@
       btn.disabled = false;
     }
   }
+/* ============ INSTALAR APP (PWA) ============ */
+  let deferredPrompt = null;
+  async function doInstall() {
+    if (!deferredPrompt) return toast('A instalação não está disponível neste momento.');
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch (e) { /* ignore */ }
+    deferredPrompt = null;
+    hide($('installBtn'));
+    hide($('installBanner'));
+  }
+
+  /* ============ EVENTOS ============ */
+  function bindEvents() {
+    document.addEventListener('error', (e) => {
+      const el = e.target;
+      if (el && el.tagName === 'IMG' && el.getAttribute('src') !== PLACEHOLDER && el.id !== 'avatarImg') el.src = PLACEHOLDER;
+    }, true);
+
+    document.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-open]');
+      if (c) { hideModal('notifModal'); openTitle(c.dataset.open); return; }
+      if (!e.target.closest('#userMenu') && !e.target.closest('#avatarBtn')) hide($('userMenu'));
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.matches('.o24-card[data-open]')) {
+        openTitle(e.target.dataset.open);
+        return;
+      }
+      if (e.key === 'Escape') {
+        if (!$('playerModal').classList.contains('hidden')) { closePlayer(); return; }
+        for (const id of ['authModal', 'profileModal', 'notifModal', 'adminPanel', 'titleModal']) {
+          if ($(id) && !$(id).classList.contains('hidden')) { hideModal(id); return; }
+        }
+      }
+    });
+
+    ['titleModal', 'notifModal', 'authModal', 'profileModal'].forEach((id) => {
+      const m = $(id);
+      if (m) m.addEventListener('click', (e) => { if (e.target === m) hideModal(id); });
+    });
+
+    // topo
+    on('logo', 'click', () => setNav('home'));
+    document.querySelectorAll('.nav-btn').forEach((b) => b.addEventListener('click', () => setNav(b.dataset.nav)));
+
+    let st;
+    on('searchInput', 'input', () => { clearTimeout(st); st = setTimeout(() => { S.query = $('searchInput').value; renderView(); }, 250); });
+    on('searchInput', 'keydown', (e) => { if (e.key === 'Enter') { S.query = $('searchInput').value; renderView(); e.target.blur(); } });
+    on('searchBtn', 'click', () => { S.query = $('searchInput').value; renderView(); });
+
+    // filtros por género
+    const gf = $('genreFilters');
+    if (gf) gf.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-genre]');
+      if (!btn) return;
+      S.genre = btn.dataset.genre;
+      renderView();
+    });
+
+    on('bellBtn', 'click', openNotifs);
+    on('notifClose', 'click', () => hideModal('notifModal'));
+    on('notifClear', 'click', () => {
+      lsSet('o24_notif_clear', String(Date.now()));
+      $('notifList').innerHTML = '<p class="o24-empty">Sem notificações.</p>';
+      updateBell();
+    });
+
+    on('loginBtn', 'click', () => openAuth('login'));
+    on('avatarBtn', 'click', () => {
+      if (!S.user) return openAuth('login');
+      $('userMenu').classList.toggle('hidden');
+    });
+    on('profileBtn', 'click', () => { hide($('userMenu')); openProfile(); });
+    on('profileClose', 'click', () => hideModal('profileModal'));
+    on('profSave', 'click', saveProfile);
+    on('logoutBtn', 'click', async () => { hide($('userMenu')); await sb.auth.signOut(); toast('Sessão terminada.'); });
+    on('adminBtn', 'click', () => { hide($('userMenu')); openAdmin(false); });
+    on('fabAdmin', 'click', () => openAdmin(false));
+    on('fabAdd', 'click', () => openAdmin(true));
+
+    // auth
+    on('closeAuth', 'click', () => hideModal('authModal'));
+    on('authSwitch', 'click', () => setAuthMode(S.authMode === 'login' ? 'signup' : 'login'));
+    on('authSubmit', 'click', submitAuth);
+    on('authPass', 'keydown', (e) => { if (e.key === 'Enter') submitAuth(); });
+
+    // hero
+    on('heroPlay', 'click', () => quickPlay(S.hero));
+    on('heroInfo', 'click', () => { if (S.hero) openTitle(S.hero.id); });
+    on('heroPrev', 'click', () => stepHero(-1));
+    on('heroNext', 'click', () => stepHero(1));
+    const hd = $('heroDots');
+    if (hd) hd.addEventListener('click', (e) => {
+      const d = e.target.closest('[data-hero-idx]');
+      if (!d) return;
+      S.heroIdx = Number(d.dataset.heroIdx) || 0;
+      renderHero();
+    });
+
+    // ficha
+    on('tmClose', 'click', () => hideModal('titleModal'));
+    on('tmPlay', 'click', playFromModal);
+    on('tmFav', 'click', () => { if (S.current) toggleFav(S.current.id); });
+    on('tmTrailer', 'click', () => { if (S.current && S.current.trailer) playTrailer(S.current); });
+    on('tmShare', 'click', () => shareTitle(S.current));
+
+    on('commentSubmit', 'click', submitComment);
+    const cl = $('tmCommentsList');
+    if (cl) cl.addEventListener('click', (e) => {
+      const d = e.target.closest('[data-del-comment]');
+      if (d) deleteComment(d.dataset.delComment);
+    });
+
+    const eb = $('tmEpisodes');
+    eb.addEventListener('click', (e) => {
+      const p = e.target.closest('[data-play-ep]');
+      if (p) {
+        const ep = S.episodes.find((x) => String(x.id) === String(p.dataset.playEp));
+        if (ep && S.current) playItem(S.current, ep);
+        return;
+      }
+      if (e.target.id === 'epDl') downloadSelected();
+    });
+    eb.addEventListener('change', (e) => {
+      if (e.target.id === 'epAll') eb.querySelectorAll('.epChk').forEach((c) => { c.checked = e.target.checked; });
+    });
+
+    // player
+    const v = $('player');
+    on('closePlayer', 'click', closePlayer);
+    on('nextEpBtn', 'click', playNext);
+    v.addEventListener('loadedmetadata', () => {
+      if (S.seekSec != null) { v.currentTime = S.seekSec; S.seekSec = null; }
+      else if (S.resumeFrac && isFinite(v.duration)) { v.currentTime = S.resumeFrac * v.duration; S.resumeFrac = 0; }
+    });
+    v.addEventListener('error', () => {
+      const src = v.getAttribute('src');
+      if (!src) return;
+      if (location.protocol === 'https:' && /^http:\/\//i.test(src)) {
+        toast('Links http:// são bloqueados pelo navegador em sites HTTPS. Usa https://.');
+      } else if (S.playing) {
+        toast('Erro ao carregar o vídeo. Verifica o link ou formato.');
+      }
+    });
+    v.addEventListener('timeupdate', () => saveProgress(false));
+    v.addEventListener('pause', () => saveProgress(true));
+    v.addEventListener('ended', () => { saveProgress(true).then(playNext); });
+    on('qualityList', 'change', () => {
+      const url = $('qualityList').value;
+      if (!url) return;
+      const was = !v.paused || !$('embedPlayer').classList.contains('hidden');
+      S.seekSec = !v.classList.contains('hidden') && v.currentTime ? v.currentTime : null;
+      const parsed = setMediaSource(url, was);
+      if (parsed && S.playing) setupSubtitles(S.playing.title, v, parsed.isEmbed);
+    });
+    on('subtitleList', 'change', () => {
+      const on_ = !!$('subtitleList').value;
+      for (let i = 0; i < v.textTracks.length; i++) v.textTracks[i].mode = on_ ? 'showing' : 'disabled';
+    });
+    on('downloadBtn', 'click', () => {
+      if (S.dlFirst) triggerDownload(S.dlFirst.url, S.dlFirst.name);
+      else toast('Sem link de download.');
+    });
+
+    // admin
+    on('adminClose', 'click', () => hideModal('adminPanel'));
+    on('newAdminBtn', 'click', () => { resetAdminForm(); toast('Formulário limpo para novo título.'); });
+    on('adminSearch', 'input', () => { S.adminQuery = $('adminSearch').value; renderAdminList(); });
+    on('fType', 'change', () => setGenreOptions($('fType').value));
+    on('addEp', 'click', () => addEpRow());
+    on('saveAdmin', 'click', saveAdmin);
+    on('sendNotif', 'click', sendNotif);
+    $('episodesWrap').addEventListener('click', (e) => {
+      if (!e.target.classList.contains('ep-del')) return;
+      const row = e.target.closest('.o24-eprow');
+      if (row && row.dataset.id) S.removedEps.push(row.dataset.id);
+      if (row) row.remove();
+    });
+    $('adminList').addEventListener('click', (e) => {
+      const ed = e.target.closest('[data-edit]');
+      const dl = e.target.closest('[data-del]');
+      if (ed) editTitle(ed.dataset.edit);
+      else if (dl) deleteTitle(dl.dataset.del);
+    });
+
+    // instalar
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      show($('installBtn'));
+      show($('installBanner'));
+    });
+    window.addEventListener('appinstalled', () => { hide($('installBtn')); hide($('installBanner')); deferredPrompt = null; });
+    on('installBtn', 'click', doInstall);
+    on('installNow', 'click', doInstall);
+    on('installLater', 'click', () => hide($('installBanner')));
+  }
+
+  /* ============ INÍCIO ============ */
+  async function init() {
+    setGenreOptions('filme');
+    bindEvents();
+    try {
+      await refreshUser();
+      await Promise.all([loadTitles(), loadNotifs()]);
+    } catch (e) {
+      console.error(e);
+      toast('Erro ao ligar ao servidor.');
+    }
+    renderAll();
+    hideSplash();
+
+    const openId = new URLSearchParams(location.search).get('id');
+    if (openId && getTitle(openId)) {
+      openTitle(openId);
+    }
+
+    setInterval(() => {
+      if (S.nav === 'home' && !S.query && S.heroList.length > 1 && !hasOpenModal()) {
+        S.heroIdx++;
+        renderHero();
+      }
+    }, 8000);
+
+    sb.auth.onAuthStateChange((evt) => {
+      if (evt === 'INITIAL_SESSION') return;
+      setTimeout(async () => {
+        await refreshUser();
+        renderAll();
+        if (S.current && !$('titleModal').classList.contains('hidden')) {
+          updateFavBtn();
+          loadComments(S.current.id);
+        }
+      }, 0);
+    });
+  }
+
+  init();
+})();
