@@ -277,3 +277,171 @@
       <div id="dlList"></div>
     </div>
         </div>
+<!-- REQUEST / REPORT MODAL -->
+  <div id="reqModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="reqModalTitle">
+    <div class="modal-box">
+      <button type="button" id="reqClose" class="close" aria-label="Fechar">✕</button>
+      <h2 id="reqModalTitle">Pedir ou Reportar</h2>
+      <select id="reqKind">
+        <option value="pedido">🎬 Pedir Filme / Série / Música</option>
+        <option value="reporte">⚠️ Reportar link quebrado / erro</option>
+      </select>
+      <input id="reqTitle" type="text" placeholder="Nome do conteúdo *">
+      <textarea id="reqDetails" placeholder="Detalhes (temporada, ano, artista ou qual foi o erro)..."></textarea>
+      <button type="button" id="reqSubmit" class="btn-primary full">Enviar</button>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div id="notifModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <button type="button" id="notifClose" class="close" aria-label="Fechar">✕</button>
+      <h2>Notificações</h2>
+      <div id="notifList"></div>
+      <button type="button" id="notifClear" class="btn-secondary full">Limpar</button>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-box large admin-box">
+      <button type="button" id="adminClose" class="close" aria-label="Fechar">✕</button>
+      <div class="admin-list-head">
+        <h2>Painel Admin</h2>
+        <button type="button" id="newAdminBtn" class="btn-secondary">＋ Novo título</button>
+      </div>
+
+      <div id="tmdbBox" class="tmdb-box">
+        <h4>Preencher automático (TMDB)</h4>
+        <div class="tmdb-row">
+          <input id="tmdbQuery" type="search" placeholder="Nome do filme, série ou anime...">
+          <button type="button" id="tmdbSearchBtn" class="btn-secondary">Buscar</button>
+        </div>
+        <input id="tmdbKeyInput" type="password" placeholder="Chave API v3 do TMDB (fica salva no teu telemóvel)">
+        <div id="tmdbResults" class="tmdb-results"></div>
+      </div>
+
+      <div class="admin-grid">
+        <input id="fTitle" placeholder="Título *">
+
+        <select id="fType">
+          <option value="filme">Filme</option>
+          <option value="serie">Série</option>
+          <option value="anime">Anime</option>
+          <option value="musica">Vídeo musical (Entretenimento)</option>
+        </select>
+
+        <select id="fGenre">
+          <option value="acao">Ação</option>
+          <option value="drama">Drama</option>
+          <option value="terror">Terror</option>
+          <option value="comedia">Comédia</option>
+          <option value="romance">Romance</option>
+          <option value="ficcao">Ficção</option>
+          <option value="animacao">Animação</option>
+          <option value="documentario">Documentário</option>
+        </select>
+
+        <input id="fYear" type="number" placeholder="Ano">
+        <input id="fRating" type="number" step="0.1" placeholder="Nota: 8.5">
+        <input id="fCast" placeholder="Elenco">
+        <textarea id="fSynopsis" placeholder="Sinopse"></textarea>
+
+        <label class="admin-full">
+          <input id="fFeatured" type="checkbox">
+          Em destaque
+        </label>
+
+        <input id="fTrailer" placeholder="Link Trailer (YouTube / MP4)">
+        <input id="fSubtitle" placeholder="Link Legenda .vtt">
+        <input id="fDownload" placeholder="Link Download autorizado">
+        <input id="fVideoUrl" placeholder="Link do vídeo (MP4, M3U8, YouTube, Drive, Embed)">
+
+        <input
+          id="fQualities"
+          class="admin-full"
+          placeholder='Qualidades JSON: [{"label":"720p","url":"https://..."}]'
+        >
+
+        <input id="fPoster" placeholder="Link Poster">
+        <input id="fBackdrop" placeholder="Link Backdrop">
+
+        <label>
+          Poster ficheiro
+          <input id="fPosterFile" type="file" accept="image/*">
+        </label>
+
+        <label>
+          Vídeo ficheiro
+          <input id="fVideoFile" type="file" accept="video/*">
+        </label>
+
+        <label class="admin-full">
+          Legenda ficheiro (.vtt)
+          <input id="fSubtitleFile" type="file" accept=".vtt">
+        </label>
+      </div>
+
+      <h3>Episódios (séries / animes)</h3>
+      <div id="episodesWrap"></div>
+
+      <button type="button" id="addEp" class="btn-secondary">＋ Adicionar Episódio</button>
+      <button type="button" id="saveAdmin" class="btn-primary full">Salvar Título</button>
+
+      <h3>Títulos existentes</h3>
+      <input id="adminSearch" type="search" placeholder="Pesquisar título no admin...">
+      <div id="adminList"></div>
+
+      <h3>Enviar Notificação</h3>
+      <input id="notifTitle" placeholder="Título da notificação">
+      <input id="notifBody" placeholder="Mensagem">
+      <select id="notifTitleId">
+        <option value="">Sem título ligado</option>
+      </select>
+      <button type="button" id="sendNotif" class="btn-secondary full">Enviar Notificação</button>
+
+      <h3>Pedidos e Reportes dos Utilizadores</h3>
+      <div id="adminRequestsList"></div>
+    </div>
+  </div>
+
+  <!-- INSTALL BANNER -->
+  <div id="installBanner" class="install-banner hidden">
+    <span>Instala o ONLY24²⁴ para melhor experiência</span>
+    <button type="button" id="installNow" class="btn-primary">Instalar</button>
+    <button type="button" id="installLater" class="btn-secondary">Depois</button>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/extras.js"></script>
+
+  <!-- SERVICE WORKER & SPLASH FALLBACK -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker
+          .register('./sw.js')
+          .catch(function (error) {
+            console.error('Erro ao registar Service Worker:', error);
+          });
+      });
+    }
+
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var splash = document.getElementById('splash');
+        if (splash && !splash.classList.contains('hidden')) {
+          splash.classList.add('fade-out');
+          setTimeout(function () { splash.classList.add('hidden'); }, 400);
+        }
+      }, 4500);
+    });
+  </script>
+
+</body>
+  </html>
