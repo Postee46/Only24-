@@ -978,3 +978,281 @@
     const next = i >= 0 ? S.episodes[i + 1] : null;
     if (next) { toast('A seguir: EP ' + next.ep_number); playItem(S.playing.title, next); }
   }
+/* ============ NOTIFICAÇÕES ============ */
+  function visibleNotifs() {
+    const c = Number(lsGet('o24_notif_clear') || 0);
+    return S.notifs.filter((n) => ts(n.created_at) > c);
+  }
+  function updateBell() {
+    const seen = Number(lsGet('o24_notif_seen') || 0);
+    const has = visibleNotifs().some((n) => ts(n.created_at) > seen);
+    has ? show($('bellDot')) : hide($('bellDot'));
+  }
+  async function openNotifs() {
+    await loadNotifs();
+    const list = visibleNotifs();
+    $('notifList').innerHTML = list.length
+      ? list.map((n) =>
+        '<div class="o24-notif"' + (n.title_id ? ' data-open="' + esc(n.title_id) + '"' : '') + '>' +
+        '<b>' + esc(n.title) + '</b><span>' + esc(n.description || '') + '</span><small>' + esc(fmtDate(n.created_at)) + '</small></div>'
+      ).join('')
+      : '<p class="o24-empty">Sem notificações.</p>';
+    lsSet('o24_notif_seen', String(Date.now()));
+    updateBell();
+    showModal('notifModal');
+  }
+
+  /* ============ ADMIN ============ */
+  const TEXT_FIELDS = ['fTitle', 'fYear', 'fRating', 'fSynopsis', 'fCast', 'fTrailer', 'fSubtitle', 'fDownload', 'fVideoUrl', 'fQualities', 'fPoster', 'fBackdrop'];
+  const FILE_FIELDS = ['fPosterFile', 'fVideoFile', 'fSubtitleFile'];
+
+  function resetAdminForm() {
+    TEXT_FIELDS.forEach((id) => { const el = $(id); if (el) el.value = ''; });
+    FILE_FIELDS.forEach((id) => { const el = $(id); if (el) el.value = ''; });
+    $('fFeatured').checked = false;
+    $('fType').selectedIndex = 0;
+    setGenreOptions('filme');
+    $('episodesWrap').innerHTML = '';
+    S.editingId = null;
+    S.removedEps = [];
+    $('saveAdmin').textContent = 'Salvar Título';
+  }
+
+  function fillNotifSelect() {
+    const sel = $('notifTitleId');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Sem título ligado</option>' +
+      S.titles.map((t) => '<option value="' + esc(t.id) + '">' + esc(t.name) + '</option>').join('');
+  }
+
+  function renderAdminList() {
+    const box = $('adminList');
+    const q = norm(S.adminQuery.trim());
+    let list = S.titles.slice().sort((a, b) => (b.views || 0) - (a.views || 0));
+    if (q) list = list.filter((t) => norm(t.name + ' ' + TYPE_LABEL[typeOf(t)]).indexOf(q) !== -1);
+
+    box.innerHTML = list.length
+      ? list.map((t) =>
+        '<div class="o24-arow"><div class="o24-ainfo"><b>' + esc(t.name) + '</b><small>' + esc(TYPE_LABEL[typeOf(t)]) + ' • 👁 ' + (t.views || 0) + '</small></div>' +
+        '<button type="button" class="btn-secondary" data-edit="' + esc(t.id) + '">Editar</button>' +
+        '<button type="button" class="btn-secondary" data-del="' + esc(t.id) + '">Apagar</button></div>'
+      ).join('')
+      : '<p class="o24-empty">' + (q ? 'Nenhum título encontrado.' : 'Ainda não há títulos.') + '</p>';
+  }
+
+  function openAdmin(fresh) {
+    if (!S.isAdmin) return toast('Só o administrador pode abrir o painel.');
+    if (fresh) resetAdminForm();
+    S.adminQuery = '';
+    if ($('adminSearch')) $('adminSearch').value = '';
+    renderAdminList();
+    fillNotifSelect();
+    showModal('adminPanel');
+  }
+
+  function addEpRow(ep) {
+    ep = ep || {};
+    const wrapEl = $('episodesWrap');
+    const next = wrapEl.querySelectorAll('.o24-eprow').length + 1;
+    const div = document.createElement('div');
+    div.className = 'o24-eprow';
+    if (ep.id) div.dataset.id = ep.id;
+    div.innerHTML =
+      '<input class="ep-season" type="number" min="1" placeholder="Temporada" value="' + esc(ep.season || 1) + '">' +
+      '<input class="ep-num" type="number" min="1" placeholder="Episódio" value="' + esc(ep.ep_number || next) + '">' +
+      '<input class="ep-title" placeholder="Título do episódio" value="' + esc(ep.title || '') + '">' +
+      '<input class="ep-url" placeholder="Link do vídeo" value="' + esc(ep.video_url || '') + '">' +
+      '<label class="ep-filelbl">Vídeo ficheiro <input class="ep-file" type="file" accept="video/*"></label>' +
+      '<button type="button" class="btn-secondary ep-del">Remover episódio</button>';
+    wrapEl.appendChild(div);
+  }
+
+  async function uploadFile(file, folder) {
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+    const path = folder + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    const opts = { cacheControl: '31536000', upsert: false };
+    if (ext === 'vtt') opts.contentType = 'text/vtt';
+    else if (file.type) opts.contentType = file.type;
+    const { error } = await sb.storage.from('media').upload(path, file, opts);
+    if (error) {
+      if (/size|large|exceed/i.test(error.message)) {
+        throw new Error('Ficheiro demasiado grande (limite grátis: 50 MB). Usa um link externo.');
+      }
+      throw new Error('Falha no upload: ' + error.message);
+    }
+    return sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+  }
+
+  async function saveAdmin() {
+    if (!S.isAdmin) return;
+    const name = $('fTitle').value.trim();
+    if (!name) return toast('Escreve o título.');
+    let qualities = null;
+    const qraw = $('fQualities').value.trim();
+    if (qraw) {
+      try { qualities = JSON.parse(qraw); if (!Array.isArray(qualities)) throw new Error('x'); }
+      catch (e) { return toast('Qualidades: JSON inválido.'); }
+    }
+    const btn = $('saveAdmin');
+    btn.disabled = true;
+    btn.textContent = 'A guardar...';
+    try {
+      let poster = $('fPoster').value.trim();
+      const pf = $('fPosterFile').files[0];
+      if (pf) { toast('A enviar poster...'); poster = await uploadFile(pf, 'posters'); }
+
+      let video = $('fVideoUrl').value.trim();
+      const vf = $('fVideoFile').files[0];
+      if (vf) { toast('A enviar vídeo (pode demorar)...'); video = await uploadFile(vf, 'videos'); }
+      if (!video && qualities && qualities[0] && qualities[0].url) video = qualities[0].url;
+
+      let subtitle = $('fSubtitle').value.trim();
+      const sf = $('fSubtitleFile').files[0];
+      if (sf) { toast('A enviar legenda...'); subtitle = await uploadFile(sf, 'subs'); }
+
+      const type = $('fType').value;
+      const row = {
+        name: name,
+        type: type,
+        cat: $('fGenre').value,
+        year: toInt($('fYear').value),
+        rating: toNum($('fRating').value),
+        synopsis: $('fSynopsis').value.trim() || null,
+        cast_list: $('fCast').value.trim() || null,
+        featured: $('fFeatured').checked,
+        trailer: $('fTrailer').value.trim() || null,
+        poster: poster || null,
+        backdrop: $('fBackdrop').value.trim() || null,
+        video_url: video || null,
+        subtitle: subtitle || null,
+        download: $('fDownload').value.trim() || null,
+        qualities: qualities
+      };
+
+      let id = S.editingId;
+      if (id) {
+        const { error } = await sb.from('titles').update(row).eq('id', id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await sb.from('titles').insert(row).select('id').single();
+        if (error) throw error;
+        id = data.id;
+      }
+
+      if (type === 'serie' || type === 'anime') {
+        if (S.removedEps.length) {
+          const { error } = await sb.from('episodes').delete().in('id', S.removedEps);
+          if (error) throw error;
+        }
+        const rows = Array.prototype.slice.call($('episodesWrap').querySelectorAll('.o24-eprow'));
+        for (const r of rows) {
+          let vurl = r.querySelector('.ep-url').value.trim();
+          const f = r.querySelector('.ep-file').files[0];
+          if (f) { toast('A enviar episódio...'); vurl = await uploadFile(f, 'videos'); }
+          const ep = {
+            title_id: id,
+            season: toInt(r.querySelector('.ep-season').value) || 1,
+            ep_number: toInt(r.querySelector('.ep-num').value) || 1,
+            title: r.querySelector('.ep-title').value.trim() || null,
+            video_url: vurl || null
+          };
+          const res = r.dataset.id
+            ? await sb.from('episodes').update(ep).eq('id', r.dataset.id)
+            : await sb.from('episodes').insert(ep);
+          if (res.error) throw res.error;
+        }
+      }
+
+      toast('Título guardado ✅');
+      resetAdminForm();
+      await loadTitles();
+      renderAll();
+      renderAdminList();
+      fillNotifSelect();
+    } catch (e) {
+      console.error(e);
+      toast('Erro: ' + (e.message || e));
+      btn.textContent = S.editingId ? 'Atualizar Título' : 'Salvar Título';
+    } finally {
+      btn.disabled = false;
+      if (!S.editingId) btn.textContent = 'Salvar Título';
+    }
+  }
+
+  async function editTitle(id) {
+    const t = getTitle(id);
+    if (!t) return;
+    resetAdminForm();
+    S.editingId = t.id;
+    $('fTitle').value = t.name || '';
+    $('fType').value = typeOf(t);
+    setGenreOptions(typeOf(t), t.cat);
+    $('fYear').value = t.year || '';
+    $('fRating').value = t.rating || '';
+    $('fSynopsis').value = t.synopsis || '';
+    $('fCast').value = t.cast_list || '';
+    $('fFeatured').checked = !!t.featured;
+    $('fTrailer').value = t.trailer || '';
+    $('fSubtitle').value = t.subtitle || '';
+    $('fDownload').value = t.download || '';
+    $('fVideoUrl').value = t.video_url || '';
+    const q = parseQualities(t.qualities);
+    $('fQualities').value = q.length ? JSON.stringify(q) : '';
+    $('fPoster').value = t.poster || '';
+    $('fBackdrop').value = t.backdrop || '';
+    $('saveAdmin').textContent = 'Atualizar Título';
+    if (hasEpisodes(t)) {
+      const eps = await loadEpisodes(t.id);
+      eps.forEach(addEpRow);
+    }
+    const box = $('adminPanel').querySelector('.modal-box');
+    $('adminPanel').scrollTop = 0;
+    if (box) box.scrollTop = 0;
+    toast('A editar: ' + t.name);
+  }
+
+  async function deleteTitle(id) {
+    const t = getTitle(id);
+    if (!t) return;
+    if (!confirm('Apagar "' + t.name + '"? Não pode ser desfeito.')) return;
+    try {
+      await sb.from('episodes').delete().eq('title_id', t.id);
+      await sb.from('favorites').delete().eq('title_id', t.id);
+      await sb.from('history').delete().eq('title_id', t.id);
+      const { error } = await sb.from('titles').delete().eq('id', t.id);
+      if (error) throw error;
+      toast('Título apagado.');
+      await loadTitles();
+      renderAll();
+      renderAdminList();
+      fillNotifSelect();
+    } catch (e) {
+      toast('Erro ao apagar: ' + (e.message || e));
+    }
+  }
+
+  async function sendNotif() {
+    if (!S.isAdmin) return;
+    const title = $('notifTitle').value.trim();
+    if (!title) return toast('Escreve o título da notificação.');
+    const btn = $('sendNotif');
+    btn.disabled = true;
+    try {
+      const row = {
+        title: title,
+        description: $('notifBody').value.trim() || null,
+        title_id: $('notifTitleId').value || null
+      };
+      const { error } = await sb.from('notifications').insert(row);
+      if (error) throw error;
+      $('notifTitle').value = '';
+      $('notifBody').value = '';
+      $('notifTitleId').value = '';
+      toast('Notificação enviada ✅');
+      loadNotifs();
+    } catch (e) {
+      toast('Erro: ' + (e.message || e));
+    } finally {
+      btn.disabled = false;
+    }
+  }
