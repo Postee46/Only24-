@@ -55,12 +55,15 @@
           <span id="bellDot" class="dot hidden"></span>
         </button>
 
-        <button type="button" id="avatarBtn" class="avatar-btn" aria-label="Perfil">
+        <button type="button" id="loginBtn" class="btn-secondary top-login">Entrar</button>
+
+        <button type="button" id="avatarBtn" class="avatar-btn hidden" aria-label="Perfil">
           <img id="avatarImg" class="hidden" alt="Foto do perfil">
           <span id="avatarLetter">👤</span>
         </button>
 
         <div id="userMenu" class="user-menu hidden">
+          <button type="button" id="profileBtn">Meu Perfil</button>
           <button type="button" id="adminBtn" class="hidden">Painel Admin</button>
           <button type="button" id="logoutBtn">Sair</button>
         </div>
@@ -86,6 +89,9 @@
     <img id="heroBg" class="hidden" alt="Destaque">
     <div class="hero-overlay"></div>
 
+    <button type="button" id="heroPrev" class="hero-arrow prev hidden" aria-label="Destaque anterior">‹</button>
+    <button type="button" id="heroNext" class="hero-arrow next hidden" aria-label="Próximo destaque">›</button>
+
     <div class="hero-content">
       <h1 id="heroTitle">Bem-vindo ao ONLY24²⁴</h1>
       <p id="heroMeta"></p>
@@ -96,14 +102,17 @@
         <button type="button" id="heroInfo" class="btn-secondary">ℹ️ Detalhes</button>
       </div>
     </div>
+
+    <div id="heroDots" class="hero-dots hidden"></div>
   </section>
 
   <!-- MAIN -->
   <main id="main">
 
-    <!-- SEARCH RESULTS -->
+    <!-- SEARCH / CATEGORY RESULTS -->
     <section id="searchResults" class="hidden">
       <h2>Resultados da pesquisa</h2>
+      <div id="genreFilters" class="genre-filters hidden"></div>
       <div id="gridHome" class="grid"></div>
     </section>
 
@@ -112,6 +121,9 @@
 
       <h2>Continuar a assistir</h2>
       <div id="continueRow" class="row"></div>
+
+      <h2>🔥 Mais vistos</h2>
+      <div id="topRow" class="row"></div>
 
       <h2>Em destaque</h2>
       <div id="catGrid" class="grid"></div>
@@ -154,6 +166,23 @@
     </div>
   </div>
 
+  <!-- PROFILE MODAL -->
+  <div id="profileModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="modal-box">
+      <button type="button" id="profileClose" class="close" aria-label="Fechar">✕</button>
+      <h2 id="profileModalTitle">Meu Perfil</h2>
+      <div class="profile-head">
+        <div id="profLetter" class="profile-avatar">U</div>
+        <div class="profile-info">
+          <p id="profEmail" class="profile-email"></p>
+          <p id="profStats" class="profile-stats"></p>
+        </div>
+      </div>
+      <input id="profName" type="text" placeholder="O teu nome">
+      <button type="button" id="profSave" class="btn-primary full">Guardar Perfil</button>
+    </div>
+  </div>
+
   <!-- TITLE MODAL -->
   <div id="titleModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
     <div class="modal-box large">
@@ -171,11 +200,30 @@
             <button type="button" id="tmPlay" class="btn-primary">▶ Assistir</button>
             <button type="button" id="tmFav" class="btn-secondary">＋ Minha Lista</button>
             <button type="button" id="tmTrailer" class="btn-secondary">▶ Trailer</button>
+            <button type="button" id="tmShare" class="btn-secondary">🔗 Partilhar</button>
           </div>
         </div>
       </div>
 
       <div id="tmEpisodes"></div>
+
+      <div id="tmCommentsWrap" class="tm-comments hidden">
+        <h3>Avaliações e Comentários</h3>
+        <div id="commentForm" class="o24-comment-form hidden">
+          <select id="commentRating" aria-label="Avaliação">
+            <option value="">Sem nota</option>
+            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+            <option value="4">⭐⭐⭐⭐ (4)</option>
+            <option value="3">⭐⭐⭐ (3)</option>
+            <option value="2">⭐⭐ (2)</option>
+            <option value="1">⭐ (1)</option>
+          </select>
+          <textarea id="commentBody" placeholder="Escreve o teu comentário..."></textarea>
+          <button type="button" id="commentSubmit" class="btn-primary">Publicar</button>
+        </div>
+        <p id="commentLoginHint" class="o24-empty hidden">Entra na tua conta para comentar ou avaliar.</p>
+        <div id="tmCommentsList"></div>
+      </div>
     </div>
   </div>
 
@@ -202,6 +250,7 @@
       ></iframe>
 
       <div class="player-tools">
+        <button type="button" id="nextEpBtn" class="btn-secondary hidden">Próximo EP ▶</button>
         <button type="button" id="downloadBtn" class="btn-secondary">⬇ Download</button>
         <select id="qualityList" aria-label="Qualidade de vídeo">
           <option value="">Qualidade</option>
@@ -229,7 +278,10 @@
   <div id="adminPanel" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-box large admin-box">
       <button type="button" id="adminClose" class="close" aria-label="Fechar">✕</button>
-      <h2>Painel Admin</h2>
+      <div class="admin-list-head">
+        <h2>Painel Admin</h2>
+        <button type="button" id="newAdminBtn" class="btn-secondary">＋ Novo título</button>
+      </div>
 
       <div class="admin-grid">
         <input id="fTitle" placeholder="Título *">
@@ -299,6 +351,7 @@
       <button type="button" id="saveAdmin" class="btn-primary full">Salvar Título</button>
 
       <h3>Títulos existentes</h3>
+      <input id="adminSearch" type="search" placeholder="Pesquisar título no admin...">
       <div id="adminList"></div>
 
       <h3>Enviar Notificação</h3>
