@@ -111,3 +111,169 @@
 
     <div id="heroDots" class="hero-dots hidden"></div>
   </section>
+<!-- MAIN -->
+  <main id="main">
+
+    <!-- SEARCH / CATEGORY RESULTS -->
+    <section id="searchResults" class="hidden">
+      <h2>Resultados da pesquisa</h2>
+      <div id="genreFilters" class="genre-filters hidden"></div>
+      <div id="gridHome" class="grid"></div>
+    </section>
+
+    <!-- HOME SECTIONS -->
+    <section id="homeSections">
+
+      <h2>Continuar a assistir</h2>
+      <div id="continueRow" class="row"></div>
+
+      <h2>🔥 Mais vistos</h2>
+      <div id="topRow" class="row"></div>
+
+      <h2>Em destaque</h2>
+      <div id="catGrid" class="grid"></div>
+
+      <h2>Filmes</h2>
+      <div id="filmGrid" class="grid"></div>
+
+      <h2>Séries</h2>
+      <div id="seriesGrid" class="grid"></div>
+
+      <h2>Animes</h2>
+      <div id="animeGrid" class="grid"></div>
+
+      <h2>Entretenimento</h2>
+      <div id="musicGrid" class="grid"></div>
+
+      <h2>Histórico</h2>
+      <div id="historyRow" class="row"></div>
+
+      <h2>Minha Lista</h2>
+      <div id="myList" class="grid"></div>
+
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="o24-footer">
+    <div class="footer-brand">ONLY<span>24²⁴</span></div>
+    <p>Filmes, Séries, Animes e Entretenimento num só lugar.</p>
+    <button type="button" id="openReqBtn" class="btn-secondary">📩 Pedir Conteúdo / Reportar Erro</button>
+    <small>© 2026 ONLY24²⁴ • Conteúdos em Domínio Público, Creative Commons e canais oficiais.</small>
+  </footer>
+
+  <!-- ADMIN BUTTONS -->
+  <button type="button" id="fabAdmin" class="fab hidden" aria-label="Admin">⚙️</button>
+  <button type="button" id="fabAdd" class="fab fab-add hidden" aria-label="Adicionar conteúdo">＋</button>
+
+  <!-- AUTH MODAL -->
+  <div id="authModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="modal-box">
+      <button type="button" id="closeAuth" class="close" aria-label="Fechar">✕</button>
+      <h2 id="authTitle">Entrar</h2>
+      <input id="authName" type="text" placeholder="Nome" class="hidden">
+      <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
+      <input id="authPass" type="password" placeholder="Senha" autocomplete="current-password">
+      <button type="button" id="authSubmit" class="btn-primary full">Entrar</button>
+      <p><button type="button" id="authSwitch" class="link">Criar conta nova</button></p>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div id="profileModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="modal-box">
+      <button type="button" id="profileClose" class="close" aria-label="Fechar">✕</button>
+      <h2 id="profileModalTitle">Meu Perfil</h2>
+      <div class="profile-head">
+        <div id="profLetter" class="profile-avatar">U</div>
+        <div class="profile-info">
+          <p id="profEmail" class="profile-email"></p>
+          <p id="profStats" class="profile-stats"></p>
+        </div>
+      </div>
+      <input id="profName" type="text" placeholder="O teu nome">
+      <button type="button" id="profSave" class="btn-primary full">Guardar Perfil</button>
+    </div>
+  </div>
+
+  <!-- TITLE MODAL -->
+  <div id="titleModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
+    <div class="modal-box large">
+      <button type="button" id="tmClose" class="close" aria-label="Fechar">✕</button>
+      <img id="tmBackdrop" alt="Imagem de destaque">
+
+      <div class="tm-body">
+        <img id="tmPoster" alt="Cartaz">
+        <div>
+          <h2 id="tmTitle"></h2>
+          <p id="tmMeta"></p>
+          <p id="tmDesc"></p>
+          <p id="tmCast"></p>
+          <div class="tm-btns">
+            <button type="button" id="tmPlay" class="btn-primary">▶ Assistir</button>
+            <button type="button" id="tmFav" class="btn-secondary">＋ Minha Lista</button>
+            <button type="button" id="tmTrailer" class="btn-secondary">▶ Trailer</button>
+            <button type="button" id="tmShare" class="btn-secondary">🔗 Partilhar</button>
+            <button type="button" id="tmReportBtn" class="btn-secondary">⚠️ Reportar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tmEpisodes"></div>
+
+      <div id="tmCommentsWrap" class="tm-comments hidden">
+        <h3>Avaliações e Comentários</h3>
+        <div id="commentForm" class="o24-comment-form hidden">
+          <select id="commentRating" aria-label="Avaliação">
+            <option value="">Sem nota</option>
+            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+            <option value="4">⭐⭐⭐⭐ (4)</option>
+            <option value="3">⭐⭐⭐ (3)</option>
+            <option value="2">⭐⭐ (2)</option>
+            <option value="1">⭐ (1)</option>
+          </select>
+          <textarea id="commentBody" placeholder="Escreve o teu comentário..."></textarea>
+          <button type="button" id="commentSubmit" class="btn-primary">Publicar</button>
+        </div>
+        <p id="commentLoginHint" class="o24-empty hidden">Entra na tua conta para comentar ou avaliar.</p>
+        <div id="tmCommentsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAYER MODAL -->
+  <div id="playerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="playerTitle">
+    <div class="modal-box player-box">
+      <button type="button" id="closePlayer" class="close" aria-label="Fechar player">✕</button>
+      <h3 id="playerTitle"></h3>
+
+      <video
+        id="player"
+        controls
+        playsinline
+        preload="metadata"
+        controlsList="nodownload"
+      ></video>
+
+      <iframe
+        id="embedPlayer"
+        class="hidden"
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+
+      <div class="player-tools">
+        <button type="button" id="nextEpBtn" class="btn-secondary hidden">Próximo EP ▶</button>
+        <button type="button" id="downloadBtn" class="btn-secondary">⬇ Download</button>
+        <select id="qualityList" aria-label="Qualidade de vídeo">
+          <option value="">Qualidade</option>
+        </select>
+        <select id="subtitleList" aria-label="Legendas">
+          <option value="">Legendas</option>
+        </select>
+      </div>
+
+      <div id="dlList"></div>
+    </div>
+        </div>
