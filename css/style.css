@@ -1140,3 +1140,72 @@ textarea:focus {
     transition-duration: 0.01ms !important;
   }
 }
+/* TMDB ADMIN + PEDIDOS + RODAPÉ */
+.tmdb-box {
+  background: #181824;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+.tmdb-box h4 {
+  font-size: 13px;
+  color: #ddd;
+  margin-bottom: 8px;
+}
+.tmdb-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.tmdb-row input { margin-bottom: 0; flex: 1; }
+.tmdb-row button { white-space: nowrap; padding: 10px 16px; }
+#tmdbKeyInput { margin-bottom: 6px; font-size: 12px; padding: 9px 12px; }
+.tmdb-results { display: flex; flex-direction: column; gap: 6px; }
+.tmdb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #222232;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  text-align: left;
+  color: #fff;
+}
+.tmdb-item:hover { border-color: var(--red); }
+.tmdb-item img { width: 38px; height: 56px; object-fit: cover; border-radius: 4px; background: #111; flex-shrink: 0; }
+.tmdb-item div { min-width: 0; }
+.tmdb-item b { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tmdb-item small { color: var(--muted); font-size: 11px; }
+
+.o24-footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 16px 90px;
+  text-align: center;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.footer-brand { font-size: 22px; font-weight: 900; color: #fff; }
+.footer-brand span { color: var(--red); }
+.o24-footer p { font-size: 13px; }
+.o24-footer small { font-size: 11px; max-width: 520px; line-height: 1.4; }
+
+.o24-req-row {
+  background: #181824;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.o24-req-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; }
+.o24-req-tag { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 99px; background: #2a2a3a; }
+.o24-req-tag.done { background: #1e5c35; color: #b9f6ca; }
+.o24-req-row p { font
