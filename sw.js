@@ -1,11 +1,12 @@
-// ONLY24²⁴ Service Worker v5
-const CACHE = 'only24-v5';
+// ONLY24²⁴ Service Worker v7
+const CACHE = 'only24-v7';
 const CORE = [
   './',
   './index.html',
   './css/style.css',
   './js/config.js',
   './js/app.js',
+  './js/extras.js',
   './manifest.json',
   './icon.svg'
 ];
@@ -31,7 +32,6 @@ self.addEventListener('fetch', (e) => {
   if (e.request.headers.get('range')) return;
 
   const url = new URL(e.request.url);
-  // Não faz cache de Supabase, CDNs externas ou vídeos/streams
   if (url.hostname.includes('supabase.co')) return;
   if (url.origin !== self.location.origin) return;
   if (/\.(mp4|mkv|webm|mov|m4v|avi|m3u8|ts)$/i.test(url.pathname)) return;
