@@ -465,3 +465,220 @@
     renderView();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+/* ============ FAVORITOS ============ */
+  function updateFavBtn() {
+    const b = $('tmFav');
+    if (!b || !S.current) return;
+    b.textContent = S.favs.has(String(S.current.id)) ? '✓ Na Minha Lista' : '＋ Minha Lista';
+  }
+
+  async function toggleFav(id) {
+    const key = String(id);
+    const t = getTitle(key);
+    const rawId = t ? t.id : id;
+
+    if (!S.user) {
+      if (S.favs.has(key)) {
+        S.favs.delete(key);
+        toast('Removido da lista.');
+      } else {
+        S.favs.add(key);
+        toast('Adicionado à lista (guardado neste dispositivo).');
+      }
+      lsSet(GUEST_FAVS_KEY, JSON.stringify(Array.from(S.favs)));
+      updateFavBtn();
+      renderView();
+      return;
+    }
+
+    if (S.favs.has(key)) {
+      const { error } = await sb.from('favorites').delete().eq('user_id', S.user.id).eq('title_id', rawId);
+      if (error) return toast('Erro ao remover.');
+      S.favs.delete(key);
+      toast('Removido da lista.');
+    } else {
+      const { error } = await sb.from('favorites').insert({ user_id: S.user.id, title_id: rawId });
+      if (error) return toast('Erro ao guardar.');
+      S.favs.add(key);
+      toast('Adicionado à lista.');
+    }
+    updateFavBtn();
+    renderView();
+  }
+
+  /* ============ PARTILHA ============ */
+  async function shareTitle(t) {
+    if (!t) return;
+    const u = new URL(location.href);
+    u.search = '';
+    u.hash = '';
+    u.searchParams.set('id', t.id);
+    const url = u.toString();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: t.name + ' — ONLY24²⁴',
+          text: cut(t.synopsis || ('Assiste ' + t.name + ' no ONLY24²⁴'), 100),
+          url
+        });
+        return;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast('Link copiado! Partilha com os teus amigos.');
+        return;
+      } catch (e) { /* fallback */ }
+    }
+    prompt('Copia o link para partilhar:', url);
+  }
+
+  /* ============ COMENTÁRIOS ============ */
+  async function loadComments(titleId) {
+    const wrapEl = $('tmCommentsWrap');
+    if (!wrapEl || !S.commentsSupported) { hide(wrapEl); return; }
+
+    const { data, error } = await sb.from('comments').select('*').eq('title_id', titleId)
+      .order('created_at', { ascending: false }).limit(50);
+
+    if (error) {
+      if (/does not exist|42P01|PGRST/i.test(error.message || '')) S.commentsSupported = false;
+      hide(wrapEl);
+      return;
+    }
+    S.comments = data || [];
+    show(wrapEl);
+    if (S.user) { show($('commentForm')); hide($('commentLoginHint')); }
+    else { hide($('commentForm')); show($('commentLoginHint')); }
+    renderComments();
+  }
+
+  function renderComments() {
+    const box = $('tmCommentsList');
+    if (!box) return;
+    box.innerHTML = S.comments.length
+      ? S.comments.map((c) => {
+          const canDel = S.user && (S.isAdmin || c.user_id === S.user.id);
+          const stars = c.rating ? ' • ⭐ ' + c.rating + '/5' : '';
+          return '<div class="o24-comment">' +
+            '<div class="o24-comment-head"><b>' + esc(c.author_name || 'Utilizador') + stars + '</b>' +
+            '<span><small>' + esc(fmtDate(c.created_at)) + '</small>' +
+            (canDel ? ' <button type="button" class="o24-comment-del" data-del-comment="' + esc(c.id) + '">Apagar</button>' : '') +
+            '</span></div><p>' + esc(c.body) + '</p></div>';
+        }).join('')
+      : '<p class="o24-empty">Ainda sem comentários. Sê o primeiro!</p>';
+  }
+
+  async function submitComment() {
+    if (!S.user || !S.current) return openAuth('login');
+    const body = $('commentBody').value.trim();
+    const rating = toInt($('commentRating').value);
+    if (!body) return toast('Escreve um comentário.');
+    const btn = $('commentSubmit');
+    btn.disabled = true;
+    try {
+      const row = {
+        title_id: S.current.id,
+        user_id: S.user.id,
+        author_name: userDisplayName() || 'Utilizador',
+        rating: rating,
+        body: body
+      };
+      const { data, error } = await sb.from('comments').insert(row).select('*').single();
+      if (error) throw error;
+      $('commentBody').value = '';
+      $('commentRating').value = '';
+      S.comments.unshift(data);
+      renderComments();
+      toast('Comentário publicado ✅');
+    } catch (e) {
+      toast('Erro ao publicar: ' + (e.message || e));
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function deleteComment(cid) {
+    const { error } = await sb.from('comments').delete().eq('id', cid);
+    if (error) return toast('Erro ao apagar comentário.');
+    S.comments = S.comments.filter((c) => String(c.id) !== String(cid));
+    renderComments();
+    toast('Comentário apagado.');
+  }
+
+  /* ============ FICHA DO TÍTULO ============ */
+  function prepareEpisodes(t) {
+    S.episodes = [];
+    if (!hasEpisodes(t)) { S.epsPromise = Promise.resolve([]); renderEpisodes(); return S.epsPromise; }
+    S.epsPromise = loadEpisodes(t.id).then((list) => {
+      if (S.current && String(S.current.id) === String(t.id)) { S.episodes = list; renderEpisodes(); }
+      return list;
+    });
+    return S.epsPromise;
+  }
+
+  function renderEpisodes() {
+    const box = $('tmEpisodes');
+    const eps = S.episodes;
+    if (!eps.length) { box.innerHTML = ''; return; }
+    const h = S.current ? S.history.find((x) => String(x.title_id) === String(S.current.id)) : null;
+    const curEpId = h && h.episode_id ? String(h.episode_id) : null;
+
+    const seasons = {};
+    eps.forEach((e) => { const s = e.season || 1; (seasons[s] = seasons[s] || []).push(e); });
+    let html = '<div class="o24-eps"><div class="o24-eps-head"><label><input type="checkbox" id="epAll"> Selecionar tudo</label>' +
+      '<button type="button" class="btn-secondary" id="epDl">⬇ Baixar selecionados</button></div>';
+    Object.keys(seasons).sort((a, b) => a - b).forEach((s) => {
+      html += '<h4>Temporada ' + esc(s) + '</h4>';
+      seasons[s].forEach((e) => {
+        const isCur = curEpId && String(e.id) === curEpId;
+        html += '<div class="ep' + (isCur ? ' ep-current' : '') + '"><input type="checkbox" class="epChk" value="' + esc(e.id) + '">' +
+          '<div class="ep-info"><b>EP ' + esc(e.ep_number) + '</b> ' + esc(e.title || '') +
+          (isCur ? '<span class="o24-ep-cur">▶ A assistir</span>' : '') + '</div>' +
+          '<button type="button" class="btn-secondary" data-play-ep="' + esc(e.id) + '">▶</button></div>';
+      });
+    });
+    box.innerHTML = html + '</div>';
+  }
+
+  function openTitle(id) {
+    const t = getTitle(id);
+    if (!t) return;
+    S.current = t;
+    $('tmBackdrop').src = t.backdrop || t.poster || PLACEHOLDER;
+    $('tmPoster').src = t.poster || PLACEHOLDER;
+    $('tmTitle').textContent = t.name;
+    $('tmMeta').textContent = metaLine(t);
+    $('tmDesc').textContent = t.synopsis || '';
+    $('tmCast').textContent = t.cast_list ? (typeOf(t) === 'musica' ? 'Artista: ' : 'Elenco: ') + t.cast_list : '';
+    t.trailer ? show($('tmTrailer')) : hide($('tmTrailer'));
+    updateFavBtn();
+    $('tmEpisodes').innerHTML = '';
+    if ($('tmCommentsList')) $('tmCommentsList').innerHTML = '';
+    showModal('titleModal');
+    prepareEpisodes(t);
+    loadComments(t.id);
+  }
+
+  async function playFromModal() {
+    const t = S.current;
+    if (!t) return;
+    await S.epsPromise;
+    if (hasEpisodes(t) && S.episodes.length) {
+      const h = S.history.find((x) => String(x.title_id) === String(t.id));
+      const ep = h && h.episode_id ? S.episodes.find((e) => String(e.id) === String(h.episode_id)) : null;
+      playItem(t, ep || S.episodes[0]);
+    } else {
+      playItem(t, null);
+    }
+  }
+
+  async function quickPlay(t) {
+    if (!t) return toast('Ainda não há conteúdo.');
+    S.current = t;
+    await prepareEpisodes(t);
+    playFromModal();
+  }
