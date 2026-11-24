@@ -192,3 +192,56 @@ async function fillFromTmdb(id, mediaType) {
         '</div></div>';
     }).join('');
         }
+/* ============ INICIALIZAÇÃO ============ */
+  function initExtras() {
+    try {
+      const savedKey = localStorage.getItem(TMDB_KEY_STORAGE);
+      if (savedKey && $('tmdbKeyInput')) $('tmdbKeyInput').value = savedKey;
+    } catch (e) { /* ignore */ }
+
+    if ($('tmdbSearchBtn')) $('tmdbSearchBtn').addEventListener('click', searchTmdb);
+    if ($('tmdbQuery')) $('tmdbQuery').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchTmdb(); });
+    if ($('tmdbResults')) {
+      $('tmdbResults').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-tmdb-id]');
+        if (btn) fillFromTmdb(btn.dataset.tmdbId, btn.dataset.tmdbType);
+      });
+    }
+
+    if ($('openReqBtn')) $('openReqBtn').addEventListener('click', () => openReqModal('pedido', ''));
+    if ($('tmReportBtn')) {
+      $('tmReportBtn').addEventListener('click', () => {
+        const t = $('tmTitle') ? $('tmTitle').textContent.trim() : '';
+        openReqModal('reporte', t);
+      });
+    }
+    if ($('reqClose')) $('reqClose').addEventListener('click', closeReqModal);
+    if ($('reqModal')) $('reqModal').addEventListener('click', (e) => { if (e.target === $('reqModal')) closeReqModal(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && $('reqModal') && !$('reqModal').classList.contains('hidden')) closeReqModal();
+    });
+    if ($('reqSubmit')) $('reqSubmit').addEventListener('click', submitRequest);
+
+    ['adminBtn', 'fabAdmin', 'fabAdd'].forEach((id) => {
+      if ($(id)) $(id).addEventListener('click', () => setTimeout(loadAdminRequests, 150));
+    });
+
+    if ($('adminRequestsList')) {
+      $('adminRequestsList').addEventListener('click', async (e) => {
+        const doneBtn = e.target.closest('[data-req-done]');
+        const delBtn = e.target.closest('[data-req-del]');
+        if (doneBtn) {
+          await sb.from('requests').update({ status: 'resolvido' }).eq('id', doneBtn.dataset.reqDone);
+          loadAdminRequests();
+          notify('Marcado como resolvido ✅');
+        } else if (delBtn) {
+          await sb.from('requests').delete().eq('id', delBtn.dataset.reqDel);
+          loadAdminRequests();
+          notify('Registo apagado.');
+        }
+      });
+    }
+  }
+
+  initExtras();
+})();
