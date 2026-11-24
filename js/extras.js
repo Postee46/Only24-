@@ -130,3 +130,26 @@ function openReqModal(kind, prefillTitle) {
         '<button type="button" class="btn-secondary" data-req-del="' + esc(r.id) + '">Apagar</button></div></div>';
     }).join('');
                                                           }
+function initExtras() {
+    try { const k = localStorage.getItem(KEY_ST); if (k && $('tmdbKeyInput')) $('tmdbKeyInput').value = k; } catch (e) {}
+    if ($('tmdbSearchBtn')) $('tmdbSearchBtn').addEventListener('click', searchTmdb);
+    if ($('tmdbQuery')) $('tmdbQuery').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchTmdb(); });
+    if ($('tmdbResults')) $('tmdbResults').addEventListener('click', (e) => { const b = e.target.closest('[data-tmdb-id]'); if (b) fillFromTmdb(b.dataset.tmdbId, b.dataset.tmdbType); });
+    if ($('openReqBtn')) $('openReqBtn').addEventListener('click', () => openReqModal('pedido', ''));
+    if ($('tmReportBtn')) $('tmReportBtn').addEventListener('click', () => openReqModal('reporte', $('tmTitle') ? $('tmTitle').textContent.trim() : ''));
+    if ($('reqClose')) $('reqClose').addEventListener('click', closeReqModal);
+    if ($('reqModal')) $('reqModal').addEventListener('click', (e) => { if (e.target === $('reqModal')) closeReqModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('reqModal') && !$('reqModal').classList.contains('hidden')) closeReqModal(); });
+    if ($('reqSubmit')) $('reqSubmit').addEventListener('click', submitRequest);
+    ['adminBtn', 'fabAdmin', 'fabAdd'].forEach((id) => { if ($(id)) $(id).addEventListener('click', () => setTimeout(loadAdminRequests, 150)); });
+    if ($('adminRequestsList')) {
+      $('adminRequestsList').addEventListener('click', async (e) => {
+        const d = e.target.closest('[data-req-done]'), del = e.target.closest('[data-req-del]');
+        if (d) { await sb.from('requests').update({ status: 'resolvido' }).eq('id', d.dataset.reqDone); loadAdminRequests(); notify('Marcado como resolvido ✅'); }
+        else if (del) { await sb.from('requests').delete().eq('id', del.dataset.reqDel); loadAdminRequests(); notify('Registo apagado.'); }
+      });
+    }
+  }
+
+  initExtras();
+})();
