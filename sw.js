@@ -1,4 +1,4 @@
-// ONLY24²⁴ Service Worker v7
+// ONLY24²⁴ Service Worker v8
 const CACHE = 'only24-v7';
 const CORE = [
   './',
