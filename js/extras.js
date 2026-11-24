@@ -74,3 +74,57 @@ async function searchTmdb() {
       notify(e.message || 'Erro ao buscar no TMDB.');
     }
       }
+async function fillFromTmdb(id, mediaType) {
+    const key = getTmdbKey();
+    if (!key) return;
+    notify('A preencher dados...');
+    try {
+      const url = 'https://api.themoviedb.org/3/' + mediaType + '/' + id +
+        '?api_key=' + encodeURIComponent(key) +
+        '&language=pt-PT&include_video_language=pt,en,null&append_to_response=credits,videos';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Erro ao carregar detalhes do TMDB.');
+      const d = await res.json();
+
+      let synopsis = d.overview || '';
+      if (!synopsis) {
+        const r2 = await fetch('https://api.themoviedb.org/3/' + mediaType + '/' + id +
+          '?api_key=' + encodeURIComponent(key) + '&language=pt-BR');
+        if (r2.ok) { const d2 = await r2.json(); synopsis = d2.overview || ''; }
+      }
+
+      const genres = d.genres || [];
+      const isAnim = genres.some((g) => g.id === 16);
+      let tipo = mediaType === 'tv' ? 'serie' : 'filme';
+      if (mediaType === 'tv' && isAnim && d.original_language === 'ja') tipo = 'anime';
+
+      $('fType').value = tipo;
+      $('fType').dispatchEvent(new Event('change'));
+
+      let cat = 'acao';
+      for (const g of genres) {
+        if (TMDB_GENRE_MAP[g.id]) { cat = TMDB_GENRE_MAP[g.id]; break; }
+      }
+      if ($('fGenre').querySelector('option[value="' + cat + '"]')) $('fGenre').value = cat;
+
+      $('fTitle').value = d.title || d.name || '';
+      $('fYear').value = (d.release_date || d.first_air_date || '').slice(0, 4);
+      $('fRating').value = d.vote_average ? Number(d.vote_average).toFixed(1) : '';
+      $('fSynopsis').value = synopsis;
+      $('fCast').value = ((d.credits && d.credits.cast) || []).slice(0, 5).map((c) => c.name).join(', ');
+      $('fPoster').value = d.poster_path ? 'https://image.tmdb.org/t/p/w500' + d.poster_path : '';
+      $('fBackdrop').value = d.backdrop_path ? 'https://image.tmdb.org/t/p/w1280' + d.backdrop_path : '';
+
+      const vids = ((d.videos && d.videos.results) || []).filter((v) => v.site === 'YouTube');
+      const tr = vids.find((v) => v.type === 'Trailer' && v.iso_639_1 === 'pt')
+        || vids.find((v) => v.type === 'Trailer')
+        || vids.find((v) => v.type === 'Teaser')
+        || vids[0];
+      $('fTrailer').value = tr ? 'https://www.youtube.com/watch?v=' + tr.key : '';
+
+      $('tmdbResults').innerHTML = '';
+      notify('Campos preenchidos! Agora cola o link do vídeo e salva.');
+    } catch (e) {
+      notify(e.message || 'Erro ao preencher.');
+    }
+}
