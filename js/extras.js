@@ -324,3 +324,110 @@ async function loadAdminStats() {
     }
   }
 
+function syncPlayerExtraUI() {
+    const v = $('player'), isVid = v && !v.classList.contains('hidden');
+    ['rw10Btn', 'ff10Btn', 'speedSel'].forEach((id) => { if ($(id)) $(id).classList.toggle('hidden', !isVid); });
+    if (isVid && $('speedSel')) { $('speedSel').value = '1'; v.playbackRate = 1; }
+  }
+
+  function setupInjectedUI() {
+    const tb = $('tmdbBox');
+    if (tb && !$('iaSearchBtn')) {
+      tb.insertAdjacentHTML('beforeend',
+        '<div style="margin:8px 0"><button type="button" id="useTrailerBtn" class="btn-secondary" style="width:100%;padding:9px 12px;font-size:13px">▶ Usar Trailer como Vídeo</button></div>' +
+        '<h4 style="margin-top:10px">Buscar vídeo público (Archive.org)</h4>' +
+        '<div class="tmdb-row"><input id="iaQuery" type="search" placeholder="Nome em inglês (ex: Night of the Living Dead)"><button type="button" id="iaSearchBtn" class="btn-secondary">Buscar</button></div>' +
+        '<div id="iaResults" class="tmdb-results"></div>');
+    }
+    if (tb && !$('adminStats')) tb.insertAdjacentHTML('beforebegin', '<div id="adminStats" class="o24-stats"></div>');
+    if ($('addEp') && !$('addSeasonBtn')) $('addEp').insertAdjacentHTML('afterend', ' <button type="button" id="addSeasonBtn" class="btn-secondary">＋ Nova Temporada</button>');
+    const pt = document.querySelector('.player-tools');
+    if (pt && !$('rw10Btn')) {
+      pt.insertAdjacentHTML('afterbegin',
+        '<button type="button" id="rw10Btn" class="btn-secondary hidden">⏪ 10s</button>' +
+        '<button type="button" id="ff10Btn" class="btn-secondary hidden">10s ⏩</button>' +
+        '<select id="speedSel" class="hidden" aria-label="Velocidade"><option value="1">1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2x</option></select>');
+    }
+    if ($('tmCommentsWrap') && !$('tmRelatedWrap')) {
+      $('tmCommentsWrap').insertAdjacentHTML('beforebegin', '<div id="tmRelatedWrap" class="tm-related hidden"><h3>Também podes gostar</h3><div id="tmRelatedRow" class="row"></div></div>');
+      const ch = $('tmCommentsWrap').querySelector('h3');
+      if (ch && !$('tmCommAvg')) ch.insertAdjacentHTML('beforeend', '<span id="tmCommAvg" class="o24-comm-avg"></span>');
+    }
+    const hr = $('historyRow');
+    if (hr && hr.previousElementSibling && !$('clearHistBtn')) {
+      hr.previousElementSibling.classList.add('o24-h2-row');
+      hr.previousElementSibling.insertAdjacentHTML('beforeend', '<button type="button" id="clearHistBtn" class="o24-clear-hist">Limpar histórico</button>');
+    }
+    if (!$('scrollTopBtn')) document.body.insertAdjacentHTML('beforeend', '<button type="button" id="scrollTopBtn" class="o24-scroll-top hidden" aria-label="Voltar ao topo">⬆</button>');
+  }
+
+  function initExtras() {
+    setupInjectedUI();
+    try { const k = localStorage.getItem(KEY_ST); if (k && $('tmdbKeyInput')) $('tmdbKeyInput').value = k; } catch (e) {}
+    if ($('tmdbSearchBtn')) $('tmdbSearchBtn').addEventListener('click', searchTmdb);
+    if ($('tmdbQuery')) $('tmdbQuery').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchTmdb(); });
+    if ($('tmdbResults')) $('tmdbResults').addEventListener('click', (e) => { const b = e.target.closest('[data-tmdb-id]'); if (b) fillFromTmdb(b.dataset.tmdbId, b.dataset.tmdbType); });
+    if ($('useTrailerBtn')) $('useTrailerBtn').addEventListener('click', useTrailerAsVideo);
+    if ($('iaSearchBtn')) $('iaSearchBtn').addEventListener('click', searchArchive);
+    if ($('iaQuery')) $('iaQuery').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchArchive(); });
+    if ($('iaResults')) $('iaResults').addEventListener('click', (e) => { const b = e.target.closest('[data-ia-id]'); if (b) fillFromArchive(b.dataset.iaId, b.dataset.iaTitle, b.dataset.iaYear); });
+    if ($('openReqBtn')) $('openReqBtn').addEventListener('click', () => openReqModal('pedido', ''));
+    if ($('tmReportBtn')) $('tmReportBtn').addEventListener('click', () => openReqModal('reporte', $('tmTitle') ? $('tmTitle').textContent.trim() : ''));
+    if ($('reqClose')) $('reqClose').addEventListener('click', closeReqModal);
+    if ($('reqModal')) $('reqModal').addEventListener('click', (e) => { if (e.target === $('reqModal')) closeReqModal(); });
+    if ($('reqSubmit')) $('reqSubmit').addEventListener('click', submitRequest);
+    if ($('clearHistBtn')) $('clearHistBtn').addEventListener('click', clearAllHistory);
+    if ($('scrollTopBtn')) $('scrollTopBtn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    if ($('rw10Btn')) $('rw10Btn').addEventListener('click', () => { const v = $('player'); if (v) v.currentTime = Math.max(0, (v.currentTime || 0) - 10); });
+    if ($('ff10Btn')) $('ff10Btn').addEventListener('click', () => { const v = $('player'); if (v) v.currentTime = Math.min(isFinite(v.duration) ? v.duration : 999999, (v.currentTime || 0) + 10); });
+    if ($('speedSel')) $('speedSel').addEventListener('change', () => { const v = $('player'); if (v) v.playbackRate = Number($('speedSel').value) || 1; });
+    if ($('player')) { $('player').addEventListener('loadedmetadata', syncPlayerExtraUI); new MutationObserver(syncPlayerExtraUI).observe($('player'), { attributes: true, attributeFilter: ['class'] }); }
+    ['adminBtn', 'fabAdmin', 'fabAdd'].forEach((id) => { if ($(id)) $(id).addEventListener('click', () => setTimeout(() => { loadAdminRequests(); loadAdminStats(); }, 150)); });
+    if ($('saveAdmin')) $('saveAdmin').addEventListener('click', () => setTimeout(() => { titlesCache = null; loadAdminStats(); }, 1200));
+    if ($('addEp')) $('addEp').addEventListener('click', () => setTimeout(() => {
+      const rows = $('episodesWrap').querySelectorAll('.o24-eprow');
+      if (rows.length >= 2) {
+        const prev = rows[rows.length - 2], cur = rows[rows.length - 1];
+        cur.querySelector('.ep-season').value = prev.querySelector('.ep-season').value || 1;
+        cur.querySelector('.ep-num').value = (Number(prev.querySelector('.ep-num').value) || 0) + 1;
+      }
+    }, 0));
+    if ($('addSeasonBtn')) $('addSeasonBtn').addEventListener('click', () => {
+      let maxS = 1;
+      $('episodesWrap').querySelectorAll('.ep-season').forEach((i) => { maxS = Math.max(maxS, Number(i.value) || 1); });
+      $('addEp').click();
+      setTimeout(() => {
+        const rows = $('episodesWrap').querySelectorAll('.o24-eprow'), cur = rows[rows.length - 1];
+        if (cur) { cur.querySelector('.ep-season').value = rows.length > 1 ? maxS + 1 : 1; cur.querySelector('.ep-num').value = 1; }
+      }, 10);
+    });
+    if ($('adminRequestsList')) $('adminRequestsList').addEventListener('click', async (e) => {
+      const d = e.target.closest('[data-req-done]'), del = e.target.closest('[data-req-del]');
+      if (d) { await sb.from('requests').update({ status: 'resolvido' }).eq('id', d.dataset.reqDone); loadAdminRequests(); loadAdminStats(); notify('Marcado como resolvido ✅'); }
+      else if (del) { await sb.from('requests').delete().eq('id', del.dataset.reqDel); loadAdminRequests(); loadAdminStats(); notify('Registo apagado.'); }
+    });
+    document.addEventListener('click', (e) => {
+      const rm = e.target.closest('[data-rm-hist]');
+      if (rm) { e.stopPropagation(); removeHistoryItem(rm.dataset.rmHist); return; }
+      if (e.target.id === 'loadMoreBtn') { gridLimit += 24; optimizeGrid($('gridHome')); return; }
+      const op = e.target.closest('[data-open]');
+      if (op) { lastOpenedId = op.dataset.open; if ($('titleModal')) $('titleModal').scrollTop = 0; }
+    }, true);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('reqModal') && !$('reqModal').classList.contains('hidden')) closeReqModal(); });
+    window.addEventListener('scroll', () => { if ($('scrollTopBtn')) $('scrollTopBtn').classList.toggle('hidden', window.scrollY < 400); }, { passive: true });
+    window.addEventListener('offline', () => notify('Sem ligação à internet.'));
+    window.addEventListener('online', () => notify('Ligação restabelecida ✅'));
+    if ($('titleModal')) new MutationObserver(() => { if (!$('titleModal').classList.contains('hidden')) loadRelated(); }).observe($('titleModal'), { attributes: true, attributeFilter: ['class'] });
+    if ($('tmCommentsList')) new MutationObserver(updateCommunityAvg).observe($('tmCommentsList'), { childList: true });
+    ['topRow', 'catGrid', 'filmGrid', 'seriesGrid', 'animeGrid', 'musicGrid', 'continueRow', 'historyRow', 'gridHome'].forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      optimizeGrid(el);
+      new MutationObserver(() => { if (id === 'gridHome') gridLimit = 24; optimizeGrid(el); }).observe(el, { childList: true });
+    });
+    sb.auth.onAuthStateChange((evt, sess) => { if (evt === 'SIGNED_IN' && sess && sess.user) syncGuestToAccount(sess.user.id); });
+  }
+
+  initExtras();
+})();
+
