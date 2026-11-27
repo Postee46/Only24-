@@ -1209,3 +1209,28 @@ textarea:focus {
 .o24-req-tag { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 99px; background: #2a2a3a; }
 .o24-req-tag.done { background: #1e5c35; color: #b9f6ca; }
 .o24-req-row p { font
+
+/* MELHORIAS v3.0 */
+.o24-h2-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.o24-clear-hist { background: #1e1e2e; color: #ccc; font-size: 12px; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--border); }
+.o24-clear-hist:hover { border-color: var(--red); color: #fff; }
+.o24-card-rm { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; background: rgba(10,10,15,.85); color: #fff; font-size: 12px; z-index: 2; border: 1px solid #444; }
+.o24-card-rm:hover { background: var(--red); border-color: var(--red); }
+
+.o24-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.o24-stat { background: #181824; border: 1px solid var(--border); border-radius: 10px; padding: 10px 6px; text-align: center; }
+.o24-stat b { display: block; font-size: 18px; color: var(--red); }
+.o24-stat small { font-size: 11px; color: var(--muted); }
+
+.tm-related { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+.tm-related h3 { font-size: 16px; margin-bottom: 10px; }
+.o24-comm-avg { font-size: 13px; color: #ffd54f; font-weight: 700; margin-left: 8px; }
+
+.o24-paged-hidden { display: none !important; }
+.o24-load-more { display: block; margin: 16px auto 0; }
+.o24-scroll-top { position: fixed; bottom: 24px; left: 18px; width: 44px; height: 44px; border-radius: 50%; background: #1c1c28; color: #fff; border: 1px solid #383848; font-size: 18px; z-index: 290; box-shadow: 0 5px 18px #0008; }
+.o24-scroll-top:hover { background: var(--red); border-color: var(--red); }
+
+@media (max-width: 480px) {
+  .o24-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
