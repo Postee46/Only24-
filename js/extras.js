@@ -1,4 +1,4 @@
-/* ONLY24²⁴ — js/extras.js */
+/* ONLY24²⁴ — js/extras.js (v3.0 completo) */
 (function () {
   'use strict';
   const CFG = window.ONLY24_CONFIG || {};
@@ -8,6 +8,10 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const KEY_ST = 'o24_tmdb_api_key';
   const GMAP = { 28:'acao', 12:'acao', 10759:'acao', 18:'drama', 80:'drama', 9648:'drama', 10768:'drama', 27:'terror', 53:'terror', 35:'comedia', 10749:'romance', 878:'ficcao', 14:'ficcao', 10765:'ficcao', 16:'animacao', 10751:'animacao', 99:'documentario' };
+  const T_LBL = { filme: 'Filme', serie: 'Série', anime: 'Anime', musica: 'Vídeo musical' };
+  let titlesCache = null;
+  let lastOpenedId = null;
+  let gridLimit = 24;
 
   function notify(msg) {
     const t = $('toast');
@@ -47,182 +51,3 @@
     } catch (e) { box.innerHTML = ''; notify(e.message || 'Erro ao buscar no TMDB.'); }
   }
 
-async function fillFromTmdb(id, mediaType) {
-    const key = getTmdbKey();
-    if (!key) return;
-    notify('A preencher dados...');
-    try {
-      const res = await fetch('https://api.themoviedb.org/3/' + mediaType + '/' + id + '?api_key=' + encodeURIComponent(key) + '&language=pt-PT&include_video_language=pt,en,null&append_to_response=credits,videos');
-      if (!res.ok) throw new Error('Erro ao carregar detalhes do TMDB.');
-      const d = await res.json();
-      let synopsis = d.overview || '';
-      if (!synopsis) {
-        const r2 = await fetch('https://api.themoviedb.org/3/' + mediaType + '/' + id + '?api_key=' + encodeURIComponent(key) + '&language=pt-BR');
-        if (r2.ok) { const d2 = await r2.json(); synopsis = d2.overview || ''; }
-      }
-      const genres = d.genres || [];
-      let tipo = mediaType === 'tv' ? 'serie' : 'filme';
-      if (mediaType === 'tv' && genres.some((g) => g.id === 16) && d.original_language === 'ja') tipo = 'anime';
-      $('fType').value = tipo;
-      $('fType').dispatchEvent(new Event('change'));
-      let cat = 'acao';
-      for (const g of genres) { if (GMAP[g.id]) { cat = GMAP[g.id]; break; } }
-      if ($('fGenre').querySelector('option[value="' + cat + '"]')) $('fGenre').value = cat;
-      $('fTitle').value = d.title || d.name || '';
-      $('fYear').value = (d.release_date || d.first_air_date || '').slice(0, 4);
-      $('fRating').value = d.vote_average ? Number(d.vote_average).toFixed(1) : '';
-      $('fSynopsis').value = synopsis;
-      $('fCast').value = ((d.credits && d.credits.cast) || []).slice(0, 5).map((c) => c.name).join(', ');
-      $('fPoster').value = d.poster_path ? 'https://image.tmdb.org/t/p/w500' + d.poster_path : '';
-      $('fBackdrop').value = d.backdrop_path ? 'https://image.tmdb.org/t/p/w1280' + d.backdrop_path : '';
-      const vids = ((d.videos && d.videos.results) || []).filter((v) => v.site === 'YouTube');
-      const tr = vids.find((v) => v.type === 'Trailer' && v.iso_639_1 === 'pt') || vids.find((v) => v.type === 'Trailer') || vids.find((v) => v.type === 'Teaser') || vids[0];
-      $('fTrailer').value = tr ? 'https://www.youtube.com/watch?v=' + tr.key : '';
-      if ($('iaQuery')) $('iaQuery').value = d.original_title || d.original_name || d.title || d.name || '';
-      $('tmdbResults').innerHTML = '';
-      notify('Campos preenchidos! Escolhe o vídeo ou usa o Trailer.');
-    } catch (e) { notify(e.message || 'Erro ao preencher.'); }
-  }
-
-async function searchArchive() {
-    const q = $('iaQuery') ? $('iaQuery').value.trim() : '';
-    if (!q) return notify('Escreve o nome do filme para buscar no Archive.org.');
-    const box = $('iaResults');
-    box.innerHTML = '<small style="color:#aaa">A procurar no Archive.org...</small>';
-    try {
-      const clean = q.replace(/[()":]/g, ' ');
-      const url = 'https://archive.org/advancedsearch.php?q=' + encodeURIComponent('(' + clean + ') AND mediatype:movies') +
-        '&fl[]=identifier&fl[]=title&fl[]=year&sort[]=downloads+desc&rows=5&output=json';
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Erro na busca Archive.org.');
-      const data = await res.json();
-      const docs = (data.response && data.response.docs) || [];
-      if (!docs.length) { box.innerHTML = '<small style="color:#aaa">Nada encontrado no Archive.org.</small>'; return; }
-      box.innerHTML = docs.map((x) => {
-        const img = 'https://archive.org/services/img/' + encodeURIComponent(x.identifier);
-        const yr = Array.isArray(x.year) ? x.year[0] : (x.year || '');
-        return '<button type="button" class="tmdb-item" data-ia-id="' + esc(x.identifier) + '" data-ia-title="' + esc(x.title || x.identifier) + '" data-ia-year="' + esc(yr) + '">' +
-          '<img src="' + esc(img) + '" alt=""><div><b>' + esc(x.title || x.identifier) + '</b><small>Archive.org' + (yr ? ' • ' + esc(yr) : '') + '</small></div></button>';
-      }).join('');
-    } catch (e) { box.innerHTML = ''; notify(e.message || 'Erro ao buscar no Archive.org.'); }
-  }
-
-  async function fillFromArchive(id, title, year) {
-    notify('A procurar vídeo MP4 no Archive.org...');
-    try {
-      const res = await fetch('https://archive.org/metadata/' + encodeURIComponent(id));
-      if (!res.ok) throw new Error('Erro ao ler ficheiros.');
-      const meta = await res.json();
-      const files = Array.isArray(meta.files) ? meta.files : [];
-      const ok = files.filter((f) => f && f.name && /\.(mp4|webm)$/i.test(f.name) && Number(f.size || 0) > 500000);
-      ok.sort((a, b) => {
-        const score = (f) => (/h\.264|mpeg4/i.test(f.format || '') ? 2 : 0) + (/\.mp4$/i.test(f.name) ? 1 : 0);
-        return score(b) - score(a) || Number(a.size || 0) - Number(b.size || 0);
-      });
-      const pick = ok.find((f) => /mpeg4|h\.264/i.test(f.format || '') && !/512kb/i.test(f.format || '')) || ok[0];
-      const videoUrl = pick
-        ? 'https://archive.org/download/' + encodeURIComponent(id) + '/' + pick.name.split('/').map(encodeURIComponent).join('/')
-        : 'https://archive.org/embed/' + encodeURIComponent(id);
-      $('fVideoUrl').value = videoUrl;
-      if ($('fTitle') && !$('fTitle').value.trim()) $('fTitle').value = title || '';
-      if ($('fYear') && !$('fYear').value.trim() && year) $('fYear').value = String(year).slice(0, 4);
-      if ($('fPoster') && !$('fPoster').value.trim()) $('fPoster').value = 'https://archive.org/services/img/' + encodeURIComponent(id);
-      $('iaResults').innerHTML = '';
-      notify(pick ? 'Vídeo MP4 preenchido ✅' : 'Link Embed preenchido ✅');
-    } catch (e) { notify(e.message || 'Erro ao carregar vídeo.'); }
-  }
-
-  function useTrailerAsVideo() {
-    const tr = $('fTrailer') ? $('fTrailer').value.trim() : '';
-    if (!tr) return notify('Preenche ou busca um trailer primeiro.');
-    if ($('fVideoUrl')) $('fVideoUrl').value = tr;
-    notify('Trailer copiado para o Link do vídeo ✅');
-  }
-
-
-function openReqModal(kind, prefillTitle) {
-    const m = $('reqModal');
-    if (!m) return;
-    $('reqKind').value = kind || 'pedido';
-    $('reqTitle').value = prefillTitle || '';
-    $('reqDetails').value = '';
-    m.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-  }
-
-  function closeReqModal() {
-    const m = $('reqModal');
-    if (!m) return;
-    m.classList.add('hidden');
-    const anyOpen = ['playerModal', 'authModal', 'profileModal', 'notifModal', 'adminPanel', 'titleModal'].some((id) => $(id) && !$(id).classList.contains('hidden'));
-    document.body.classList.toggle('modal-open', anyOpen);
-  }
-
-  async function submitRequest() {
-    const titleName = $('reqTitle').value.trim();
-    if (!titleName) return notify('Escreve o nome do conteúdo.');
-    const btn = $('reqSubmit');
-    btn.disabled = true;
-    try {
-      const { data: sess } = await sb.auth.getSession();
-      const uid = sess && sess.session ? sess.session.user.id : null;
-      const { error } = await sb.from('requests').insert({ user_id: uid, kind: $('reqKind').value, title_name: titleName, details: $('reqDetails').value.trim() || null });
-      if (error) throw error;
-      closeReqModal();
-      notify('Enviado com sucesso! Obrigado pelo feedback ✅');
-    } catch (e) { notify('Erro ao enviar: ' + (e.message || e)); }
-    finally { btn.disabled = false; }
-  }
-
-  async function loadAdminRequests() {
-    const box = $('adminRequestsList');
-    if (!box) return;
-    const { data, error } = await sb.from('requests').select('*').order('created_at', { ascending: false }).limit(40);
-    if (error) { box.innerHTML = '<p class="o24-empty">Sem pedidos por agora.</p>'; return; }
-    const list = data || [];
-    if (!list.length) { box.innerHTML = '<p class="o24-empty">Nenhum pedido ou reporte recebido.</p>'; return; }
-    box.innerHTML = list.map((r) => {
-      const done = r.status === 'resolvido';
-      return '<div class="o24-req-row"><div class="o24-req-top"><b>' + (r.kind === 'reporte' ? '⚠️ Reporte' : '🎬 Pedido') + ': ' + esc(r.title_name) + '</b><span class="o24-req-tag' + (done ? ' done' : '') + '">' + esc(r.status) + '</span></div>' +
-        (r.details ? '<p>' + esc(r.details) + '</p>' : '') +
-        '<div class="o24-req-actions">' + (!done ? '<button type="button" class="btn-secondary" data-req-done="' + esc(r.id) + '">✓ Marcar resolvido</button>' : '') +
-        '<button type="button" class="btn-secondary" data-req-del="' + esc(r.id) + '">Apagar</button></div></div>';
-    }).join('');
-  }
-
-function initExtras() {
-    try { const k = localStorage.getItem(KEY_ST); if (k && $('tmdbKeyInput')) $('tmdbKeyInput').value = k; } catch (e) {}
-    const tb = $('tmdbBox');
-    if (tb && !$('iaSearchBtn')) {
-      tb.insertAdjacentHTML('beforeend',
-        '<div style="margin:8px 0"><button type="button" id="useTrailerBtn" class="btn-secondary" style="width:100%;padding:9px 12px;font-size:13px">▶ Usar Trailer como Vídeo</button></div>' +
-        '<h4 style="margin-top:10px">Buscar vídeo público (Archive.org)</h4>' +
-        '<div class="tmdb-row"><input id="iaQuery" type="search" placeholder="Nome em inglês (ex: Night of the Living Dead)"><button type="button" id="iaSearchBtn" class="btn-secondary">Buscar</button></div>' +
-        '<div id="iaResults" class="tmdb-results"></div>'
-      );
-    }
-    if ($('tmdbSearchBtn')) $('tmdbSearchBtn').addEventListener('click', searchTmdb);
-    if ($('tmdbQuery')) $('tmdbQuery').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchTmdb(); });
-    if ($('tmdbResults')) $('tmdbResults').addEventListener('click', (e) => { const b = e.target.closest('[data-tmdb-id]'); if (b) fillFromTmdb(b.dataset.tmdbId, b.dataset.tmdbType); });
-    if ($('useTrailerBtn')) $('useTrailerBtn').addEventListener('click', useTrailerAsVideo);
-    if ($('iaSearchBtn')) $('iaSearchBtn').addEventListener('click', searchArchive);
-    if ($('iaQuery')) $('iaQuery').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchArchive(); });
-    if ($('iaResults')) $('iaResults').addEventListener('click', (e) => { const b = e.target.closest('[data-ia-id]'); if (b) fillFromArchive(b.dataset.iaId, b.dataset.iaTitle, b.dataset.iaYear); });
-    if ($('openReqBtn')) $('openReqBtn').addEventListener('click', () => openReqModal('pedido', ''));
-    if ($('tmReportBtn')) $('tmReportBtn').addEventListener('click', () => openReqModal('reporte', $('tmTitle') ? $('tmTitle').textContent.trim() : ''));
-    if ($('reqClose')) $('reqClose').addEventListener('click', closeReqModal);
-    if ($('reqModal')) $('reqModal').addEventListener('click', (e) => { if (e.target === $('reqModal')) closeReqModal(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('reqModal') && !$('reqModal').classList.contains('hidden')) closeReqModal(); });
-    if ($('reqSubmit')) $('reqSubmit').addEventListener('click', submitRequest);
-    ['adminBtn', 'fabAdmin', 'fabAdd'].forEach((id) => { if ($(id)) $(id).addEventListener('click', () => setTimeout(loadAdminRequests, 150)); });
-    if ($('adminRequestsList')) {
-      $('adminRequestsList').addEventListener('click', async (e) => {
-        const d = e.target.closest('[data-req-done]'), del = e.target.closest('[data-req-del]');
-        if (d) { await sb.from('requests').update({ status: 'resolvido' }).eq('id', d.dataset.reqDone); loadAdminRequests(); notify('Marcado como resolvido ✅'); }
-        else if (del) { await sb.from('requests').delete().eq('id', del.dataset.reqDel); loadAdminRequests(); notify('Registo apagado.'); }
-      });
-    }
-  }
-
-  initExtras();
-})();
