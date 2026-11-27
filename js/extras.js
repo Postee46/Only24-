@@ -92,38 +92,46 @@ async function searchArchive() {
     const q = $('iaQuery') ? $('iaQuery').value.trim() : '';
     if (!q) return notify('Escreve o nome do filme para buscar no Archive.org.');
     const box = $('iaResults');
-    box.innerHTML = '<small style="color:#aaa">A procurar no Archive.org...</small>';
+    box.innerHTML = '<small style="color:#aaa">A procurar filmes completos no Archive.org...</small>';
     try {
       const clean = q.replace(/[()":]/g, ' ');
-      const url = 'https://archive.org/advancedsearch.php?q=' + encodeURIComponent('(' + clean + ') AND mediatype:movies') +
+      const query = '(' + clean + ') AND mediatype:movies AND collection:(feature_films OR classic_tv OR film_noir OR sci_fi_horror)';
+      const url = 'https://archive.org/advancedsearch.php?q=' + encodeURIComponent(query) +
         '&fl[]=identifier&fl[]=title&fl[]=year&sort[]=downloads+desc&rows=5&output=json';
       const res = await fetch(url);
       if (!res.ok) throw new Error('Erro na busca Archive.org.');
       const data = await res.json();
       const docs = (data.response && data.response.docs) || [];
-      if (!docs.length) { box.innerHTML = '<small style="color:#aaa">Nada encontrado no Archive.org.</small>'; return; }
+      if (!docs.length) { box.innerHTML = '<small style="color:#aaa">Nenhum filme completo encontrado no Archive.org.</small>'; return; }
       box.innerHTML = docs.map((x) => {
         const img = 'https://archive.org/services/img/' + encodeURIComponent(x.identifier);
         const yr = Array.isArray(x.year) ? x.year[0] : (x.year || '');
         return '<button type="button" class="tmdb-item" data-ia-id="' + esc(x.identifier) + '" data-ia-title="' + esc(x.title || x.identifier) + '" data-ia-year="' + esc(yr) + '">' +
-          '<img src="' + esc(img) + '" alt=""><div><b>' + esc(x.title || x.identifier) + '</b><small>Archive.org' + (yr ? ' • ' + esc(yr) : '') + '</small></div></button>';
+          '<img src="' + esc(img) + '" alt=""><div><b>' + esc(x.title || x.identifier) + '</b><small>Filme Completo • Archive.org' + (yr ? ' • ' + esc(yr) : '') + '</small></div></button>';
       }).join('');
     } catch (e) { box.innerHTML = ''; notify(e.message || 'Erro ao buscar no Archive.org.'); }
   }
 
   async function fillFromArchive(id, title, year) {
-    notify('A procurar vídeo MP4 no Archive.org...');
+    notify('A procurar o filme completo MP4...');
     try {
       const res = await fetch('https://archive.org/metadata/' + encodeURIComponent(id));
       if (!res.ok) throw new Error('Erro ao ler ficheiros.');
       const meta = await res.json();
       const files = Array.isArray(meta.files) ? meta.files : [];
-      const ok = files.filter((f) => f && f.name && /\.(mp4|webm)$/i.test(f.name) && Number(f.size || 0) > 500000);
+      const secs = (l) => {
+        if (!l) return 0;
+        const p = String(l).split(':').map(Number);
+        return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p.length === 2 ? p[0] * 60 + p[1] : (Number(l) || 0);
+      };
+      const ok = files.filter((f) => f && f.name && /\.(mp4|webm)$/i.test(f.name) && Number(f.size || 0) > 5000000);
       ok.sort((a, b) => {
-        const score = (f) => (/h\.264|mpeg4/i.test(f.format || '') ? 2 : 0) + (/\.mp4$/i.test(f.name) ? 1 : 0);
-        return score(b) - score(a) || Number(a.size || 0) - Number(b.size || 0);
+        const durDiff = secs(b.length) - secs(a.length);
+        if (Math.abs(durDiff) > 120) return durDiff;
+        const fmt = (f) => (/h\.264|mpeg4/i.test(f.format || '') && !/512kb/i.test(f.format || '') ? 2 : /\.mp4$/i.test(f.name) ? 1 : 0);
+        return fmt(b) - fmt(a) || Number(b.size || 0) - Number(a.size || 0);
       });
-      const pick = ok.find((f) => /mpeg4|h\.264/i.test(f.format || '') && !/512kb/i.test(f.format || '')) || ok[0];
+      const pick = ok[0];
       const videoUrl = pick
         ? 'https://archive.org/download/' + encodeURIComponent(id) + '/' + pick.name.split('/').map(encodeURIComponent).join('/')
         : 'https://archive.org/embed/' + encodeURIComponent(id);
@@ -132,7 +140,8 @@ async function searchArchive() {
       if ($('fYear') && !$('fYear').value.trim() && year) $('fYear').value = String(year).slice(0, 4);
       if ($('fPoster') && !$('fPoster').value.trim()) $('fPoster').value = 'https://archive.org/services/img/' + encodeURIComponent(id);
       $('iaResults').innerHTML = '';
-      notify(pick ? 'Vídeo MP4 preenchido ✅' : 'Link Embed preenchido ✅');
+      const mb = pick ? Math.round(Number(pick.size || 0) / 1048576) : 0;
+      notify(pick ? 'Filme completo preenchido (' + mb + ' MB) ✅' : 'Link Embed preenchido ✅');
     } catch (e) { notify(e.message || 'Erro ao carregar vídeo.'); }
   }
 
