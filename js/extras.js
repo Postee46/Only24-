@@ -216,3 +216,111 @@ function openReqModal(kind, prefillTitle) {
     if (moved) { notify('Lista e histórico sincronizados ✅'); setTimeout(() => location.reload(), 900); }
   }
 
+async function loadAdminStats() {
+    const box = $('adminStats');
+    if (!box) return;
+    const [{ data: tData }, { data: rData }] = await Promise.all([
+      sb.from('titles').select('id,featured,views'),
+      sb.from('requests').select('id,status')
+    ]);
+    const t = tData || [], r = rData || [];
+    const views = t.reduce((sum, x) => sum + (Number(x.views) || 0), 0);
+    const feat = t.filter((x) => x.featured).length;
+    const pend = r.filter((x) => x.status !== 'resolvido').length;
+    box.innerHTML =
+      '<div class="o24-stat"><b>' + t.length + '</b><small>Títulos</small></div>' +
+      '<div class="o24-stat"><b>' + views + '</b><small>Views</small></div>' +
+      '<div class="o24-stat"><b>' + feat + '</b><small>Destaques</small></div>' +
+      '<div class="o24-stat"><b>' + pend + '</b><small>Pedidos</small></div>';
+  }
+
+  async function loadRelated() {
+    const wrap = $('tmRelatedWrap'), row = $('tmRelatedRow');
+    if (!wrap || !row) return;
+    if (!titlesCache) {
+      const { data } = await sb.from('titles').select('id,name,type,cat,year,poster,featured').order('views', { ascending: false }).limit(200);
+      titlesCache = data || [];
+    }
+    const name = $('tmTitle') ? $('tmTitle').textContent.trim() : '';
+    const cur = titlesCache.find((x) => (lastOpenedId && String(x.id) === String(lastOpenedId)) || x.name === name);
+    if (!cur) { wrap.classList.add('hidden'); return; }
+    const sameCat = titlesCache.filter((x) => String(x.id) !== String(cur.id) && x.cat && x.cat === cur.cat);
+    const sameType = titlesCache.filter((x) => String(x.id) !== String(cur.id) && x.type === cur.type && x.cat !== cur.cat);
+    const list = sameCat.concat(sameType).slice(0, 8);
+    if (!list.length) { wrap.classList.add('hidden'); return; }
+    wrap.classList.remove('hidden');
+    row.innerHTML = list.map((x) => {
+      const img = (x.poster || '').replace('image.tmdb.org/t/p/w500/', 'image.tmdb.org/t/p/w300/');
+      return '<div class="o24-card" data-open="' + esc(x.id) + '" tabindex="0" role="button">' +
+        (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(x.name) + '">' : '') +
+        '<div class="cn">' + esc(x.name) + '</div><div class="cm">' + esc((T_LBL[x.type] || 'Título') + (x.year ? ' • ' + x.year : '')) + '</div></div>';
+    }).join('');
+  }
+
+  function updateCommunityAvg() {
+    const avgEl = $('tmCommAvg'), box = $('tmCommentsList');
+    if (!avgEl || !box) return;
+    const nums = [];
+    box.querySelectorAll('.o24-comment-head b').forEach((b) => {
+      const m = /⭐\s*(\d)\/5/.exec(b.textContent || '');
+      if (m) nums.push(Number(m[1]));
+    });
+    if (!nums.length) { avgEl.textContent = ''; return; }
+    const avg = (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(1);
+    avgEl.textContent = '⭐ ' + avg + '/5 (' + nums.length + ')';
+  }
+
+  async function removeHistoryItem(tid) {
+    try {
+      const gh = JSON.parse(localStorage.getItem('o24_guest_history') || '[]');
+      localStorage.setItem('o24_guest_history', JSON.stringify(gh.filter((h) => String(h.title_id) !== String(tid))));
+    } catch (e) {}
+    const { data: sess } = await sb.auth.getSession();
+    if (sess && sess.session) await sb.from('history').delete().eq('user_id', sess.session.user.id).eq('title_id', tid);
+    ['continueRow', 'historyRow'].forEach((rid) => {
+      const el = $(rid);
+      if (!el) return;
+      el.querySelectorAll('.o24-card[data-open="' + tid + '"]').forEach((c) => c.remove());
+      if (!el.querySelector('.o24-card')) el.innerHTML = '<p class="o24-empty">' + (rid === 'continueRow' ? 'Nada para continuar.' : 'O teu histórico está vazio.') + '</p>';
+    });
+    notify('Removido do histórico.');
+  }
+
+  async function clearAllHistory() {
+    if (!confirm('Limpar todo o teu histórico e "Continuar a assistir"?')) return;
+    try { localStorage.removeItem('o24_guest_history'); } catch (e) {}
+    const { data: sess } = await sb.auth.getSession();
+    if (sess && sess.session) await sb.from('history').delete().eq('user_id', sess.session.user.id);
+    if ($('continueRow')) $('continueRow').innerHTML = '<p class="o24-empty">Nada para continuar.</p>';
+    if ($('historyRow')) $('historyRow').innerHTML = '<p class="o24-empty">O teu histórico está vazio.</p>';
+    notify('Histórico limpo ✅');
+  }
+
+  function optimizeGrid(grid) {
+    if (!grid) return;
+    grid.querySelectorAll('img').forEach((img) => {
+      const s = img.getAttribute('src') || '';
+      if (s.indexOf('image.tmdb.org/t/p/w500/') !== -1) img.src = s.replace('image.tmdb.org/t/p/w500/', 'image.tmdb.org/t/p/w300/');
+    });
+    if (grid.id === 'continueRow' || grid.id === 'historyRow') {
+      grid.querySelectorAll('.o24-card[data-open]').forEach((c) => {
+        if (!c.querySelector('.o24-card-rm')) {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'o24-card-rm'; b.textContent = '✕'; b.dataset.rmHist = c.dataset.open;
+          c.appendChild(b);
+        }
+      });
+    }
+    if (grid.id === 'gridHome') {
+      const cards = Array.from(grid.querySelectorAll('.o24-card'));
+      cards.forEach((c, i) => c.classList.toggle('o24-paged-hidden', i >= gridLimit));
+      let btn = $('loadMoreBtn');
+      const rest = cards.length - gridLimit;
+      if (rest > 0) {
+        if (!btn) { btn = document.createElement('button'); btn.id = 'loadMoreBtn'; btn.type = 'button'; btn.className = 'btn-secondary o24-load-more'; grid.parentNode.appendChild(btn); }
+        btn.textContent = 'Ver mais (+' + rest + ')';
+        btn.classList.remove('hidden');
+      } else if (btn) btn.classList.add('hidden');
+    }
+  }
+
