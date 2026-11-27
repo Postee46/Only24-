@@ -190,3 +190,39 @@ function openReqModal(kind, prefillTitle) {
     }).join('');
   }
 
+function initExtras() {
+    try { const k = localStorage.getItem(KEY_ST); if (k && $('tmdbKeyInput')) $('tmdbKeyInput').value = k; } catch (e) {}
+    const tb = $('tmdbBox');
+    if (tb && !$('iaSearchBtn')) {
+      tb.insertAdjacentHTML('beforeend',
+        '<div style="margin:8px 0"><button type="button" id="useTrailerBtn" class="btn-secondary" style="width:100%;padding:9px 12px;font-size:13px">▶ Usar Trailer como Vídeo</button></div>' +
+        '<h4 style="margin-top:10px">Buscar vídeo público (Archive.org)</h4>' +
+        '<div class="tmdb-row"><input id="iaQuery" type="search" placeholder="Nome em inglês (ex: Night of the Living Dead)"><button type="button" id="iaSearchBtn" class="btn-secondary">Buscar</button></div>' +
+        '<div id="iaResults" class="tmdb-results"></div>'
+      );
+    }
+    if ($('tmdbSearchBtn')) $('tmdbSearchBtn').addEventListener('click', searchTmdb);
+    if ($('tmdbQuery')) $('tmdbQuery').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchTmdb(); });
+    if ($('tmdbResults')) $('tmdbResults').addEventListener('click', (e) => { const b = e.target.closest('[data-tmdb-id]'); if (b) fillFromTmdb(b.dataset.tmdbId, b.dataset.tmdbType); });
+    if ($('useTrailerBtn')) $('useTrailerBtn').addEventListener('click', useTrailerAsVideo);
+    if ($('iaSearchBtn')) $('iaSearchBtn').addEventListener('click', searchArchive);
+    if ($('iaQuery')) $('iaQuery').addEventListener('keydown', (e) => { if (e.key === 'Enter') searchArchive(); });
+    if ($('iaResults')) $('iaResults').addEventListener('click', (e) => { const b = e.target.closest('[data-ia-id]'); if (b) fillFromArchive(b.dataset.iaId, b.dataset.iaTitle, b.dataset.iaYear); });
+    if ($('openReqBtn')) $('openReqBtn').addEventListener('click', () => openReqModal('pedido', ''));
+    if ($('tmReportBtn')) $('tmReportBtn').addEventListener('click', () => openReqModal('reporte', $('tmTitle') ? $('tmTitle').textContent.trim() : ''));
+    if ($('reqClose')) $('reqClose').addEventListener('click', closeReqModal);
+    if ($('reqModal')) $('reqModal').addEventListener('click', (e) => { if (e.target === $('reqModal')) closeReqModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('reqModal') && !$('reqModal').classList.contains('hidden')) closeReqModal(); });
+    if ($('reqSubmit')) $('reqSubmit').addEventListener('click', submitRequest);
+    ['adminBtn', 'fabAdmin', 'fabAdd'].forEach((id) => { if ($(id)) $(id).addEventListener('click', () => setTimeout(loadAdminRequests, 150)); });
+    if ($('adminRequestsList')) {
+      $('adminRequestsList').addEventListener('click', async (e) => {
+        const d = e.target.closest('[data-req-done]'), del = e.target.closest('[data-req-del]');
+        if (d) { await sb.from('requests').update({ status: 'resolvido' }).eq('id', d.dataset.reqDone); loadAdminRequests(); notify('Marcado como resolvido ✅'); }
+        else if (del) { await sb.from('requests').delete().eq('id', del.dataset.reqDel); loadAdminRequests(); notify('Registo apagado.'); }
+      });
+    }
+  }
+
+  initExtras();
+})();
