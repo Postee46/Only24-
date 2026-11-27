@@ -1,5 +1,5 @@
 // ONLY24²⁴ Service Worker v8
-const CACHE = 'only24-v7';
+const CACHE = 'only24-v9';
 const CORE = [
   './',
   './index.html',
